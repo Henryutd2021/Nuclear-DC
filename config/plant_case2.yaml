@@ -1,0 +1,29 @@
+# Case 2: Integrated ORC + Absorption Cooling
+# Split heat to main turbine + ORC
+# Absorption chiller uses diverted/recovered heat
+# Electric chiller as backup/peaking
+
+case_id: 2
+
+# Equipment availability
+turbine_enabled: true
+orc_enabled: true
+absorption_chiller_enabled: true
+electric_chiller_enabled: false
+tes_enabled: true
+grid_import_enabled: false
+grid_export_enabled: false
+
+# Equipment capacity bounds [MW or MWth]
+reactor_thermal_max: 100.0      # MWth
+turbine_capacity_max: 35.0      # MW electric
+orc_capacity_max: 8.0           # MW electric
+absorption_capacity_max: 20.0   # MWth
+electric_chiller_capacity_max: 0.0   # Disabled
+tes_capacity_max: 50.0          # MWh_th
+
+# Operating constraints
+turbine_min_load_fraction: 0.3
+turbine_ramp_rate: 5.0  # Max ramp rate [MW/hour]
+header_efficiency: 0.98
+

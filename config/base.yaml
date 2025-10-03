@@ -1,0 +1,38 @@
+# Base configuration - global defaults
+
+time:
+  num_hours: 168  # One week
+  delta_t: 1.0    # Hourly resolution
+
+solver:
+  name: gurobi
+  mip_gap: 0.0001     # 0.01% optimality gap
+  time_limit: null    # No time limit (null = unlimited)
+  threads: -1         # Use all available threads
+  log_to_console: true
+  log_to_file: true
+  seed: 42            # Reproducibility
+
+physics:
+  # Thermal Energy Storage
+  tes_charge_efficiency: 0.95
+  tes_discharge_efficiency: 0.95
+  tes_loss_rate_per_hour: 0.001  # 0.1% per hour
+
+  # Chilled water system
+  chw_supply_temp: 7.0   # °C
+  chw_return_temp: 12.0  # °C
+
+  # Pump parasitics: P_pump = pump_power_per_flow * Q_flow + pump_power_base
+  pump_power_per_flow: 0.01  # MW per MWth flow
+  pump_power_base: 0.1       # MW
+
+  # PUE for cooling derivation (if cooling_load.csv missing)
+  pue_default: 1.5
+  cooling_chain_efficiency: 0.9
+
+optimization:
+  capacity_optimization: false  # false = dispatch only; true = co-design
+  enable_ramping: true          # Turbine ramping constraints
+  enable_unit_commitment: false # Binary on/off variables
+

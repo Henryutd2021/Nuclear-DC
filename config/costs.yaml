@@ -1,0 +1,38 @@
+# Cost parameters (all in USD)
+
+# Financial parameters
+discount_rate: 0.05      # 5% annual
+project_lifetime: 20     # years
+
+# CAPEX ($/capacity_unit)
+capex_turbine: 1000000        # $/MW
+capex_orc: 1500000            # $/MW
+capex_absorption: 500000      # $/MWth
+capex_electric_chiller: 300000  # $/MWth
+capex_tes: 50000              # $/MWh_th
+capex_multiplier: 1.3         # EPC, contingency, indirect costs
+
+# Fixed O&M ($/capacity_unit/year)
+fom_turbine: 20000      # $/MW/yr
+fom_orc: 30000          # $/MW/yr
+fom_absorption: 10000   # $/MWth/yr
+fom_electric_chiller: 5000   # $/MWth/yr
+fom_tes: 1000           # $/MWh_th/yr
+
+# Variable O&M ($/MWh energy produced/consumed)
+vom_turbine: 2.0        # $/MWh_e
+vom_orc: 3.0            # $/MWh_e
+vom_absorption: 0.5     # $/MWh_th
+vom_electric_chiller: 1.0    # $/MWh_th
+
+# Fuel cost
+fuel_cost: 5.0          # Reactor fuel, $/MWh_th
+
+# Grid electricity prices ($/MWh)
+grid_price_import: 50.0
+grid_price_export: 30.0
+
+# Penalty costs (should be zero in feasible solutions)
+penalty_unmet_it: 10000      # $/MWh unmet IT load
+penalty_unmet_cooling: 5000  # $/MWh_th unmet cooling
+
