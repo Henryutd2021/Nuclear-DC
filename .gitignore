@@ -1,3 +1,10 @@
+# Local tooling (Claude Code, Cursor, Aider, etc.) — NEVER push
+.claude/
+.cursor/
+.aider*
+*.session
+.zed/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -59,3 +66,53 @@ gurobi.log
 
 # Documentation (except README.md)
 docs/
+
+# =============================================================================
+# Data tiering (see data/README.md "How to get the data")
+# =============================================================================
+# Tier 1 (TRACKED in git): YAMLs + scripts + perf curves + small bridge CSVs +
+#   docs + tiny summary CSVs. Total ~400 KB. Lets a fresh clone run the main
+#   case after `make data` regenerates Tier 2.
+#
+# Tier 2 (IGNORED — regen via `make data`, ~10 min): full ERCOT 2022-2024
+#   prices/load, full Open-Meteo Houston weather, hourly carbon intensity,
+#   workload aggregates, Henry Hub daily series.
+#
+# Tier 3 (IGNORED — manual download per data/MANUAL_COLLECTION.md): NLR 1 GB
+#   raw 1-minute AI workload profiles (third-party data, not redistributable).
+# =============================================================================
+
+# Tier 2 — ERCOT historical (regen: data/_raw/fetch_ercot_dam.py + _rtm.py + _eia930_erco.py)
+data/ercot/*_dam_spp_all.csv.gz
+data/ercot/*_dam_lmp_houston.csv
+data/ercot/*_rtm_spp_all.csv.gz
+data/ercot/*_rtm_lmp_houston_hourly.csv
+data/ercot/*_eia930_erco_full.csv
+data/ercot/*_genmix_erco.csv
+data/ercot/*_load_system_actual.csv
+
+# Tier 2 — Weather (regen: data/_raw/fetch_open_meteo_houston.py)
+data/weather/houston_ambient_*.csv
+data/weather/houston_hourly_*.csv
+data/weather/houston_wet_bulb_combined.csv
+
+# Tier 2 — Hourly carbon intensity (regen: data/_raw/build_real_carbon_intensity.py)
+data/environmental/ercot_carbon_intensity_hourly_*.csv
+
+# Tier 2 — Workload aggregates (regen: data/_raw/build_real_ai_workload.py, requires Tier 3 input)
+data/workload/dc_200mw_real_*u_*.csv
+data/workload/cooling_load_pue*.csv
+
+# Tier 2 — Henry Hub daily (regen: data/_raw/fetch_henry_hub.py)
+data/economics/henry_hub_daily_*.csv
+data/economics/henry_hub_monthly_summary.csv
+
+# Tier 2 — Intermediate raw downloads (regenerable, large)
+data/_raw/*.xls
+data/_raw/*.log
+data/_raw/EIA930_BALANCE_*.csv
+data/_raw/ai_workload_dataset.zip
+data/_raw/nlr_extract/
+
+# Tier 3 — NLR raw 1-minute profiles (manual download, 226 MB, third-party)
+data/workload/raw_nlr_colocation/*.csv
