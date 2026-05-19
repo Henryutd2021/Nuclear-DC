@@ -1,0 +1,53 @@
+# Henry Hub Natural Gas Spot Prices — Annual Summary 2022-2024
+# Used for: Case 4 (NGCC on-site) fuel cost driver across the 3 price regimes.
+# Raw daily data: data/economics/henry_hub_daily_2022_2024.csv
+# Monthly stats:  data/economics/henry_hub_monthly_summary.csv
+
+annual_summary:
+  2022:
+    mean_usd_per_mmbtu: 6.45
+    min_usd_per_mmbtu: 3.46
+    max_usd_per_mmbtu: 9.85
+    std_usd_per_mmbtu: 1.67
+    context: "Spike driven by Russia-Ukraine LNG market disruption + cold Q1"
+  2023:
+    mean_usd_per_mmbtu: 2.53
+    min_usd_per_mmbtu: 1.74
+    max_usd_per_mmbtu: 3.78
+    std_usd_per_mmbtu: 0.38
+    context: "Reverted to pre-crisis levels; mild winter and high storage"
+  2024:
+    mean_usd_per_mmbtu: 2.19
+    min_usd_per_mmbtu: 1.21
+    max_usd_per_mmbtu: 13.20
+    std_usd_per_mmbtu: 0.86
+    context: "Mostly low ($2 baseline); one Jan-2024 cold-snap spike to $13"
+
+ercot_houston_ship_channel_basis:
+  typical_usd_per_mmbtu: 0.10
+  range_usd_per_mmbtu: [-0.20, 0.40]
+  source_note: "Houston Ship Channel basis to Henry Hub; ERCOT delivered gas pricing"
+
+paper_paper_baseline_for_ngcc_case4:
+  delivered_fuel_usd_per_mmbtu: 2.60
+  delivered_fuel_range_2022_2024: [1.60, 9.00]
+  notes: "Range matches monthly extremes 2022-2024; baseline = 2024 mean + basis"
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "EIA-HenryHub-Daily"
+    title: "Daily Henry Hub Natural Gas Spot Price"
+    publisher: "U.S. Energy Information Administration, Series NG.RNGWHHD.D"
+    year: 2024
+    url: "https://www.eia.gov/dnav/ng/hist/rngwhhdd.htm"
+    raw_data_url: "https://www.eia.gov/dnav/ng/hist_xls/RNGWHHDd.xls"
+    used_for: ["annual_summary.*"]
+
+  - id: "EIA-NaturalGas-Texas-Basis"
+    title: "Natural Gas Prices by Region — ERCOT/Texas"
+    publisher: "EIA"
+    year: 2024
+    url: "https://www.eia.gov/dnav/ng/ng_pri_fut_s1_m.htm"
+    used_for: ["ercot_houston_ship_channel_basis.*"]

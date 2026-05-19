@@ -1,0 +1,39 @@
+# Financial Parameters — Project Economics
+# Used by paper: amortization of CAPEX in TAC, LCOE, LCOC calculations.
+
+financial:
+  WACC_nominal: 0.067                    # 6.7% — NREL ATB 2024 default for nuclear, US, private financing
+  WACC_real: 0.044                       # ~ (1 + WACC_nominal) / (1 + inflation) - 1, with inflation ~2.2%
+  inflation_rate: 0.022                  # US long-run CPI assumption
+  project_lifetime_years: 20             # paper convention (NB: physical asset life much longer)
+  capital_recovery_factor: 0.0907        # CRF(i=6.7%, n=20)
+  capital_recovery_factor_formula: "i*(1+i)^n / ((1+i)^n - 1)"
+
+  # Reactor-specific physical life (for LCOE only; TAC uses 20-year window)
+  reactor_physical_life_years: 60
+  reactor_lcoe_amortization_years: 40    # NREL ATB 2024 SMR convention
+  reactor_crf_40yr_at_67: 0.0734
+
+  # Tax / subsidy environment (used in MIT ANP-201 reconciliation)
+  itc_rate_assumed: 0.30                 # IRA Section 48 nuclear tax credit (2024)
+  ptc_usd_per_mwh_assumed: 30            # IRA Section 45U nuclear production tax credit
+  ptc_phaseout_year: 2032
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "NREL-ATB-2024-Financial"
+    title: "NREL ATB 2024 — Financial Assumptions"
+    publisher: "NREL"
+    year: 2024
+    url: "https://atb.nrel.gov/electricity/2024/financial_cases_&_methods"
+    used_for: ["WACC_nominal", "WACC_real", "inflation_rate", "project_lifetime_years",
+               "capital_recovery_factor"]
+
+  - id: "IRA-2022-Subsidies"
+    title: "Inflation Reduction Act of 2022 — Sections 45U (PTC) and 48E (ITC)"
+    publisher: "U.S. Congress / Department of Treasury"
+    year: 2022
+    url: "https://www.congress.gov/bill/117th-congress/house-bill/5376"
+    used_for: ["itc_rate_assumed", "ptc_usd_per_mwh_assumed", "ptc_phaseout_year"]

@@ -1,0 +1,106 @@
+# ERCOT Grid Carbon Intensity — Annual + Seasonal + Hour-of-Day (REAL)
+# Use: avoided-emissions accounting when nuclear-cogen DC displaces grid power.
+# Used in TAC carbon term AND in headline metric "carbon abatement cost ($/tCO2)".
+
+# ============================================================================
+# Two-source strategy:
+#   1. EPA AVERT (annual + seasonal) — marginal regional emissions factors.
+#   2. EIA-930 ERCO hourly generation mix (hour-of-day shape) — AVERAGE emission
+#      factor (AEF) computed from actual fuel-mix per hour, weighted by UNECE
+#      2022 lifecycle factors.
+# Both are REAL data. WattTime API would provide MARGINAL Operating Emission
+# Rate (MOER) at hourly resolution — see MANUAL_COLLECTION.md §2 if needed.
+# ============================================================================
+
+annual_emission_rates_2023:
+  ercot:
+    co2_lb_per_mwh: 814             # AVERT 2023 ERCOT region
+    co2_g_per_kwh: 369              # = 814 lb/MWh × 453.59 g/lb / 1000
+    nox_lb_per_mwh: 0.42
+    so2_lb_per_mwh: 0.74
+    pm25_lb_per_mwh: 0.07
+    source: "EPA-AVERT-2024"
+    notes: "Annual AEF (MARGINAL) from EPA AVERT, used for headline accounting."
+
+# Annual AEF computed from EIA-930 ERCO generation mix (2022-2024)
+annual_emission_rates_eia930_aef:
+  ercot:
+    2022_g_per_kwh: 350           # mean AEF from generation mix × UNECE LCA factors
+    2023_g_per_kwh: 333
+    2024_g_per_kwh: 320           # declining trend with renewables growth
+    three_year_mean_g_per_kwh: 334
+    notes: "Computed by data/_raw/build_real_carbon_intensity.py — see ercot_carbon_intensity_*.csv"
+
+# AVERT seasonal multipliers (relative to annual average)
+seasonal_multipliers_2023:
+  ercot:
+    Q1_winter:   1.05
+    Q2_spring:   0.94
+    Q3_summer:   1.12
+    Q4_fall:     0.91
+    source: "EPA-AVERT-2024"
+
+# Hour-of-day shape — REAL from 3 years (2022-2024) ERCOT generation mix
+# Computed from data/ercot/*_genmix_erco.csv + UNECE 2022 LCA emission factors
+# (see data/_raw/build_real_carbon_intensity.py)
+hour_of_day_shape:
+  ercot_aef_3yr_mean:
+    description: |
+      Real hour-of-day average emission factor multiplier for ERCOT 2022-2024.
+      Multiplier × annual_mean_g_per_kwh = expected emission factor at that hour.
+      Pattern: peak overnight (0-4 AM, ~1.10×) due to coal/NG-dominated mix;
+      trough afternoon (14-17, ~0.93×) due to solar penetration.
+    annual_mean_g_per_kwh: 334.2
+    # 0..23 multiplier vs annual mean
+    multiplier_by_hour: [1.0732, 1.1326, 1.1338, 1.0967, 1.0551, 1.0173,
+                        0.9837, 0.9615, 0.9541, 0.9582, 0.9727, 0.9971,
+                        1.0317, 1.0495, 1.0092, 0.9466, 0.9262, 0.9323,
+                        0.9423, 0.9502, 0.9542, 0.9574, 0.9656, 0.9989]
+    source: "EIA-930 ERCO 2022-2024 + UNECE 2022 LCA factors (AEF)"
+    file: "data/environmental/ercot_carbon_intensity_hour_of_day_shape.csv"
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "EPA-AVERT-2024"
+    title: "AVERT (AVoided Emissions and geneRation Tool) — 2023 Emission Rates"
+    publisher: "U.S. Environmental Protection Agency"
+    year: 2024
+    url: "https://www.epa.gov/avert/avert-emission-rates"
+    download_url: "https://www.epa.gov/system/files/documents/2024-04/avert-emission-factors-2023.xlsx"
+    used_for: ["annual_emission_rates_2023.ercot.*", "seasonal_multipliers_2023.ercot.*"]
+
+  - id: "EIA-930-2024-ERCO"
+    title: "EIA-930 Hourly Electric Grid Monitor — ERCOT Region (BA: ERCO)"
+    publisher: "U.S. Energy Information Administration"
+    year: 2024
+    url: "https://www.eia.gov/electricity/gridmonitor/"
+    used_for: ["hour_of_day_shape.ercot_aef_3yr_mean.*", "annual_emission_rates_eia930_aef.*"]
+    notes: "REAL hourly generation mix by fuel type. AEF derived using UNECE LCA factors per fuel."
+
+  - id: "UNECE-2022-LCA"
+    title: "Carbon Neutrality in the UNECE Region — Integrated Lifecycle Assessment"
+    publisher: "United Nations Economic Commission for Europe"
+    year: 2022
+    url: "https://unece.org/sites/default/files/2022-04/LCA_3_FINAL%20March%202022.pdf"
+    used_for: ["AEF emission factors per fuel"]
+    factors_gCO2e_per_kwh:
+      coal: 980
+      natural_gas: 430
+      petroleum: 810
+      nuclear: 12
+      solar: 43
+      wind: 11
+      hydro: 24
+
+  - id: "WattTime-Optional"
+    title: "WattTime API — Marginal Operating Emissions Rate (MOER) for ERCOTC/H"
+    publisher: "WattTime (501c3 nonprofit)"
+    url: "https://www.watttime.org/api-documentation/"
+    notes: |
+      OPTIONAL — would provide MARGINAL emission rate (MEF) at 5-min resolution.
+      Current setup uses AVERAGE emission factor (AEF) from EIA-930. MEF would
+      be more accurate for "displacement" accounting (carbon abatement cost
+      metric); AEF is conservative — slightly underestimates abatement. Apply at
+      https://www.watttime.org/api-documentation/ if needed (1-2 day approval).

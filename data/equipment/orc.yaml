@@ -1,0 +1,111 @@
+# Organic Rankine Cycle (ORC) — Equipment Parameters
+# Use: Cases 2 (full cogen) and Case 3 (compare without ORC)
+#
+# Role in BWRX-300 cogeneration:
+# Main steam (287°C / 7.17 MPa) is prioritized for the main turbine (high exergy).
+# ORC bottoming cycle uses turbine extraction or condenser-side low-grade heat
+# (80–150°C) to recover additional power before rejecting to the cooling tower.
+# In paper Case 2, ORC + double-effect absorption share the low-pressure tap
+# (cascade arrangement: absorption first at ~160°C, ORC at ~120°C).
+
+# ------------------------------------------------------------------------------
+# CAPEX / OPEX (paper baseline + ±40% sensitivity range)
+# ------------------------------------------------------------------------------
+economics:
+  capex_baseline_usd_per_kWe: 2800        # installed turnkey (paper baseline)
+  capex_range_usd_per_kWe: [2000, 4000]   # peer-reviewed lit range (Quoilin/Lemmens/NREL)
+  capex_S5_sensitivity_low:  1680          # = baseline × 0.6 (paper S5 robustness check)
+  capex_S5_sensitivity_high: 3920          # = baseline × 1.4 (paper S5 robustness check)
+
+  fixed_om_usd_per_kWe_year: 75            # 2.5% of CAPEX (Lemmens 2016)
+  variable_om_usd_per_mwh: 1.5             # small (low-T cycle, simple controls)
+  fixed_om_range_usd_per_kWe_year: [60, 90]
+
+  lifetime_years: 25                       # Tartière & Astolfi 2017
+  availability: 0.92                       # follows host reactor CF
+  module_size_typical_MWe: [1, 20]         # capacity range for current commercial offerings
+
+# ------------------------------------------------------------------------------
+# Thermal efficiency η as a function of heat-source temperature T_hot
+# (used by performance curve in data/perf/orc_eta.csv)
+# Source: Quoilin 2013, RSER, Sec. 4 — empirical fit across multiple ORC vendors.
+# Working fluid context: R245fa (most common at 100–200°C); R1233zd(E) for ODP-free.
+# ------------------------------------------------------------------------------
+efficiency_vs_temperature:
+  T_hot_C:  [ 80,  90, 100, 110, 120, 130, 140, 150, 170, 200]
+  eta_net: [0.045, 0.06, 0.075, 0.085, 0.10, 0.11, 0.12, 0.13, 0.15, 0.17]
+  uncertainty_pp: 2          # ±2 percentage points (Quoilin 2013)
+  cycle_assumption: "R245fa subcritical; T_cooling = 25-35 °C; ηpump=0.75, ηturbine=0.80"
+
+# ------------------------------------------------------------------------------
+# Part-load behavior (used by optimizer's piecewise-linear approximation)
+# ------------------------------------------------------------------------------
+partial_load_curve:
+  description: |
+    Relative efficiency η/η_design vs load fraction L = Q_in / Q_in_design.
+    Source: Quoilin 2013 + Lemmens 2016. Above 50% load, η decays ≤ 10 %; below
+    30 %, very steep decay due to ηturbine drop-off.
+  load_fraction: [0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00]
+  relative_efficiency: [0.55, 0.75, 0.85, 0.90, 0.94, 0.97, 0.99, 1.00, 1.00]
+  min_load_fraction_for_operation: 0.20   # below this, ORC offline (binary or PWL deadband)
+
+# ------------------------------------------------------------------------------
+# Paper-specific configuration (BWRX-300 anchor)
+# ------------------------------------------------------------------------------
+paper_configuration:
+  inlet_steam_pressure_bar: 2.0          # LP extraction (after absorption-chiller tap)
+  inlet_steam_temperature_C: 120         # saturated @ 2 bar
+  working_fluid: "R245fa"
+  refrigerant_GWP100: 858                # documented for Discussion §5.X env footnote
+  capacity_MWe_nominal: 8                # Case 2: ORC nominal (matches config/plant_case2.yaml)
+  notes: |
+    Capacity in optimizer is a decision variable bounded by orc_capacity_max in
+    config/plant_case{2}.yaml. The baseline of 8 MWe corresponds to the case where
+    ~50 MWth of LP extraction at 120°C gives ~10% net thermal efficiency = ~5
+    MWe but with PWL approximation and rounding we set the nominal upper bound
+    to 8 MWe.
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "Quoilin-2013-RSER"
+    title: "Techno-economic survey of Organic Rankine Cycle (ORC) systems"
+    authors: "Sylvain Quoilin, Martijn Van Den Broek, Sébastien Declaye, Pierre Dewallef, Vincent Lemort"
+    publisher: "Renewable and Sustainable Energy Reviews"
+    year: 2013
+    doi: "10.1016/j.rser.2013.01.028"
+    used_for: ["capex_baseline_usd_per_kWe", "efficiency_vs_temperature", "partial_load_curve"]
+    notes: "Foundational ORC TEA review, 2,500+ citations; CAPEX correlations and η(T) curves widely adopted."
+
+  - id: "Lemmens-2016-Energies"
+    title: "Cost engineering techniques and their applicability for cost estimation of organic Rankine cycle systems"
+    authors: "Sanne Lemmens"
+    publisher: "Energies (MDPI), open-access"
+    year: 2016
+    doi: "10.3390/en9070485"
+    url: "https://www.mdpi.com/1996-1073/9/7/485"
+    used_for: ["capex_range_usd_per_kWe", "fixed_om_usd_per_kWe_year"]
+
+  - id: "NREL-ATB-2024-Geothermal-Binary"
+    title: "NREL ATB 2024 — Geothermal Binary (analog for ORC bottoming)"
+    publisher: "NREL"
+    year: 2024
+    url: "https://atb.nrel.gov/electricity/2024/geothermal"
+    used_for: ["capex_range_usd_per_kWe"]
+    notes: "Binary geothermal plant cost = good proxy for ORC bottoming cycle at similar T_hot range."
+
+  - id: "Tartiere-Astolfi-2017"
+    title: "A World Overview of the Organic Rankine Cycle Market"
+    publisher: "ORC Power Systems / Energy Procedia"
+    year: 2017
+    url: "https://orc-world-map.org/docs/WorldOverview2017.pdf"
+    used_for: ["lifetime_years", "module_size_typical_MWe"]
+
+  - id: "Thunder-Said-Energy-2024"
+    title: "ORC Cost Curve — 2024 update"
+    publisher: "Thunder Said Energy (industry analyst)"
+    year: 2024
+    url: "https://thundersaidenergy.com/downloads/orc-cost-curve/"
+    used_for: ["capex_range_usd_per_kWe"]
+    notes: "Industry-side dual source (paid summary, free abstract); used for cross-check only."

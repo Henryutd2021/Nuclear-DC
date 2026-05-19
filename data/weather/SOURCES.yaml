@@ -1,0 +1,25 @@
+# Weather Data Provenance — data/weather/*
+
+houston_wet_bulb_synth_2024.csv:
+  type: "SYNTHETIC archetype — placeholder until NSRDB API access acquired"
+  basis:
+    - "NOAA NCEI 1991-2020 climate normals, Houston Intercontinental Airport (KIAH)"
+    - "Monthly avg wet-bulb derived from dry-bulb + relative-humidity normals"
+  algorithm: |
+    month_mean[m] + 2.5 * sin(2π(h-9)/24) + smoothed_noise(σ=1.8)
+    Where month_mean is the monthly average wet-bulb °C, and smoothed_noise is
+    a 24-h centered rolling mean of N(0,1.8) — represents synoptic variability.
+    Bounded to [-3, +30] °C.  RNG seed = 7.
+  intended_use: "Houston wet-bulb input to cooling-tower model and absorption
+                 chiller COP derating.  Mean summer wb ≈ 25 °C, p95 ≈ 28 °C."
+  replace_with: |
+    NREL NSRDB hourly observations for Houston, 2022-2024 (3 actual years).
+    See data/MANUAL_COLLECTION.md §3.
+
+sources:
+  - id: "NCEI-1991-2020-Normals-Houston"
+    title: "NOAA NCEI 1991-2020 Climate Normals — Houston Intercontinental Airport"
+    publisher: "National Centers for Environmental Information / NOAA"
+    url: "https://www.ncei.noaa.gov/access/us-climate-normals/"
+    station_id: "USW00012960 (KIAH)"
+    used_for: "Monthly wet-bulb seasonal anchors"

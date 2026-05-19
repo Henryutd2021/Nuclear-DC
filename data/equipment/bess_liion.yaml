@@ -1,0 +1,63 @@
+# Battery Energy Storage System (Lithium-Ion) — Paper S3 Sensitivity
+# Use: Paper Case 1-3 with/without 100 MWh BESS attachment (binary sensitivity).
+# Paper question: does battery storage substitute for or complement heat recovery?
+
+bess_liion:
+  technology: "Lithium-Ion (LFP-dominated for grid-scale 2024)"
+  configuration_paper: "100 MWh / 25 MW (4-hour duration)"
+
+  economics:
+    capex_total_2024_usd_per_kwh: 405          # NREL ATB 2024 Battery Storage, Moderate
+    capex_total_2024_usd_per_kw: 1620          # 4-hour total ($/kW)
+    capex_battery_pack_usd_per_kwh: 156        # cell + module + pack
+    capex_balance_of_system_usd_per_kwh: 249   # PCS, EPC, interconnect
+    capex_range_usd_per_kwh: [325, 485]
+    fixed_om_usd_per_kw_year: 25
+    variable_om_usd_per_mwh: 0.5
+    replacement_cycle_years: 10                # warranty cycle; refurb at year 10
+    end_of_life_credit_pct: 5                  # salvage value of cells/casing
+
+  technical:
+    round_trip_efficiency: 0.85                # AC-AC including PCS losses
+    self_discharge_per_day: 0.001              # 0.1 % / day (negligible at hourly resolution)
+    depth_of_discharge_max: 0.95
+    cycle_life_at_dod90: 6000                  # cycles before 20% capacity fade (LFP)
+    calendar_life_years: 15
+    c_rate_max_charge: 0.25                    # 4-hour
+    c_rate_max_discharge: 0.25
+    response_time_seconds: 0.2
+
+  operational_paper_assumptions:
+    initial_soc_fraction: 0.5
+    final_soc_constraint: "soc_8760 = soc_0"   # cycle closure (paper baseline)
+    soc_min_fraction: 0.05
+    soc_max_fraction: 0.95
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "NREL-ATB-2024-Storage"
+    title: "NREL ATB 2024 — Battery Storage (4-hour duration, Utility-Scale)"
+    publisher: "NREL"
+    year: 2024
+    url: "https://atb.nrel.gov/electricity/2024/utility-scale_battery_storage"
+    used_for: ["economics.capex_*", "economics.fixed_om_usd_per_kw_year",
+               "economics.variable_om_usd_per_mwh"]
+
+  - id: "Cole-Karmakar-NREL-2024"
+    title: "Cost Projections for Utility-Scale Battery Storage: 2024 Update"
+    authors: "Wesley Cole, Akash Karmakar"
+    publisher: "NREL Technical Report"
+    year: 2024
+    url: "https://www.nrel.gov/docs/fy24osti/89625.pdf"
+    used_for: ["economics.capex_battery_pack_usd_per_kwh",
+               "economics.capex_balance_of_system_usd_per_kwh"]
+
+  - id: "Lazard-LCOS-2024"
+    title: "Lazard's Levelized Cost of Storage Analysis — Version 9.0"
+    publisher: "Lazard"
+    year: 2024
+    url: "https://www.lazard.com/research-insights/levelized-cost-of-energy-2024/"
+    used_for: ["economics.capex_range_usd_per_kwh"]
+    notes: "Industry-side dual source for CAPEX cross-check."

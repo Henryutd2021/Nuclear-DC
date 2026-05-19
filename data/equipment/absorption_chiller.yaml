@@ -1,0 +1,155 @@
+# Absorption Chiller (LiBr-H2O) — Equipment Parameters
+# Use: Cases 2 and 3 (cooling delivery to AI data center via heat-driven cycle)
+#
+# Two variants: single-effect (low-T drive) and double-effect (medium-T drive).
+# Paper baseline = DOUBLE-EFFECT because BWRX-300's IP-extraction at ~165 °C
+# (7 bar saturated) directly meets the 140–180 °C drive range.
+
+# ==============================================================================
+# DOUBLE-EFFECT LiBr-H2O (BASELINE for paper Cases 2 / 3)
+# ==============================================================================
+double_effect:
+  description: "Two-stage generator; driven by medium-pressure steam ~7 bar / 165 °C"
+
+  economics:
+    capex_baseline_usd_per_kW_cooling: 750
+    capex_range_usd_per_kW_cooling: [450, 1000]
+    capex_S5_sensitivity_low:  450   # = baseline × 0.6 (paper S5 robustness check)
+    capex_S5_sensitivity_high: 1050  # = baseline × 1.4 (paper S5 robustness check)
+    fixed_om_usd_per_kW_cooling_year: 20    # ~2.5% of CAPEX, Shahzad 2021
+    variable_om_usd_per_mwh_cooling: 0.4    # mostly water treatment + LiBr makeup
+    lifetime_years: 25
+    availability: 0.95
+
+  thermal_performance:
+    # COP_thermal = Q_cooling_out / Q_heat_in
+    # Nameplate (from manufacturers + Shahzad 2021)
+    cop_nameplate_baseline: 1.30
+    cop_nameplate_range: [1.10, 1.50]
+    # Houston wet-bulb correction (CRITICAL — see notes below)
+    cop_effective_houston: 1.10
+    derating_factor_houston: 0.846   # = 1.10 / 1.30, ~15 % reduction
+
+    # Driving heat
+    drive_steam_pressure_bar: 7.0
+    drive_steam_temperature_C: 165
+    drive_steam_pressure_range_bar: [2.5, 9]
+    drive_steam_temperature_range_C: [140, 180]
+
+    # Chilled-water (CHW) delivery to data center
+    chw_supply_temp_C: 6.5            # baseline (range 5-9 °C)
+    chw_return_temp_C: 12.0           # typical 5-6 K rise
+    chw_supply_range_C: [5, 9]
+
+    # Cooling-water (rejection) side
+    cooling_water_inlet_C_houston: 32   # cooling-tower outlet @ Houston summer wet-bulb 26 °C
+    cooling_water_inlet_range_C: [29, 35]
+    libr_crystallization_safety_margin_C: 3
+    libr_crystallization_critical_inlet_C: 32
+
+  parasitics:
+    pump_electric_kWe_per_kW_cooling: 0.020   # ~2 % of cooling output as electrical parasitic
+    cooling_tower_fan_kWe_per_kW_cooling: 0.015
+
+  module_size_typical_kW_cooling: [1000, 5000]   # commercial range
+  capacity_MWth_nominal_paper: 20                # Case 2 nominal
+
+# ==============================================================================
+# SINGLE-EFFECT LiBr-H2O (alternative / cascade end)
+# ==============================================================================
+single_effect:
+  description: "One-stage generator; driven by low-pressure steam / hot water 80–110 °C"
+
+  economics:
+    capex_baseline_usd_per_kW_cooling: 500
+    capex_range_usd_per_kW_cooling: [400, 700]
+    fixed_om_usd_per_kW_cooling_year: 15
+    lifetime_years: 25
+    availability: 0.95
+
+  thermal_performance:
+    cop_nameplate_baseline: 0.72
+    cop_nameplate_range: [0.65, 0.80]
+    cop_effective_houston: 0.65       # ~10 % derating (less severe than double-effect)
+    drive_steam_pressure_bar: 1.5
+    drive_steam_temperature_C: 95
+    drive_steam_temperature_range_C: [80, 110]
+    chw_supply_temp_C: 7.5
+    cooling_water_inlet_C_houston: 30
+
+  use_in_paper: "Cascade end (recovers residual heat after double-effect, optional Case 2 variant — SI only)"
+
+# ==============================================================================
+# Houston wet-bulb correction (CRITICAL — referenced in paper §1.4.5.2 +
+# Methods §2.2; not modeling this would draw a definite reviewer flag)
+# ==============================================================================
+houston_correction:
+  rationale: |
+    Manufacturer COP_nameplate (1.30 for double-effect) assumes ASHRAE-standard
+    cooling-water inlet temperature 29 °C. Houston summer wet-bulb temperature
+    averages ~26 °C (NSRDB Houston Intercontinental Airport TMY3), giving
+    cooling-tower outlet 32-35 °C. This raises absorber and condenser temperatures,
+    lowering COP by ~12-18 % and bringing the system close to the LiBr crystallization
+    boundary (~32 °C cooling-water inlet for stable operation).
+  wet_bulb_summer_avg_C: 26
+  wet_bulb_summer_p95_C: 28
+  cooling_tower_approach_K: 5         # tower outlet = wb + approach
+  cooling_water_inlet_C: 31           # baseline (=26+5); range 29-35 over season
+  resulting_derating_pct: 15
+  paper_choice: |
+    Use COP_effective = 1.10 throughout Houston anchor case; document the 1.30 → 1.10
+    derating in Methods §2.2 with NSRDB wet-bulb time series as evidence.
+  source_for_correction: "Shahzad 2021 + Herold/Radermacher Absorption Chillers and Heat Pumps (CRC, 2016, 2nd ed.)"
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "Shahzad-2021-Energies"
+    title: "Energy efficient absorption chillers for sustainable industrial cooling"
+    authors: "Muhammad Wakil Shahzad et al."
+    publisher: "Energies (MDPI), open-access"
+    year: 2021
+    doi: "10.3390/en14092433"
+    url: "https://www.mdpi.com/1996-1073/14/9/2433"
+    used_for: ["double_effect.economics.capex_*", "double_effect.thermal_performance.cop_*",
+               "single_effect.economics.*", "single_effect.thermal_performance.*",
+               "double_effect.economics.fixed_om_*"]
+    notes: "Direct TEA benchmark for data-center absorption-cooling deployments — must-cite paper."
+
+  - id: "ORNL-Pub14546"
+    title: "Combined Heat and Power Applications in Data Centers"
+    publisher: "Oak Ridge National Laboratory"
+    year: 2009
+    url: "https://info.ornl.gov/sites/publications/files/Pub14546.pdf"
+    used_for: ["double_effect.thermal_performance.*", "double_effect.parasitics.*"]
+
+  - id: "DOE-CHP-2017"
+    title: "Combined Heat and Power Technology Fact Sheet Series: Absorption Chillers"
+    publisher: "U.S. Department of Energy, Office of Energy Efficiency & Renewable Energy"
+    year: 2017
+    url: "https://www.energy.gov/sites/prod/files/2017/06/f35/CHP-Absorption%20Chiller-compliant.pdf"
+    used_for: ["double_effect.economics.capex_range_usd_per_kW_cooling",
+               "double_effect.thermal_performance.cop_nameplate_range",
+               "single_effect.thermal_performance.cop_nameplate_range"]
+
+  - id: "Manufacturer-datasheets"
+    title: "Manufacturer technical datasheets (Shuangliang, Thermax, York YHAU-CW, Broad)"
+    publisher: "Manufacturer literature (free PDFs)"
+    used_for: ["double_effect.thermal_performance.drive_steam_*",
+               "double_effect.thermal_performance.chw_supply_temp_C"]
+    notes: "All COP, drive-temperature, and chilled-water-outlet specs are public; only purchase price requires quotation."
+
+  - id: "Herold-2016-CRC"
+    title: "Absorption Chillers and Heat Pumps (2nd ed.)"
+    authors: "Keith E. Herold, Reinhard Radermacher, Sanford A. Klein"
+    publisher: "CRC Press"
+    year: 2016
+    used_for: ["houston_correction.rationale", "houston_correction.cooling_tower_approach_K"]
+    notes: "Standard textbook for crystallization and rejection-temperature constraints."
+
+  - id: "oemof-thermal-absorption"
+    title: "oemof.thermal absorption_chillers module documentation"
+    publisher: "Open Energy Modelling Framework"
+    url: "https://oemof-thermal.readthedocs.io/en/latest/absorption_chillers.html"
+    notes: "Open-source Kühn-Ziegler characteristic-equation parameters (a, e, s, r) for several commercial chillers; useful for validation."

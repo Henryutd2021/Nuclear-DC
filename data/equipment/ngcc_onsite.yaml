@@ -1,0 +1,61 @@
+# NGCC On-Site Cogeneration — Case 4 Reference Case
+# Use: Paper Case 4 = on-site natural-gas combined-cycle + DC (deployment-realistic
+# alternative to nuclear on-site cogen). Provides "nuclear vs gas" head-to-head.
+# Most direct contemporary precedent: data-center on-site gas turbines + heat
+# recovery (Microsoft on-site gas pilot, Crusoe stranded-gas).
+
+economics:
+  overnight_capital_cost_usd_per_kWe: 1330    # NREL ATB 2024 NGCC F-class, Moderate
+  overnight_capital_cost_range_usd_per_kWe: [1077, 1583]  # ATB Advanced → Conservative
+  fixed_om_usd_per_kWe_year: 29.3              # NREL ATB 2024 NGCC
+  variable_om_usd_per_mwh: 2.65                # NREL ATB 2024 NGCC
+  lifetime_years: 30
+  capacity_factor_realistic: 0.85              # high CF when sized for DC firm power
+
+  # Fuel
+  henry_hub_baseline_usd_per_mmbtu: 2.50       # 2024 avg ≈ $2.50; range over 2022-2024 [1.5, 8.0]
+  ercot_basis_usd_per_mmbtu: 0.10              # delivered basis to Houston Ship Channel
+  delivered_fuel_usd_per_mmbtu: 2.60
+  delivered_fuel_range_usd_per_mmbtu: [1.6, 9.0]   # observed 2022-2024 monthly
+
+technical:
+  net_efficiency_lhv: 0.55                     # F-class GT + steam bottoming
+  net_efficiency_hhv: 0.495                    # for fuel-cost conversion
+  thermal_capacity_MWth: 100                   # nominal (sized to match 50 MWe net + ~50 MWth recoverable)
+  electric_capacity_MWe: 50
+  recoverable_heat_MWth: 40                    # exhaust + steam blow-down (used for absorption or HRSG)
+  ramp_rate_pct_per_min: 10                    # NGCC fast-ramp capability
+  min_load_fraction: 0.40
+
+emissions:
+  co2_direct_g_per_kwh_e_lhv: 333              # 0.181 kg/MJ × 3.6 MJ/kWh / 0.55 (NREL ATB)
+  co2_direct_g_per_kwh_e_paper: 360            # paper uses 360 to match commonly cited NGCC value
+  ch4_upstream_g_co2eq_per_kwh: 60             # methane leakage (Alvarez 2018 + recent EDF tracking)
+  total_lifecycle_g_co2eq_per_kwh: 420
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "NREL-ATB-2024-NaturalGas"
+    title: "NREL ATB 2024 — Natural Gas (NGCC)"
+    publisher: "NREL"
+    year: 2024
+    url: "https://atb.nrel.gov/electricity/2024/natural_gas"
+    used_for: ["economics.overnight_capital_cost_usd_per_kWe", "economics.fixed_om_usd_per_kWe_year",
+               "economics.variable_om_usd_per_mwh", "technical.net_efficiency_lhv"]
+
+  - id: "EIA-NaturalGas-2024"
+    title: "U.S. Natural Gas Prices — Henry Hub and Regional Hubs"
+    publisher: "U.S. Energy Information Administration"
+    year: 2024
+    url: "https://www.eia.gov/dnav/ng/ng_pri_fut_s1_m.htm"
+    used_for: ["economics.henry_hub_baseline_usd_per_mmbtu", "economics.delivered_fuel_*"]
+
+  - id: "Alvarez-2018-Science"
+    title: "Assessment of methane emissions from the U.S. oil and gas supply chain"
+    authors: "Ramón A. Alvarez et al."
+    publisher: "Science"
+    year: 2018
+    doi: "10.1126/science.aar7204"
+    used_for: ["emissions.ch4_upstream_g_co2eq_per_kwh", "emissions.total_lifecycle_g_co2eq_per_kwh"]

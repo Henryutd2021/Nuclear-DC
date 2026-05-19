@@ -1,0 +1,52 @@
+# Water Consumption Intensity by Generation Technology
+# Use: paper KPI #8 = water footprint L/MWh_e
+# Reactor cooling type strongly affects water consumption — relevant since
+# Houston has water-stress concerns and AE journal expects LCA completeness.
+
+# Units: liters of water consumed per MWh of electricity generated (L/MWh)
+# Consumption = withdrawal − return (the truly lost water).
+
+# Medians from Macknick et al. 2012 (NREL), most-cited reference work.
+values:
+  nuclear_LWR_once_through_L_per_MWh: 1018       # withdrawal: 165,000; consumption: 1,018
+  nuclear_LWR_pond_cooling_L_per_MWh: 2680
+  nuclear_LWR_recirc_tower_L_per_MWh: 2546       # paper baseline (BWRX-300 assumed recirculating + tower)
+  nuclear_LWR_dry_cooling_L_per_MWh: 60          # forced air-cooling (for water-stressed sites)
+
+  ngcc_recirc_tower_L_per_MWh: 754
+  ngcc_dry_cooling_L_per_MWh: 19
+
+  coal_recirc_tower_L_per_MWh: 1818
+  solar_pv_utility_L_per_MWh: 102
+  wind_onshore_L_per_MWh: 1.4
+
+paper_baseline:
+  bwrx300_assumed_cooling: "recirculating wet tower"
+  water_intensity_L_per_MWh_e: 2546
+  rationale: |
+    BWRX-300 uses recirculating cooling (cooling-tower). Houston site is inland
+    enough that once-through is infeasible. Dry-cooling is technically possible
+    but adds ~7% capital cost (Macknick 2012) and reduces summer capacity by
+    ~5%; not assumed as baseline.
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "Macknick-2012-NREL"
+    title: "Operational water consumption and withdrawal factors for electricity generating technologies: a review of existing literature"
+    authors: "Jordan Macknick, Robin Newmark, Garvin Heath, K. C. Hallett"
+    publisher: "Environmental Research Letters / NREL Technical Report"
+    year: 2012
+    doi: "10.1088/1748-9326/7/4/045802"
+    url: "https://www.nrel.gov/docs/fy12osti/53470.pdf"
+    used_for: ["values.*", "paper_baseline.water_intensity_L_per_MWh_e"]
+    notes: "Reference review widely cited in LCA and energy-water nexus literature."
+
+  - id: "DOE-EIA-2014-Cooling"
+    title: "Thermoelectric cooling water data"
+    publisher: "EIA Form 923"
+    year: 2014
+    url: "https://www.eia.gov/electricity/data/water/"
+    used_for: ["cross-check"]
+    notes: "Used by Macknick 2012 indirectly via cooling-technology census."

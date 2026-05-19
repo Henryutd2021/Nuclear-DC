@@ -1,0 +1,56 @@
+# Nuclear Power Lifecycle Carbon Emissions
+# Used by paper for: full-lifecycle CO2 accounting in TAC + emissions KPI.
+# Critical because nuclear-on-site cogeneration ONLY makes sense if the
+# upstream lifecycle carbon is small relative to NGCC or grid-average.
+
+# All values in gCO2-equivalent per kWh of electricity delivered (gCO2e/kWh)
+
+values:
+  nuclear_lca_median_g_per_kwh: 5.1     # UNECE 2022 (global LWR fleet median, 100-yr GWP)
+  nuclear_lca_range_g_per_kwh: [3.7, 24]
+  # Paper baseline (round to 12 to be conservative; aligns with plan §1.4 spec)
+  nuclear_lca_paper_baseline_g_per_kwh: 12
+
+  # Comparison points (for Discussion §5)
+  ngcc_lca_g_per_kwh: 430               # NGCC w/ direct + upstream CH4
+  coal_lca_g_per_kwh: 980
+  solar_pv_utility_lca_g_per_kwh: 43
+  wind_onshore_lca_g_per_kwh: 11
+  grid_average_us_2024_g_per_kwh: 376   # EIA 2024 generation-weighted avg
+
+breakdown_nuclear:
+  uranium_mining_and_milling: 0.8
+  enrichment_and_conversion: 1.7        # GLE/Centrifuge — much lower for diffusion plants
+  fuel_fabrication: 0.4
+  plant_construction: 1.5
+  plant_operation_and_maintenance: 0.4
+  spent_fuel_management_and_decommissioning: 0.3
+  total_g_per_kwh: 5.1
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "UNECE-2022-LCA"
+    title: "Carbon Neutrality in the UNECE Region — Integrated Lifecycle Assessment of Electricity Sources"
+    publisher: "United Nations Economic Commission for Europe"
+    year: 2022
+    url: "https://unece.org/sites/default/files/2022-04/LCA_3_FINAL%20March%202022.pdf"
+    used_for: ["nuclear_lca_median_g_per_kwh", "nuclear_lca_range_g_per_kwh",
+               "ngcc_lca_g_per_kwh", "coal_lca_g_per_kwh", "solar_pv_utility_lca_g_per_kwh",
+               "wind_onshore_lca_g_per_kwh", "breakdown_nuclear"]
+    notes: "Most current integrated LCA across all sources, harmonized 100-yr GWP and consistent boundaries."
+
+  - id: "IPCC-AR6-WG3-2022"
+    title: "IPCC AR6 WG3 Annex II — Metrics & Methodology / Lifecycle GHG Tables"
+    publisher: "Intergovernmental Panel on Climate Change"
+    year: 2022
+    url: "https://www.ipcc.ch/report/ar6/wg3/downloads/report/IPCC_AR6_WGIII_Annex-II.pdf"
+    used_for: ["cross-check"]
+
+  - id: "EIA-2024-CarbonIntensity"
+    title: "U.S. Electric Power Annual 2024 — Total CO2 from Electricity Generation"
+    publisher: "U.S. Energy Information Administration"
+    year: 2024
+    url: "https://www.eia.gov/electricity/annual/"
+    used_for: ["grid_average_us_2024_g_per_kwh"]

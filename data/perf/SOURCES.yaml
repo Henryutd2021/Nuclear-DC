@@ -1,0 +1,32 @@
+# Source provenance for data/perf/*.csv
+turbine_hr.csv:
+  description: "BWRX-300 saturated-steam turbine heat rate vs gross MWe output"
+  derived_from:
+    - "GE-Hitachi BWRX-300 General Description (design HR = 2.90 MWth/MWe @ 300 MWe)"
+    - "Black & Veatch off-design steam-turbine factor library (HR vs load shape)"
+  curve_basis: "design HR fixed; part-load HR_factor lookup from large-steam-turbine practice"
+
+orc_eta.csv:
+  description: "ORC net thermal efficiency vs heat input Q_in, at baseline T_hot=120 °C"
+  derived_from:
+    - "Quoilin 2013, RSER (10.1016/j.rser.2013.01.028) — design η=0.10 @ 120 °C"
+    - "Lemmens 2016, Energies (10.3390/en9070485) — part-load curve shape"
+  notes: "Full η(T_hot) table available in data/equipment/orc.yaml"
+
+ab_cop.csv:
+  description: "Double-effect LiBr-H2O absorption chiller COP, Houston-corrected"
+  derived_from:
+    - "Shahzad 2021, Energies 14(9):2433 (10.3390/en14092433) — double-effect baseline"
+    - "ORNL Pub14546 — DC absorption deployment data"
+    - "oemof.thermal Kühn-Ziegler model — part-load shape"
+    - "Manufacturer datasheets (Shuangliang/Thermax/York) — operating envelopes"
+  houston_correction: "nameplate 1.30 → effective 1.10 (Houston wet-bulb 26 °C → CW inlet 32 °C)"
+  notes: "Full COP + drive-T + CHW-T spec available in data/equipment/absorption_chiller.yaml"
+
+ec_cop.csv:
+  description: "Electric chiller COP (water-cooled centrifugal, ~5 MWth class), Houston-corrected"
+  derived_from:
+    - "AHRI 550/590-2024 standard"
+    - "ASHRAE Handbook — Refrigeration"
+    - "Trane CenTraVac + York YMC2 manufacturer datasheets"
+  houston_correction: "design COP 6.1 → effective 5.75 at 32 °C cooling-water inlet"

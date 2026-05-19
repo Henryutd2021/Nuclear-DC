@@ -1,0 +1,137 @@
+# BWRX-300 Economic Parameters — Three-Scenario CAPEX/LCOE
+# Used by paper Sensitivity dimension S4: CAPEX deployment-maturity (FOAK / ATB-Mid / NOAK)
+#
+# Critical paper claim: BWRX-300 OCC has a 6.5× real-world spread
+# ($2,250 to $14,700 /kWe) depending on whether FOAK or NOAK is assumed.
+# This is far larger than the standard ±30% sensitivity AE expects, and
+# is the strongest narrative in the paper (S4 critical-point analysis).
+
+# ------------------------------------------------------------------------------
+# Three locked scenarios (paper §3 / §1.2.2)
+# ------------------------------------------------------------------------------
+scenarios:
+
+  FOAK:
+    label: "First-of-a-Kind — Ontario Power Generation Darlington empirical budget"
+    overnight_capital_cost_usd_per_kWe: 14700
+    lcoe_usd_per_mwh: 194              # MIT ANP-201 FOAK estimate (with ITC + LPO loan)
+    description: |
+      OPG Darlington Unit 1 CAPEX as approved by the Ontario provincial government
+      in 2024-09. Total project budget is CAD 6.1B for the SMR + CAD 1.6B for site
+      infrastructure = CAD 7.7B total for one 300-MWe-net unit. At 300 MWe net and
+      USD/CAD ≈ 0.73 (2024-Q3 avg), this implies USD 14,700 /kWe overnight cost.
+      This is the only real-world budgeted cost figure for the BWRX-300 design.
+    capex_breakdown:
+      smr_unit_CAD: 6100000000        # 6.1 B CAD, OPG announcement 2024-09
+      site_infrastructure_CAD: 1600000000  # 1.6 B CAD
+      total_CAD: 7700000000
+      exchange_rate_usd_per_cad_2024Q3: 0.73
+      total_USD: 5621000000
+      net_capacity_MW: 300
+      occ_usd_per_kWe: 14700
+    primary_source: "OPG-CNSC-2024"
+    secondary_source: "WNN-2024-09"
+
+  ATB_Mid:
+    label: "NREL ATB 2024 Moderate — generic SMR mid-range"
+    overnight_capital_cost_usd_per_kWe: 7615
+    lcoe_usd_per_mwh: 130              # interpolated from ATB Moderate Nuclear-SMR 2030 cohort
+    description: |
+      NREL Annual Technology Baseline 2024 'Nuclear — SMR — Moderate' financial
+      assumption for a generic light-water SMR. Treated as the intermediate point
+      between FOAK realities and NOAK targets. Conservative-case = $8,017/kWe
+      (not used as primary scenario; documented for completeness).
+    primary_source: "NREL-ATB-2024-Nuclear"
+    conservative_alternative_usd_per_kWe: 8017
+
+  NOAK:
+    label: "N-th-of-a-Kind — GE-Hitachi vendor target"
+    overnight_capital_cost_usd_per_kWe: 2250
+    lcoe_usd_per_mwh: 95               # MIT ANP-201 NOAK estimate
+    description: |
+      GE-Hitachi public statements (BWRX-300 fact sheets, investor materials)
+      claim long-term NOAK overnight cost target of $2,250 /kWe assuming
+      learning-by-doing across ≥10 units, supply-chain maturity, and regulatory
+      precedent. This is a vendor target, NOT a budgeted figure, but it caps the
+      lower bound of plausible long-run deployment cost.
+    primary_source: "GE-Hitachi-2024"
+    secondary_source: "MIT-ANP-201-2024"
+
+# ------------------------------------------------------------------------------
+# Cross-validation: INL meta-analysis range
+# ------------------------------------------------------------------------------
+sanity_check:
+  source: "INL-RPT-24-77048"
+  range_usd_per_kWe: [5000, 12000]
+  notes: |
+    Idaho National Laboratory 2024 meta-analysis of 35 bottom-up SMR cost
+    estimates yields $5,000-12,000 /kWe range. Our three locked scenarios
+    ($2,250 / $7,615 / $14,700) bracket this range, with FOAK above the high
+    end (consistent with INL's noted FOAK premium) and NOAK below the low end
+    (vendor-target territory, not yet empirically demonstrated).
+
+# ------------------------------------------------------------------------------
+# Fixed operating cost (FOM) — common across all 3 scenarios
+# ------------------------------------------------------------------------------
+fixed_om_usd_per_kWe_year: 121          # NREL ATB 2024 SMR Moderate
+variable_om_usd_per_mwh: 3.50           # NREL ATB 2024 SMR Moderate (incl. minor consumables)
+fuel_cost_usd_per_mwh_thermal: 6.0      # baseline (EIA 2024 nuclear fleet avg); paper sensitivity range [5, 7]
+fuel_cost_range_usd_per_mwh_thermal: [5.0, 7.0]
+
+# ------------------------------------------------------------------------------
+# Financial parameters (apply across all 3 scenarios)
+# ------------------------------------------------------------------------------
+financial:
+  WACC_nominal: 0.067                   # 6.7% — NREL ATB 2024 default (private financing, US, nuclear)
+  project_lifetime_years: 20            # for amortization in TAC; reactor physical life is 60 years
+  capital_recovery_factor: 0.0907       # CRF = i(1+i)^n / [(1+i)^n - 1] @ i=6.7%, n=20
+  source: "NREL-ATB-2024"
+
+# ==============================================================================
+# SOURCES
+# ==============================================================================
+sources:
+  - id: "OPG-CNSC-2024"
+    title: "Darlington New Nuclear Project — Cost & Schedule update"
+    publisher: "Ontario Power Generation"
+    year: 2024
+    url: "https://www.opg.com/projects-services/projects/nuclear/dnnp/"
+    notes: "CAD 6.1B + CAD 1.6B = CAD 7.7B total budget for first unit, announced 2024-09"
+
+  - id: "WNN-2024-09"
+    title: "What is the budget for Canada's first SMR project?"
+    publisher: "World Nuclear News"
+    year: 2024
+    url: "https://www.world-nuclear-news.org/articles/what-is-the-budget-for-canadas-first-smr-project"
+
+  - id: "NREL-ATB-2024-Nuclear"
+    title: "NREL Annual Technology Baseline 2024 — Nuclear (SMR)"
+    publisher: "National Renewable Energy Laboratory, US DOE"
+    year: 2024
+    url: "https://atb.nrel.gov/electricity/2024/nuclear"
+    notes: "CSV downloads available; cost categories: SMR Moderate/Conservative/Advanced"
+
+  - id: "MIT-ANP-201-2024"
+    title: "ANP-201 The Future of Nuclear Energy in a Carbon-Constrained World — Cost analyses"
+    publisher: "MIT Center for Advanced Nuclear Energy Systems"
+    year: 2024
+    url: "https://web.mit.edu/kshirvan/www/research/ANP201%20TR%20CANES.pdf"
+    notes: "FOAK LCOE $194/MWh (with ITC + LPO); NOAK LCOE $95/MWh"
+
+  - id: "GE-Hitachi-2024"
+    title: "BWRX-300 General Description / Fact Sheet"
+    publisher: "GE Vernova / Hitachi Nuclear Energy"
+    year: 2024
+    url: "https://www.gevernova.com/nuclear/carbon-free-power/bwrx-300-small-modular-reactor"
+
+  - id: "INL-RPT-24-77048"
+    title: "Comparison of LWR SMR Cost Estimates — Meta-analysis of 35 bottom-up studies"
+    publisher: "Idaho National Laboratory"
+    year: 2024
+    url: "https://inldigitallibrary.inl.gov/sites/sti/sti/Sort_107010.pdf"
+
+  - id: "EIA-Nuclear-2024"
+    title: "Nuclear Fuel & Operating Cost — EIA Form 923 / Form 860"
+    publisher: "U.S. Energy Information Administration"
+    year: 2024
+    url: "https://www.eia.gov/electricity/data/eia923/"
