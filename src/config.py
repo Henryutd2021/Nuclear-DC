@@ -61,6 +61,18 @@ class VccConfig(BaseModel):
     lifetime_years: int = Field(gt=0)
 
 
+class NgccConfig(BaseModel):
+    capex_usd_per_kWe: float = Field(gt=0.0)
+    fixed_om_usd_per_kWe_year: float = Field(ge=0.0)
+    variable_om_usd_per_mwh_e: float = Field(ge=0.0)
+    net_efficiency_lhv: float = Field(gt=0.0, lt=1.0)
+    net_efficiency_hhv: float = Field(gt=0.0, lt=1.0)
+    co2_direct_g_per_kwh_e: float = Field(ge=0.0)
+    co2_upstream_ch4_g_per_kwh_e: float = Field(ge=0.0)
+    henry_hub_basis_usd_per_mmbtu: float
+    lifetime_years: int = Field(gt=0)
+
+
 class CaseConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -69,6 +81,7 @@ class CaseConfig(BaseModel):
     equipment: CaseEquipment
     capacities: CaseCapacities
     vcc: Optional[VccConfig] = None
+    ngcc: Optional[NgccConfig] = None
 
 
 # ---------------------------------------------------------------------------

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Union
 
 import pandas as pd
+import yaml
 
 _VALID_YEARS: set[int] = {2022, 2023, 2024}
 _HOURS_PER_YEAR: int = 8760
@@ -17,6 +18,9 @@ class TimeSeries:
     """Aligned hourly inputs for a single ERCOT operating year.
 
     All Series are 0-indexed of length ``num_hours`` after any slicing.
+    ``henry_hub_usd_per_mmbtu`` is the year's annual mean Henry Hub spot
+    price (scalar), used by Case 4 for NGCC fuel cost across the v2.5
+    S2 year-regime sensitivity.
     """
 
     year: int
@@ -25,6 +29,7 @@ class TimeSeries:
     wet_bulb_C: pd.Series
     price_import_usd_per_mwh: pd.Series
     carbon_intensity_g_per_kwh: pd.Series
+    henry_hub_usd_per_mmbtu: float
 
 
 def _read_column(path: Path, col: str, start: int, n: int) -> pd.Series:
@@ -101,4 +106,30 @@ def load_time_series(
         carbon_intensity_g_per_kwh=_read_column(
             carbon_path, "carbon_intensity_g_per_kwh", start_hour, num_hours
         ),
+        henry_hub_usd_per_mmbtu=load_henry_hub_annual_mean(root, year),
     )
+
+
+def load_henry_hub_annual_mean(
+    project_root: Union[Path, str], year: int
+) -> float:
+    """Return the Henry Hub annual mean spot price for ``year`` in $/MMBtu.
+
+    Reads ``data/economics/henry_hub_summary.yaml`` (EIA NG.RNGWHHD.D series,
+    2022-2024). Used by Case 4 to scale NGCC fuel cost across the v2.5 S2
+    year-regime sensitivity.
+
+    Raises:
+        ValueError: if ``year`` is not in {2022, 2023, 2024}.
+        FileNotFoundError: if the summary yaml is missing.
+    """
+    if year not in _VALID_YEARS:
+        raise ValueError(
+            f"year must be one of {sorted(_VALID_YEARS)}, got {year!r}"
+        )
+    path = Path(project_root) / "data" / "economics" / "henry_hub_summary.yaml"
+    if not path.exists():
+        raise FileNotFoundError(f"Henry Hub summary not found: {path}")
+    with path.open() as f:
+        summary = yaml.safe_load(f)
+    return float(summary["annual_summary"][year]["mean_usd_per_mmbtu"])

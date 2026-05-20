@@ -1,0 +1,53 @@
+# Case 4 — NGCC on-site, off-grid baseline (v2.5 §B)
+#
+# Plain English: NGCC plant on the DC site supplies all electricity (IT + VCC
+# chiller). No grid connection — provides a pure-fossil deployment-realistic
+# alternative to nuclear on-site cogen. Premium vs Case 0 (grid-only) shows
+# whether building gas locally beats buying ERCOT power; Premium vs Cases 1-3
+# is the main "nuclear cogen vs gas" comparison.
+#
+# Per v2.5 §2.1, Case 4 runs as an INDEPENDENT LP (parallel to Case 0).
+# Off-grid + fixed PUE + constant-efficiency NGCC = closed-form dispatch.
+#
+# Fuel cost is year-resolved from data/economics/henry_hub_summary.yaml,
+# delivered = HH annual mean + Houston Ship Channel basis (~$0.10/MMBtu).
+
+case_id: 4
+label: "NGCC on-site, off-grid"
+
+equipment:
+  reactor_enabled:            false
+  turbine_enabled:            false
+  orc_enabled:                false
+  absorption_chiller_enabled: false
+  electric_chiller_enabled:   true     # same VCC as Case 0
+  tes_enabled:                false
+  bess_enabled:               false
+  ngcc_enabled:               true
+  grid_import_enabled:        false    # pure off-grid
+  grid_export_enabled:        false
+
+capacities:
+  electric_chiller_capacity_MWth: 120.0   # identical to Case 0 (same DC)
+  ngcc_capacity_MWe:              200.0   # covers max IT (142 MW) + max VCC draw (~22 MW) + buffer
+
+# Vapor-compression chiller — identical to Case 0 baseline
+vcc:
+  cop_baseline:    3.5
+  cop_houston:     3.2
+  fixed_om_usd_per_kWth_year: 8
+  variable_om_usd_per_mwh_th: 0.5
+  capex_usd_per_kWth: 250
+  lifetime_years: 25
+
+# NGCC parameters from data/equipment/ngcc_onsite.yaml (NREL ATB 2024 + EIA + Alvarez 2018)
+ngcc:
+  capex_usd_per_kWe:                1330      # NREL ATB 2024 NGCC F-class Moderate
+  fixed_om_usd_per_kWe_year:        29.3
+  variable_om_usd_per_mwh_e:        2.65
+  net_efficiency_lhv:               0.55      # for fuel-energy → electricity
+  net_efficiency_hhv:               0.495     # HH prices are HHV-basis → use HHV η for $/MWh fuel
+  co2_direct_g_per_kwh_e:           360       # paper value, commonly cited NGCC direct emissions
+  co2_upstream_ch4_g_per_kwh_e:     60        # Alvarez 2018 methane leakage (CO2-equivalent)
+  henry_hub_basis_usd_per_mmbtu:    0.10      # Houston Ship Channel basis to Henry Hub
+  lifetime_years:                   30        # NREL ATB convention (NGCC life > nuclear 20-yr window)

@@ -80,9 +80,7 @@ def test_invalid_case_id_rejected():
         load_config(case_id=-1, project_root=PROJECT_ROOT)
 
 
-def test_case_id_yaml_mismatch_raises():
-    """If yaml says case_id=2 but caller asks for 0, must raise."""
-    # No fixture file mismatch in repo; we verify the guard exists by patching.
-    # Simplest: just confirm a non-existent case_id (e.g., 4) raises FileNotFoundError.
+def test_missing_yaml_raises_filenotfound():
+    """Bogus project root must raise FileNotFoundError on the first yaml read."""
     with pytest.raises(FileNotFoundError):
-        load_config(case_id=4, project_root=PROJECT_ROOT)
+        load_config(case_id=0, project_root="/nonexistent/path/Nuclear-DC")
