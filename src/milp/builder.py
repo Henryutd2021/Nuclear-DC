@@ -245,11 +245,52 @@ def build_model(
     else:
         m.P_grid_sell = pyo.Param(m.T, initialize=0.0)
 
+    # ---- BESS (S3 binary sensitivity) --------------------------------------
+    # LP formulation: round-trip loss in the objective makes simultaneous
+    # charge/discharge unprofitable, so no integer interlock is needed.
+    if eq.bess_enabled and cfg.case.bess is not None:
+        bs = cfg.case.bess
+        Cap_E = cap.bess_capacity_MWh
+        Cap_P = cap.bess_power_MW
+        if Cap_E is None or Cap_P is None:
+            raise ValueError(
+                "BESS enabled but capacities.bess_capacity_MWh / bess_power_MW missing"
+            )
+        sqrt_eta = bs.round_trip_efficiency ** 0.5
+        soc_min = bs.soc_min_fraction * Cap_E
+        soc_max = bs.soc_max_fraction * Cap_E
+        soc_init = bs.initial_soc_fraction * Cap_E
+
+        m.B_charge = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, Cap_P))
+        m.B_discharge = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(0, Cap_P))
+        m.B_soc = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(soc_min, soc_max))
+
+        def soc_dynamics(mdl, t):
+            if t == mdl.T.first():
+                prev = soc_init
+            else:
+                prev = mdl.B_soc[t - 1]
+            return mdl.B_soc[t] == prev * (1 - bs.self_discharge_per_hour) + (
+                sqrt_eta * mdl.B_charge[t] - mdl.B_discharge[t] / sqrt_eta
+            ) * dt
+
+        m.bess_soc_dyn = pyo.Constraint(m.T, rule=soc_dynamics)
+
+        # Cycle closure: only enforce for full-year runs to avoid penalizing
+        # short smoke tests that can't naturally close the cycle.
+        if ts.num_hours == 8760:
+            m.bess_cycle_closure = pyo.Constraint(
+                expr=m.B_soc[m.T.last()] == soc_init
+            )
+    else:
+        m.B_charge = pyo.Param(m.T, initialize=0.0)
+        m.B_discharge = pyo.Param(m.T, initialize=0.0)
+
     # ---- Energy balances ---------------------------------------------------
     def electric_balance(mdl, t):
         return (
-            mdl.P_turb_net[t] + mdl.P_orc[t] + mdl.P_grid_buy[t]
-            == mdl.P_IT[t] + mdl.P_vcc[t] + mdl.P_grid_sell[t]
+            mdl.P_turb_net[t] + mdl.P_orc[t] + mdl.P_grid_buy[t] + mdl.B_discharge[t]
+            == mdl.P_IT[t] + mdl.P_vcc[t] + mdl.P_grid_sell[t] + mdl.B_charge[t]
         )
 
     m.elec_balance = pyo.Constraint(m.T, rule=electric_balance)
@@ -279,6 +320,12 @@ def build_model(
         abs_cap_MWth = cap.absorption_capacity_MWth or 100.0
         capex_annual_expr += ab.capex_usd_per_kWth * abs_cap_MWth * 1000.0 * crf
         fom_annual_expr += ab.fixed_om_usd_per_kWth_year * abs_cap_MWth * 1000.0
+    if eq.bess_enabled and cfg.case.bess is not None:
+        bs = cfg.case.bess
+        Cap_E = cap.bess_capacity_MWh
+        Cap_P = cap.bess_power_MW
+        capex_annual_expr += bs.capex_usd_per_kwh * Cap_E * 1000.0 * crf
+        fom_annual_expr += bs.fixed_om_usd_per_kw_year * Cap_P * 1000.0
 
     vom_per_hour = (
         rx.variable_om_usd_per_mwh_e * m.P_turb_net[m.T.first()]
@@ -303,6 +350,13 @@ def build_model(
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
         vom_annual_expr = vom_annual_expr + sum(
             cfg.case.absorption.variable_om_usd_per_mwh_th * m.Q_abs_cool[t]
+            for t in m.T
+        ) * dt * annual_scale
+    if eq.bess_enabled and cfg.case.bess is not None:
+        # VOM scales with throughput (charge + discharge), per NREL ATB convention.
+        vom_annual_expr = vom_annual_expr + sum(
+            cfg.case.bess.variable_om_usd_per_mwh
+            * (m.B_charge[t] + m.B_discharge[t])
             for t in m.T
         ) * dt * annual_scale
 

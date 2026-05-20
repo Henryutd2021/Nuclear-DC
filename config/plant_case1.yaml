@@ -27,6 +27,8 @@ capacities:
   reactor_thermal_capacity_MWth: 870.0      # BWRX-300 nameplate
   turbine_capacity_MWe:          300.0      # gross; net ≈ 270 after auxiliaries
   electric_chiller_capacity_MWth: 120.0     # same VCC as Case 0
+  bess_capacity_MWh:             100.0      # v2.5 S3 BESS sensitivity (100 MWh / 25 MW)
+  bess_power_MW:                 25.0
 
 vcc:
   cop_baseline:    3.5
@@ -58,3 +60,17 @@ turbine:
   fixed_om_usd_per_kWe_year:      0        # bundled
   variable_om_usd_per_mwh_e:      0        # bundled
   aux_load_fraction:              0.10     # ~10% net-vs-gross (300→270 MWe)
+
+# Lithium-ion BESS — data/equipment/bess_liion.yaml (NREL ATB 2024 Moderate).
+# Used only when equipment.bess_enabled is flipped on for the S3 sensitivity.
+bess:
+  capex_usd_per_kwh:           405      # NREL ATB 2024 Moderate
+  capex_usd_per_kw:            1620     # 4-hour duration (=405×4)
+  fixed_om_usd_per_kw_year:    25
+  variable_om_usd_per_mwh:     0.5
+  round_trip_efficiency:       0.85
+  self_discharge_per_hour:     0.0000417  # 0.1% per day / 24
+  soc_min_fraction:            0.05
+  soc_max_fraction:            0.95
+  initial_soc_fraction:        0.50
+  lifetime_years:              15

@@ -24,6 +24,8 @@ capacities:
   turbine_capacity_MWe:           300.0
   absorption_capacity_MWth:       100.0
   electric_chiller_capacity_MWth: 100.0
+  bess_capacity_MWh:              100.0
+  bess_power_MW:                  25.0
 
 # Reactor + turbine + absorption + VCC all identical to Case 2
 reactor:
@@ -66,3 +68,16 @@ vcc:
   variable_om_usd_per_mwh_th:  0.5
   capex_usd_per_kWth:          250
   lifetime_years:              25
+
+# Lithium-ion BESS — same spec as Cases 1/2 (v2.5 S3 binary sensitivity)
+bess:
+  capex_usd_per_kwh:           405
+  capex_usd_per_kw:            1620
+  fixed_om_usd_per_kw_year:    25
+  variable_om_usd_per_mwh:     0.5
+  round_trip_efficiency:       0.85
+  self_discharge_per_hour:     0.0000417
+  soc_min_fraction:            0.05
+  soc_max_fraction:            0.95
+  initial_soc_fraction:        0.50
+  lifetime_years:              15

@@ -270,3 +270,19 @@ def load_config(case_id: int, project_root: Union[Path, str]) -> RunConfig:
         )
 
     return RunConfig(case=case, base=base, financial=financial)
+
+
+def with_bess(cfg: RunConfig, enabled: bool = True) -> RunConfig:
+    """Return a copy of ``cfg`` with ``equipment.bess_enabled`` set.
+
+    Lets v2.5 S3 sensitivity flip BESS on/off without editing yaml files.
+    The case yaml must already carry a ``bess`` block — the helper only
+    toggles the enablement flag.
+    """
+    if enabled and cfg.case.bess is None:
+        raise ValueError(
+            f"Case {cfg.case.case_id} has no bess block in yaml; cannot enable"
+        )
+    new_equipment = cfg.case.equipment.model_copy(update={"bess_enabled": enabled})
+    new_case = cfg.case.model_copy(update={"equipment": new_equipment})
+    return cfg.model_copy(update={"case": new_case})

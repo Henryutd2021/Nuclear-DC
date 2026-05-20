@@ -28,6 +28,8 @@ capacities:
   orc_capacity_MWe:               8.0     # data/equipment/orc.yaml nominal
   absorption_capacity_MWth:       100.0   # covers DC max cooling 79 MWth + headroom
   electric_chiller_capacity_MWth: 100.0   # backup during absorption crystallization outage
+  bess_capacity_MWh:              100.0   # v2.5 S3 BESS sensitivity (100 MWh / 25 MW)
+  bess_power_MW:                  25.0
 
 # Reactor + turbine identical to Case 1
 reactor:
@@ -81,3 +83,16 @@ vcc:
   variable_om_usd_per_mwh_th:  0.5
   capex_usd_per_kWth:          250
   lifetime_years:              25
+
+# Lithium-ion BESS — same spec as Case 1 (v2.5 S3 binary sensitivity, 100 MWh / 25 MW)
+bess:
+  capex_usd_per_kwh:           405
+  capex_usd_per_kw:            1620
+  fixed_om_usd_per_kw_year:    25
+  variable_om_usd_per_mwh:     0.5
+  round_trip_efficiency:       0.85
+  self_discharge_per_hour:     0.0000417
+  soc_min_fraction:            0.05
+  soc_max_fraction:            0.95
+  initial_soc_fraction:        0.50
+  lifetime_years:              15
