@@ -49,21 +49,13 @@ def test_case0_vcc_houston_derated_cop_is_below_nameplate():
 
 
 def test_financial_params_match_v25_locked_values():
-    """v2.5 §A: WACC=6.7%, n=20 → CRF=0.0907."""
+    """v2.5 §A: WACC=6.7%, n=20 → CRF=0.0922 (reconciled 2026-05-19)."""
     cfg = load_config(case_id=0, project_root=PROJECT_ROOT)
     assert cfg.financial.WACC_nominal == pytest.approx(0.067, abs=1e-4)
     assert cfg.financial.project_lifetime_years == 20
-    assert cfg.financial.capital_recovery_factor == pytest.approx(0.0907, abs=1e-4)
+    assert cfg.financial.capital_recovery_factor == pytest.approx(0.0922, abs=1e-4)
 
 
-@pytest.mark.xfail(
-    reason=(
-        "Plan v2.5 §A locks CRF=0.0907 but WACC=0.067, n=20 → formula yields "
-        "0.0922. Discrepancy implies either WACC should be 6.5% or CRF should "
-        "be 0.0922. Surfaced 2026-05-19, awaiting user decision on canonical."
-    ),
-    strict=True,
-)
 def test_crf_self_consistent_with_formula():
     """CRF = i(1+i)^n / ((1+i)^n - 1) must match the stored value."""
     cfg = load_config(case_id=0, project_root=PROJECT_ROOT)

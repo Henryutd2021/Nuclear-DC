@@ -6,13 +6,13 @@ financial:
   WACC_real: 0.044                       # ~ (1 + WACC_nominal) / (1 + inflation) - 1, with inflation ~2.2%
   inflation_rate: 0.022                  # US long-run CPI assumption
   project_lifetime_years: 20             # paper convention (NB: physical asset life much longer)
-  capital_recovery_factor: 0.0907        # CRF(i=6.7%, n=20)
+  capital_recovery_factor: 0.0922        # CRF(i=6.7%, n=20); corrected from 0.0907 on 2026-05-19
   capital_recovery_factor_formula: "i*(1+i)^n / ((1+i)^n - 1)"
 
   # Reactor-specific physical life (for LCOE only; TAC uses 20-year window)
   reactor_physical_life_years: 60
   reactor_lcoe_amortization_years: 40    # NREL ATB 2024 SMR convention
-  reactor_crf_40yr_at_67: 0.0734
+  reactor_crf_40yr_at_67: 0.0724         # CRF(i=6.7%, n=40); corrected from 0.0734 on 2026-05-19
 
   # Tax / subsidy environment (used in MIT ANP-201 reconciliation)
   itc_rate_assumed: 0.30                 # IRA Section 48 nuclear tax credit (2024)
