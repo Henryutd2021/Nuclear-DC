@@ -1,28 +1,60 @@
-# Case 1: Baseline (Turbine Only)
-# All reactor heat → turbine → electricity
-# Cooling via electric chiller only (no ORC, no absorption)
+# Case 1 — BWRX-300 + main turbine only, no heat recovery (v2.5 §B)
+#
+# Plain English: a nuclear plant powers the DC but throws away all of its
+# waste heat. Cooling is from a vapor-compression chiller (same as Case 0).
+# This is the "we built a reactor but didn't bother with cogen" reference
+# that quantifies how much value the heat-recovery system in Cases 2-3 adds.
+#
+# Grid is allowed but optional — the reactor at 92% CF and 270 MWe net is
+# more than enough for the 200 MW DC peak, so excess can be sold or curtailed.
 
 case_id: 1
+label: "Nuclear + turbine, no heat recovery"
 
-# Equipment availability
-turbine_enabled: true
-orc_enabled: false
-absorption_chiller_enabled: false
-electric_chiller_enabled: true
-tes_enabled: true
-grid_import_enabled: false
-grid_export_enabled: false
+equipment:
+  reactor_enabled:            true
+  turbine_enabled:            true
+  orc_enabled:                false
+  absorption_chiller_enabled: false
+  electric_chiller_enabled:   true       # VCC
+  tes_enabled:                false      # no thermal storage in this paper
+  bess_enabled:               false      # S3 toggles on later
+  ngcc_enabled:               false
+  grid_import_enabled:        true       # backup if reactor in outage
+  grid_export_enabled:        true       # sell surplus to ERCOT
 
-# Equipment capacity bounds [MW or MWth]
-reactor_thermal_max: 100.0      # MWth
-turbine_capacity_max: 40.0      # MW electric
-orc_capacity_max: 0.0           # Disabled
-absorption_capacity_max: 0.0    # Disabled
-electric_chiller_capacity_max: 25.0  # MWth
-tes_capacity_max: 50.0          # MWh_th
+capacities:
+  reactor_thermal_capacity_MWth: 870.0      # BWRX-300 nameplate
+  turbine_capacity_MWe:          300.0      # gross; net ≈ 270 after auxiliaries
+  electric_chiller_capacity_MWth: 120.0     # same VCC as Case 0
 
-# Operating constraints
-turbine_min_load_fraction: 0.3  # Min 30% of capacity
-turbine_ramp_rate: 5.0          # Max ramp rate [MW/hour]
-header_efficiency: 0.98         # Steam header efficiency
+vcc:
+  cop_baseline:    3.5
+  cop_houston:     3.2
+  fixed_om_usd_per_kWth_year: 8
+  variable_om_usd_per_mwh_th: 0.5
+  capex_usd_per_kWth: 250
+  lifetime_years: 25
 
+# BWRX-300 — v2.5 baseline uses NREL ATB 2024 Moderate ($7,615/kWe).
+# Run S4 sensitivity by overriding capex_usd_per_kWe to 14700 (FOAK) or 2250 (NOAK).
+reactor:
+  thermal_power_MWth:           870
+  electric_power_net_MWe:       270
+  thermal_efficiency:           0.345
+  capex_usd_per_kWe:            7615      # NREL ATB 2024 Moderate (v2.5 §A baseline)
+  fixed_om_usd_per_kWe_year:    121       # NREL ATB 2024
+  variable_om_usd_per_mwh_e:    3.50      # NREL ATB 2024
+  fuel_cost_usd_per_mwh_th:     6.0       # EIA 2024 fleet avg
+  co2_lifecycle_g_per_kwh_e:    12        # UNECE 2022 LCA
+  min_load_fraction:            0.50      # P1-B BWRX min load (IAEA ARIS 2024)
+  ramp_rate_pct_per_min:        1.0       # P1-B BWRX ramp (GE-H brochure)
+  capacity_factor:              0.92      # mature US BWR fleet baseline
+  lifetime_years:               20        # paper TAC amortization window
+
+turbine:
+  rated_efficiency:               0.345    # matches reactor 300/870
+  capex_usd_per_kWe:              0        # bundled into reactor OCC (NREL ATB convention)
+  fixed_om_usd_per_kWe_year:      0        # bundled
+  variable_om_usd_per_mwh_e:      0        # bundled
+  aux_load_fraction:              0.10     # ~10% net-vs-gross (300→270 MWe)

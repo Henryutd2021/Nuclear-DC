@@ -73,6 +73,79 @@ class NgccConfig(BaseModel):
     lifetime_years: int = Field(gt=0)
 
 
+class ReactorConfig(BaseModel):
+    """BWRX-300 economic + operational parameters used by Cases 1-3."""
+
+    thermal_power_MWth: float = Field(gt=0.0)
+    electric_power_net_MWe: float = Field(gt=0.0)
+    thermal_efficiency: float = Field(gt=0.0, lt=1.0)
+    capex_usd_per_kWe: float = Field(gt=0.0)        # v2.5 S4: FOAK/ATB-Mid/NOAK
+    fixed_om_usd_per_kWe_year: float = Field(ge=0.0)
+    variable_om_usd_per_mwh_e: float = Field(ge=0.0)
+    fuel_cost_usd_per_mwh_th: float = Field(ge=0.0)
+    co2_lifecycle_g_per_kwh_e: float = Field(ge=0.0)
+    # P1-B BWRX MILP locks (v2.5 §A A-block)
+    min_load_fraction: float = Field(gt=0.0, lt=1.0)
+    ramp_rate_pct_per_min: float = Field(gt=0.0)
+    capacity_factor: float = Field(gt=0.0, le=1.0)
+    lifetime_years: int = Field(gt=0)
+
+
+class TurbineConfig(BaseModel):
+    """Main steam turbine fed by reactor (Cases 1-3)."""
+
+    rated_efficiency: float = Field(gt=0.0, lt=1.0)   # at full main-steam load
+    capex_usd_per_kWe: float = Field(ge=0.0)          # 0 if bundled into reactor CAPEX
+    fixed_om_usd_per_kWe_year: float = Field(ge=0.0)
+    variable_om_usd_per_mwh_e: float = Field(ge=0.0)
+    aux_load_fraction: float = Field(ge=0.0, lt=1.0)  # parasitic loads as fraction of gross
+
+
+class OrcConfig(BaseModel):
+    """ORC bottoming cycle (Case 2)."""
+
+    capex_usd_per_kWe: float = Field(gt=0.0)
+    fixed_om_usd_per_kWe_year: float = Field(ge=0.0)
+    variable_om_usd_per_mwh_e: float = Field(ge=0.0)
+    net_efficiency: float = Field(gt=0.0, lt=1.0)     # at design T_hot (120 °C)
+    extraction_temperature_C: float = Field(gt=0.0)
+    lifetime_years: int = Field(gt=0)
+
+
+class AbsorptionConfig(BaseModel):
+    """Double-effect LiBr-H2O absorption chiller (Cases 2, 3).
+
+    Wet-bulb-driven dynamic COP (P1-A): COP_effective(t) = nameplate × derate(T_wb).
+    Crystallization cutoff: forces VCC backup when cooling-water-in > critical.
+    """
+
+    capex_usd_per_kWth: float = Field(gt=0.0)
+    fixed_om_usd_per_kWth_year: float = Field(ge=0.0)
+    variable_om_usd_per_mwh_th: float = Field(ge=0.0)
+    cop_nameplate: float = Field(gt=0.0)              # 1.30 for double-effect
+    cop_houston_baseline: float = Field(gt=0.0)       # 1.10 at T_wb = 26 °C (paper baseline)
+    derate_per_celsius_above_baseline: float = Field(gt=0.0)
+    cooling_water_approach_K: float = Field(gt=0.0)
+    crystallization_cw_inlet_C: float = Field(gt=0.0) # 32 °C critical
+    parasitic_kWe_per_kWth: float = Field(ge=0.0)
+    lifetime_years: int = Field(gt=0)
+
+
+class BessConfig(BaseModel):
+    """Lithium-ion BESS for v2.5 S3 binary sensitivity."""
+
+    capex_usd_per_kwh: float = Field(gt=0.0)
+    capex_usd_per_kw: float = Field(gt=0.0)
+    fixed_om_usd_per_kw_year: float = Field(ge=0.0)
+    variable_om_usd_per_mwh: float = Field(ge=0.0)
+    round_trip_efficiency: float = Field(gt=0.0, le=1.0)
+    self_discharge_per_hour: float = Field(ge=0.0)
+    soc_min_fraction: float = Field(ge=0.0, lt=1.0)
+    soc_max_fraction: float = Field(gt=0.0, le=1.0)
+    initial_soc_fraction: float = Field(ge=0.0, le=1.0)
+    lifetime_years: int = Field(gt=0)
+
+
 class CaseConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -82,6 +155,11 @@ class CaseConfig(BaseModel):
     capacities: CaseCapacities
     vcc: Optional[VccConfig] = None
     ngcc: Optional[NgccConfig] = None
+    reactor: Optional[ReactorConfig] = None
+    turbine: Optional[TurbineConfig] = None
+    orc: Optional[OrcConfig] = None
+    absorption: Optional[AbsorptionConfig] = None
+    bess: Optional[BessConfig] = None
 
 
 # ---------------------------------------------------------------------------
