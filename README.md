@@ -1,6 +1,6 @@
 # Nuclear-Powered Data Center Optimization
 
-A modular Pyomo + Gurobi framework for co-optimizing electricity and chilled-water provision to a data center using nuclear heat, with three operating cases and support for both dispatch-only and capacity co-design optimization.
+A modular Pyomo + Gurobi framework for co-optimizing electricity and chilled-water provision to a data center using nuclear heat, with five operating cases and support for both dispatch-only and capacity co-design optimization.
 
 ## Overview
 
@@ -13,11 +13,13 @@ This repository implements an optimization model that minimizes total system cos
 - **Storage:** Stratified chilled-water thermal energy storage (TES)
 - **Balance of plant:** Condensers, feedwater network, pumps, heat exchangers, auxiliaries
 
-### Three Operating Cases
+### Five Operating Cases
 
-1. **Case 1 - Baseline (Turbine Only):** All reactor heat → turbine → electricity; cooling via electric chiller only
-2. **Case 2 - Integrated ORC + Absorption:** Split heat to turbine + ORC; absorption chiller uses diverted heat
-3. **Case 3 - Turbine + Absorption (No ORC):** Turbine generates power; turbine exhaust drives absorption chiller
+0. **Case 0 - Grid-only baseline:** Data center buys all electricity and cooling-driving power from the grid; no on-site reactor. Used as the TAC denominator for the *Premium of Co-generation* metric.
+1. **Case 1 - Turbine-only co-located reactor:** All reactor heat → turbine → electricity; cooling via electric chiller only.
+2. **Case 2 - Integrated ORC + absorption:** Split heat to turbine + ORC; absorption chiller uses diverted reactor heat.
+3. **Case 3 - Turbine + absorption (no ORC):** Turbine generates power; turbine exhaust steam drives absorption chiller.
+4. **Case 4 - On-site NGCC alternative:** Natural-gas combined-cycle plant supplies the data center in place of the reactor; benchmark for fossil-baseload comparison.
 
 ## Quick Start
 
@@ -41,27 +43,32 @@ pip install -r requirements.txt
 ### Basic Usage
 
 ```bash
-# Run Case 1 (baseline) with 24-hour horizon
-python -m src.solve --case 1 --num-hours 24
+# Single-case solves (24-hour smoke test)
+python -m src.solve --case 0 --num-hours 24   # grid-only baseline
+python -m src.solve --case 1 --num-hours 24   # turbine only
+python -m src.solve --case 2 --num-hours 24   # ORC + absorption
+python -m src.solve --case 3 --num-hours 24   # turbine + absorption
+python -m src.solve --case 4 --num-hours 24   # NGCC alternative
 
-# Run Case 2 (ORC + absorption) with full week
-python -m src.solve --case 2 --num-hours 168
+# Full 8760-hour annual run with capacity co-design
+python -m src.solve --case 2 --capacity-opt --num-hours 8760
 
-# Run Case 3 (turbine + absorption)
-python -m src.solve --case 3 --num-hours 24
-
-# Enable capacity optimization mode
-python -m src.solve --case 2 --capacity-opt --num-hours 168
+# Drive the full sensitivity grid (baseline + S1..S5, 51 solves)
+python scripts/run_all_analyses.py
 ```
+
+The grid driver writes per-run `summary.json` + compressed dispatch CSVs to `outputs/<group>/<run_id>/`, plus a flat `outputs/master_kpi_table.csv` and `outputs/manifest.json`.
 
 ### Configuration
 
 All parameters are specified in YAML files in the `config/` directory:
 
 - **`base.yaml`** - Global defaults (time horizon, solver settings, physical parameters)
-- **`plant_case1.yaml`** - Equipment configuration for Case 1 (baseline)
+- **`plant_case0.yaml`** - Grid-only baseline (no on-site reactor)
+- **`plant_case1.yaml`** - Equipment configuration for Case 1 (turbine only)
 - **`plant_case2.yaml`** - Equipment configuration for Case 2 (ORC + absorption)
 - **`plant_case3.yaml`** - Equipment configuration for Case 3 (turbine + absorption)
+- **`plant_case4.yaml`** - Equipment configuration for Case 4 (NGCC alternative)
 - **`costs.yaml`** - CAPEX, fixed & variable O&M, fuel costs, penalties
 
 ### Input Data
@@ -82,64 +89,67 @@ Performance curves in `data/perf/`:
 
 ## Repository Structure
 
-```
+```text
 Nuclear-DC/
 ├── README.md                  # This file
-├── LICENSE                    # License information
+├── LICENSE / LICENSES.md      # License information
+├── Makefile                   # Data-pipeline + test/lint shortcuts
 ├── requirements.txt           # Python dependencies
-├── pyproject.toml            # Project metadata & tool configs
-├── config/                   # Configuration files
-│   ├── base.yaml             # Global settings
-│   ├── plant_case1.yaml      # Case 1 configuration
-│   ├── plant_case2.yaml      # Case 2 configuration
-│   ├── plant_case3.yaml      # Case 3 configuration
-│   └── costs.yaml            # Economic parameters
-├── data/                     # Input time-series data
-│   ├── it_load.csv           # IT electric load
-│   ├── cooling_load.csv      # Cooling demand (optional)
-│   ├── grid_price_import.csv # Grid import prices (optional)
-│   ├── grid_price_export.csv # Grid export prices (optional)
-│   └── perf/                 # Performance curves
-│       ├── turbine_hr.csv    # Turbine heat rate
-│       ├── orc_eta.csv       # ORC efficiency
-│       ├── ab_cop.csv        # Absorption COP
-│       └── ec_cop.csv        # Electric chiller COP
-├── src/                      # Source code
-│   ├── io_config.py          # Configuration loading & validation (Pydantic)
-│   ├── io_data.py            # Data loading & preprocessing
-│   ├── sets_params.py        # Pyomo sets & parameters
-│   ├── model_core.py         # Model structure & variable declarations
-│   ├── pwl_helper.py         # Piecewise-linear constraint utilities (SOS2)
-│   ├── objective.py          # Total annualized cost objective
-│   ├── solve.py              # CLI & solver interface
-│   ├── constraints/          # Modular constraint modules
-│   │   ├── __init__.py
-│   │   ├── demand.py         # IT & cooling demand balances
-│   │   ├── steam_network.py  # IHX, HP/LP headers, flash vessel
-│   │   ├── routing.py        # Heat routing & case logic
-│   │   ├── turbine.py        # Turbine performance & ramping
-│   │   ├── orc.py            # ORC with recuperator & pump
-│   │   ├── absorption.py     # Absorption chiller (generator T/P)
+├── pyproject.toml             # Project metadata & tool configs
+├── config/                    # YAML configuration
+│   ├── base.yaml              # Global settings
+│   ├── plant_case0.yaml       # Case 0 (grid-only baseline)
+│   ├── plant_case1.yaml       # Case 1 (turbine only)
+│   ├── plant_case2.yaml       # Case 2 (ORC + absorption)
+│   ├── plant_case3.yaml       # Case 3 (turbine + absorption)
+│   ├── plant_case4.yaml       # Case 4 (NGCC alternative)
+│   └── costs.yaml             # Economic parameters
+├── data/                      # Input time-series + raw fetchers
+│   ├── it_load.csv            # IT electric load
+│   ├── cooling_load.csv       # Cooling demand (optional)
+│   ├── grid_price_import.csv  # Grid import prices (optional)
+│   ├── grid_price_export.csv  # Grid export prices (optional)
+│   ├── perf/                  # Performance curves (turbine, ORC, AB, EC)
+│   └── _raw/                  # Public-source fetchers (ERCOT, EIA, weather, ATB)
+├── src/                       # Source code
+│   ├── io_config.py           # Configuration loading & validation (Pydantic)
+│   ├── io_data.py             # Data loading & preprocessing
+│   ├── sets_params.py         # Pyomo sets & parameters
+│   ├── model_core.py          # Model structure & variable declarations
+│   ├── pwl_helper.py          # Piecewise-linear constraint utilities (SOS2)
+│   ├── objective.py           # Total annualized cost objective
+│   ├── solve.py               # CLI & solver interface
+│   ├── cases/                 # Per-case build entry points (case0..case4)
+│   ├── constraints/           # Modular constraint modules
+│   │   ├── demand.py          # IT & cooling demand balances
+│   │   ├── steam_network.py   # IHX, HP/LP headers, flash vessel
+│   │   ├── routing.py         # Heat routing & case logic
+│   │   ├── turbine.py         # Turbine performance & ramping
+│   │   ├── orc.py             # ORC with recuperator & pump
+│   │   ├── absorption.py      # Absorption chiller (generator T/P)
 │   │   ├── electric_chiller.py # Electric chiller
-│   │   ├── storage.py        # TES dynamics & losses
-│   │   ├── condenser_fw.py   # Condenser & feedwater network
-│   │   ├── auxiliaries.py    # Parasitic loads (pumps, etc.)
-│   │   └── capacity.py       # Equipment sizing constraints
-│   └── results/              # Output processing
-│       ├── writers.py        # CSV/JSON export
-│       └── postprocess.py    # KPI calculation & reporting
-├── tests/                    # Unit & integration tests
-│   ├── test_io.py            # Config & data loading tests
-│   ├── test_pwl.py           # Piecewise-linear helper tests
-│   ├── test_constraints.py   # Constraint module tests
-│   ├── test_storage.py       # TES dynamics tests
-│   └── test_end_to_end.py    # Full model solve tests
-├── notebooks/                # Jupyter analysis notebooks
-│   └── demo_case_compare.ipynb
-└── outputs/                  # Solver outputs (git-ignored)
-    ├── dispatch_caseX.csv    # Hourly dispatch results
-    ├── cost_summary_caseX.json # Cost breakdown
-    └── solve_caseX.log       # Solver log
+│   │   ├── storage.py         # TES dynamics & losses
+│   │   ├── condenser_fw.py    # Condenser & feedwater network
+│   │   ├── auxiliaries.py     # Parasitic loads (pumps, etc.)
+│   │   └── capacity.py        # Equipment sizing constraints
+│   └── results/               # Output processing
+│       ├── writers.py         # CSV/JSON export
+│       └── postprocess.py     # KPI calculation & reporting
+├── scripts/                   # Run drivers
+│   └── run_all_analyses.py    # 51-run baseline + S1..S5 sensitivity grid
+├── tests/                     # Unit & integration tests
+├── notebooks/                 # Jupyter analysis notebooks
+│   ├── make_paper_figures.ipynb  # Figure suite driver
+│   ├── figure_helpers.py
+│   └── build_notebook.py
+├── figures/                   # Compiled paper figures
+│   └── fig1_schematic/        # LaTeX/TikZ schematic of the heat-and-power network
+├── docs/                      # Plan, model diagram, gap analysis, changelog
+└── outputs/                   # Solver outputs (git-ignored)
+    ├── <group>/<run_id>/summary.json
+    ├── <group>/<run_id>/dispatch.csv.gz
+    ├── master_kpi_table.csv
+    └── manifest.json
 ```
 
 ## Key Features
@@ -255,67 +265,9 @@ Minimize **Total Annualized Cost (TAC)** including:
 - Equipment availability flags enforce case-specific configurations
 - Disabled equipment capacities forced to zero
 
-## Example Outputs
+## Outputs
 
-After solving, the framework generates:
-
-### 1. Dispatch Results (`outputs/dispatch_caseX.csv`)
-
-Hourly time-series data:
-
-```csv
-hour,P_tur_g_MW,P_ORC_g_MW,P_elc_MW,Q_rx_MWth,Q_chw_AB_MWth,Q_chw_EC_MWth,E_tank_MWh,...
-0,34.2,5.8,12.4,98.5,8.2,15.3,25.0,...
-1,34.5,5.9,12.1,99.1,8.5,14.9,24.2,...
-...
-```
-
-### 2. Cost Summary (`outputs/cost_summary_caseX.json`)
-
-```json
-{
-  "total_annualized_cost": 8496316.74,
-  "capex_annualized": 3245123.45,
-  "fixed_om": 1234567.89,
-  "variable_om_fuel": 3456789.12,
-  "grid_costs": 123456.78,
-  "penalties": 0.0,
-  ...
-}
-```
-
-### 3. Console Output
-
-```
-============================================================
-Solve Results
-============================================================
-Status: optimal
-Solve time: 0.10 seconds
-Optimal solution found!
-Objective value (TAC): $8,496,316.74/year
-✅ All IT load met
-✅ All cooling demand met
-
-============================================================
-KEY PERFORMANCE INDICATORS
-============================================================
-Total Annualized Cost:     $8,496,317/year
-LCOE (Levelized Cost):     $10,085.25/MWh
-LCOC (Cooling Cost):       $40,311.48/MWh_th
-
-Capacity Factors:
-  Turbine:                 98.3%
-  ORC:                     8.9%
-
-Cooling Mix:
-  Absorption fraction:     0.0%
-  Electric chiller:        100.0%
-
-TES Utilization:           50.0%
-  Max SOC:                 25.0 MWh
-  Avg SOC:                 24.8 MWh
-```
+For a single-case solve, the model writes hourly dispatch (CSV) and a scalar KPI summary (JSON) under `outputs/`, together with the Gurobi log. The sensitivity-grid driver (`scripts/run_all_analyses.py`) additionally produces a flat `outputs/master_kpi_table.csv` covering every (case × year × PUE × reactor-CAPEX × BESS × equipment-CAPEX) cell, and a `manifest.json` recording the run grid plus per-run wall time.
 
 ## Development
 
@@ -358,12 +310,6 @@ black src/ tests/ && ruff check . && mypy src/
 3. Import and call in `src/solve.py` → `build_full_model()`
 4. Add tests in `tests/test_constraints.py`
 
-### Adding New Cases
-
-1. Create `config/plant_caseX.yaml` with equipment flags
-2. Update case descriptions in documentation
-3. Test with: `python -m src.solve --case X --num-hours 24`
-
 ## System Requirements
 
 ### Software
@@ -382,10 +328,11 @@ black src/ tests/ && ruff check . && mypy src/
 
 ### Performance
 
-- **Typical solve times:**
-  - 24-hour horizon: < 30 seconds
-  - 168-hour horizon: 1-5 minutes
-  - Depends on case complexity and solver settings
+- **Typical solve times (Gurobi 11, 12-core workstation):**
+  - 24-hour smoke test: a few seconds
+  - 168-hour horizon: 10–60 seconds
+  - 8760-hour annual run: 1–10 minutes per case (depends on case and whether capacity co-design is enabled)
+  - Full 51-run sensitivity grid via `scripts/run_all_analyses.py`: roughly 1–2 hours end-to-end
 
 ## Troubleshooting
 
@@ -406,41 +353,18 @@ python -c "import gurobipy; print(gurobipy.gurobi.version())"
 - Review solver log in `outputs/solve_caseX.log`
 - Enable verbose output: Edit `base.yaml` → `solver.log_to_console: true`
 
-## Future Enhancements
-
-- [ ] Unit commitment with binary variables (startup/shutdown costs)
-- [ ] Multi-stage stochastic optimization (demand uncertainty)
-- [ ] Additional cooling technologies (mechanical chillers, free cooling)
-- [ ] Grid services (frequency regulation, reserves)
-- [ ] Renewable integration (solar PV, wind)
-- [ ] Advanced visualization dashboard
-- [ ] Sensitivity analysis automation
-- [ ] Multi-objective optimization (cost vs. emissions)
-
-## Contributing
-
-Contributions welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
-3. Make changes with tests
-4. Ensure all tests pass (`pytest`)
-5. Format code (`black src/ tests/`)
-6. Submit pull request
-
 ## License
 
 MIT License
 
 ## Citation
 
-
 ```bibtex
 @software{nuclear_dc_optimization,
-  title = {Nuclear-Powered Data Center Optimization Framework},
+  title  = {Nuclear-Powered Data Center Optimization Framework},
   author = {Honglin Li},
-  year = {2025},
-  url = {https://github.com/Henryutd2021/Nuclear-DC}
+  year   = {2026},
+  url    = {https://github.com/Henryutd2021/Nuclear-DC}
 }
 ```
 
@@ -449,8 +373,8 @@ MIT License
 For questions, issues, or collaboration opportunities:
 
 - **Issues:** Use GitHub issue tracker
-- **Email:** honglin.li@utdallas.edu
+- **Email:** <honglin.li@utdallas.edu>
 
 ---
 
-**Last Updated:** October 2025
+**Last Updated:** May 2026
