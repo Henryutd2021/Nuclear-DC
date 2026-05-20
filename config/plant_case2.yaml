@@ -1,29 +1,83 @@
-# Case 2: Integrated ORC + Absorption Cooling
-# Split heat to main turbine + ORC
-# Absorption chiller uses diverted/recovered heat
-# Electric chiller as backup/peaking
+# Case 2 — BWRX-300 + main turbine + ORC + double-effect absorption (v2.5 §B)
+#
+# Full heat-recovery configuration. Main steam goes to the turbine; medium-
+# pressure extraction (~165 C) drives a double-effect LiBr-H2O absorption
+# chiller for DC cooling; lower-pressure extraction (~120 C) drives an ORC
+# for additional electricity. A 100 MWth VCC stays installed as backup so
+# the system can handle Houston wet-bulb spikes when the absorption unit
+# is forced off by the P1-A crystallization gate (cooling-water-in > 32 C).
 
 case_id: 2
+label: "Nuclear + ORC + absorption (full cogen)"
 
-# Equipment availability
-turbine_enabled: true
-orc_enabled: true
-absorption_chiller_enabled: true
-electric_chiller_enabled: false
-tes_enabled: true
-grid_import_enabled: false
-grid_export_enabled: false
+equipment:
+  reactor_enabled:            true
+  turbine_enabled:            true
+  orc_enabled:                true
+  absorption_chiller_enabled: true
+  electric_chiller_enabled:   true       # VCC backup for crystallization gate
+  tes_enabled:                false
+  bess_enabled:               false      # S3 toggles on later
+  ngcc_enabled:               false
+  grid_import_enabled:        true       # backup during reactor outages
+  grid_export_enabled:        true       # sell surplus
 
-# Equipment capacity bounds [MW or MWth]
-reactor_thermal_max: 100.0      # MWth
-turbine_capacity_max: 35.0      # MW electric
-orc_capacity_max: 8.0           # MW electric
-absorption_capacity_max: 20.0   # MWth
-electric_chiller_capacity_max: 0.0   # Disabled
-tes_capacity_max: 50.0          # MWh_th
+capacities:
+  reactor_thermal_capacity_MWth:  870.0
+  turbine_capacity_MWe:           300.0
+  orc_capacity_MWe:               8.0     # data/equipment/orc.yaml nominal
+  absorption_capacity_MWth:       100.0   # covers DC max cooling 79 MWth + headroom
+  electric_chiller_capacity_MWth: 100.0   # backup during absorption crystallization outage
 
-# Operating constraints
-turbine_min_load_fraction: 0.3
-turbine_ramp_rate: 5.0  # Max ramp rate [MW/hour]
-header_efficiency: 0.98
+# Reactor + turbine identical to Case 1
+reactor:
+  thermal_power_MWth:           870
+  electric_power_net_MWe:       270
+  thermal_efficiency:           0.345
+  capex_usd_per_kWe:            7615
+  fixed_om_usd_per_kWe_year:    121
+  variable_om_usd_per_mwh_e:    3.50
+  fuel_cost_usd_per_mwh_th:     6.0
+  co2_lifecycle_g_per_kwh_e:    12
+  min_load_fraction:            0.50
+  ramp_rate_pct_per_min:        1.0
+  capacity_factor:              0.92
+  lifetime_years:               20
 
+turbine:
+  rated_efficiency:               0.345
+  capex_usd_per_kWe:              0
+  fixed_om_usd_per_kWe_year:      0
+  variable_om_usd_per_mwh_e:      0
+  aux_load_fraction:              0.10
+
+# ORC — data/equipment/orc.yaml
+orc:
+  capex_usd_per_kWe:              2800     # Quoilin 2013 + Lemmens 2016 + NREL ATB
+  fixed_om_usd_per_kWe_year:      75
+  variable_om_usd_per_mwh_e:      1.5
+  net_efficiency:                 0.10     # at T_hot 120 C (R245fa subcritical)
+  extraction_temperature_C:       120
+  lifetime_years:                 25
+
+# Double-effect absorption — data/equipment/absorption_chiller.yaml
+absorption:
+  capex_usd_per_kWth:                       750
+  fixed_om_usd_per_kWth_year:               20
+  variable_om_usd_per_mwh_th:               0.4
+  cop_nameplate:                            1.30
+  cop_houston_baseline:                     1.10     # at T_wb 26 C (v2.5 §F.2 paper baseline)
+  derate_per_celsius_above_baseline:        0.015    # ~1.5% absolute per C above 26 C
+  cooling_water_approach_K:                 5        # tower outlet = T_wb + 5 K
+  crystallization_cw_inlet_C:               32       # LiBr crystallization threshold
+  parasitic_kWe_per_kWth:                   0.020
+  lifetime_years:                           25
+
+# VCC backup (same model as Cases 0/1)
+vcc:
+  cop_baseline:                3.5
+  cop_houston:                 3.2
+  fixed_om_usd_per_kWth_year:  8
+  variable_om_usd_per_mwh_th:  0.5
+  capex_usd_per_kWth:          250
+  lifetime_years:              25

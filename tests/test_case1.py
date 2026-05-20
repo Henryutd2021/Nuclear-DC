@@ -51,7 +51,7 @@ def test_case1_electric_balance_closes(cfg, ts_2023_168h):
 def test_case1_cooling_balance_via_vcc_only(cfg, ts_2023_168h):
     """No absorption in Case 1 → Q_VCC_cool == Q_cool_demand every hour."""
     result = solve_case1(cfg, ts_2023_168h)
-    residual = (result.Q_VCC_cool_MWth - result.Q_cool_MWth).abs().max()
+    residual = (result.Q_VCC_cool_MWth - result.Q_cool_demand_MWth).abs().max()
     assert residual < 1e-4
 
 

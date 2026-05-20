@@ -1,9 +1,8 @@
-"""Case 1 — BWRX-300 + main turbine, no heat recovery (v2.5 §B).
+"""Case 3 — BWRX-300 + main turbine + absorption (no ORC) (v2.5 §B).
 
-The reactor's full thermal output goes through the main turbine to make
-electricity for the data center; cooling is from a VCC chiller exactly like
-Case 0. This case quantifies how much value the cogen system (ORC +
-absorption) in Cases 2-3 adds on top of "just buying the reactor".
+Same as Case 2 but without the ORC bottoming cycle. Tests whether the
+ORC step actually pays for itself — Case 2 vs Case 3 isolates the
+incremental value of the ~$2,800/kWe ORC capex at the system level.
 """
 
 from __future__ import annotations
@@ -17,14 +16,14 @@ from src.milp.result import NuclearCaseResult, extract_result
 from src.milp.solve import solve_model
 
 
-def solve_case1(
+def solve_case3(
     cfg: RunConfig,
     ts: TimeSeries,
     pue: Optional[float] = None,
     solver_name: str = "gurobi",
 ) -> NuclearCaseResult:
-    if cfg.case.case_id != 1:
-        raise ValueError(f"solve_case1 requires case_id=1, got {cfg.case.case_id}")
+    if cfg.case.case_id != 3:
+        raise ValueError(f"solve_case3 requires case_id=3, got {cfg.case.case_id}")
     model = build_model(cfg, ts, pue=pue)
     solve_model(model, solver_name=solver_name)
     return extract_result(model, cfg, ts)
