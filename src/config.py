@@ -50,6 +50,7 @@ class CaseCapacities(BaseModel):
     bess_capacity_MWh: Optional[float] = None
     bess_power_MW: Optional[float] = None
     ngcc_capacity_MWe: Optional[float] = None
+    pcc_capacity_MW: Optional[float] = None       # v2.5 §A11 interconnect limit
 
 
 class VccConfig(BaseModel):

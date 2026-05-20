@@ -32,14 +32,16 @@ def test_case2_solve_returns_optimal(cfg, ts_2023_168h):
 
 
 def test_case2_electric_balance_closes(cfg, ts_2023_168h):
-    """P_turb_net + P_orc + P_grid_buy = P_IT + P_VCC + P_grid_sell."""
+    """P_turb_net + P_orc + P_grid_buy = P_IT + P_VCC + abs_parasitic + P_grid_sell."""
     r = solve_case2(cfg, ts_2023_168h)
+    parasitic = cfg.case.absorption.parasitic_kWe_per_kWth * r.Q_abs_cool_MWth
     residual = (
         r.P_turb_net_MW
         + r.P_orc_MW
         + r.P_grid_buy_MW
         - r.P_IT_MW
         - r.P_VCC_elec_MW
+        - parasitic
         - r.P_grid_sell_MW
     ).abs().max()
     assert residual < 1e-4

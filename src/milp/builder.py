@@ -160,6 +160,15 @@ def build_model(
     m.ramp_up = pyo.Constraint(m.T, rule=ramp_up)
     m.ramp_down = pyo.Constraint(m.T, rule=ramp_down)
 
+    # v2.5 §A15: enforce capacity factor on full-year runs.
+    # Treated as a soft annual-mean lower bound (sum P_rx >= CF × cap × T),
+    # not as per-hour forced outages — model is too coarse for explicit outages.
+    if ts.num_hours == 8760:
+        m.reactor_cf = pyo.Constraint(
+            expr=sum(m.P_rx[t] for t in m.T)
+            >= rx.capacity_factor * P_rx_cap * ts.num_hours
+        )
+
     # ---- ORC steam tap (Case 2 only) ---------------------------------------
     if eq.orc_enabled and cfg.case.orc is not None:
         Q_orc_max = (
@@ -235,13 +244,18 @@ def build_model(
         rule=lambda mdl, t: mdl.Q_vcc_cool[t] == vcc.cop_houston * mdl.P_vcc[t],
     )
 
-    # ---- Grid --------------------------------------------------------------
+    # ---- Grid (v2.5 §A11 PCC interconnect limit) ---------------------------
+    pcc_cap = cap.pcc_capacity_MW or 300.0
     if eq.grid_import_enabled:
-        m.P_grid_buy = pyo.Var(m.T, domain=pyo.NonNegativeReals)
+        m.P_grid_buy = pyo.Var(
+            m.T, domain=pyo.NonNegativeReals, bounds=(0, pcc_cap)
+        )
     else:
         m.P_grid_buy = pyo.Param(m.T, initialize=0.0)
     if eq.grid_export_enabled:
-        m.P_grid_sell = pyo.Var(m.T, domain=pyo.NonNegativeReals)
+        m.P_grid_sell = pyo.Var(
+            m.T, domain=pyo.NonNegativeReals, bounds=(0, pcc_cap)
+        )
     else:
         m.P_grid_sell = pyo.Param(m.T, initialize=0.0)
 
@@ -287,10 +301,22 @@ def build_model(
         m.B_discharge = pyo.Param(m.T, initialize=0.0)
 
     # ---- Energy balances ---------------------------------------------------
+    # Absorption-chiller parasitic electric load (v2.5 §F.2: ~0.02 kWe/kWth)
+    absorption_parasitic = (
+        cfg.case.absorption.parasitic_kWe_per_kWth
+        if (eq.absorption_chiller_enabled and cfg.case.absorption is not None)
+        else 0.0
+    )
+
     def electric_balance(mdl, t):
+        absorption_aux = absorption_parasitic * mdl.Q_abs_cool[t]
         return (
             mdl.P_turb_net[t] + mdl.P_orc[t] + mdl.P_grid_buy[t] + mdl.B_discharge[t]
-            == mdl.P_IT[t] + mdl.P_vcc[t] + mdl.P_grid_sell[t] + mdl.B_charge[t]
+            == mdl.P_IT[t]
+            + mdl.P_vcc[t]
+            + absorption_aux
+            + mdl.P_grid_sell[t]
+            + mdl.B_charge[t]
         )
 
     m.elec_balance = pyo.Constraint(m.T, rule=electric_balance)

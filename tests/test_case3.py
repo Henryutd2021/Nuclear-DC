@@ -38,12 +38,15 @@ def test_case3_no_orc(cfg, ts_2023_168h):
 
 
 def test_case3_electric_balance_closes(cfg, ts_2023_168h):
+    """Same as Case 2 minus ORC; absorption parasitic still applies."""
     r = solve_case3(cfg, ts_2023_168h)
+    parasitic = cfg.case.absorption.parasitic_kWe_per_kWth * r.Q_abs_cool_MWth
     residual = (
         r.P_turb_net_MW
         + r.P_grid_buy_MW
         - r.P_IT_MW
         - r.P_VCC_elec_MW
+        - parasitic
         - r.P_grid_sell_MW
     ).abs().max()
     assert residual < 1e-4
