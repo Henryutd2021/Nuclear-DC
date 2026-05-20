@@ -61,6 +61,19 @@ outputs/
 *.mps
 *.sol
 
+# LaTeX build artifacts (figures/<subdir>/ standalone compiles, etc.)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.out
+figures/**/main.pdf
+
 # Gurobi
 gurobi.log
 
