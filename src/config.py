@@ -15,7 +15,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal, Optional, Union
 
-import yaml
+import yaml  # noqa: F401  (used by with_reactor_capex)
 from pydantic import BaseModel, ConfigDict, Field
 
 CaseId = Literal[0, 1, 2, 3, 4]
@@ -285,4 +285,55 @@ def with_bess(cfg: RunConfig, enabled: bool = True) -> RunConfig:
         )
     new_equipment = cfg.case.equipment.model_copy(update={"bess_enabled": enabled})
     new_case = cfg.case.model_copy(update={"equipment": new_equipment})
+    return cfg.model_copy(update={"case": new_case})
+
+
+_REACTOR_CAPEX_SCENARIOS: dict[str, str] = {
+    "FOAK": "FOAK",
+    "ATB_Mid": "ATB_Mid",
+    "NOAK": "NOAK",
+}
+
+
+def with_reactor_capex(
+    cfg: RunConfig,
+    scenario: str,
+    project_root: Union[Path, str],
+) -> RunConfig:
+    """Override the reactor CAPEX with a v2.5 S4 scenario.
+
+    Reads ``data/reactor/bwrx300_economic.yaml`` and substitutes the chosen
+    scenario's ``overnight_capital_cost_usd_per_kWe`` into the case config.
+    Used to drive the v2.5 S4 sensitivity (FOAK $14,700 / ATB_Mid $7,615 /
+    NOAK $2,250 per kWe) without editing yamls.
+
+    Args:
+        cfg: the base ``RunConfig`` for one of Cases 1-3.
+        scenario: ``"FOAK"``, ``"ATB_Mid"``, or ``"NOAK"``.
+        project_root: repo root path so the helper can read the data yaml.
+
+    Raises:
+        ValueError: if the case has no reactor block, or scenario is unknown.
+    """
+    if cfg.case.reactor is None:
+        raise ValueError(
+            f"Case {cfg.case.case_id} has no reactor block; nothing to override"
+        )
+    if scenario not in _REACTOR_CAPEX_SCENARIOS:
+        raise ValueError(
+            f"scenario must be one of {sorted(_REACTOR_CAPEX_SCENARIOS)}, "
+            f"got {scenario!r}"
+        )
+    path = (
+        Path(project_root) / "data" / "reactor" / "bwrx300_economic.yaml"
+    )
+    if not path.exists():
+        raise FileNotFoundError(f"BWRX-300 economic yaml not found: {path}")
+    with path.open() as f:
+        econ = yaml.safe_load(f)
+    occ = float(
+        econ["scenarios"][scenario]["overnight_capital_cost_usd_per_kWe"]
+    )
+    new_reactor = cfg.case.reactor.model_copy(update={"capex_usd_per_kWe": occ})
+    new_case = cfg.case.model_copy(update={"reactor": new_reactor})
     return cfg.model_copy(update={"case": new_case})
