@@ -1,25 +1,25 @@
 # Nuclear-Powered Data Center Optimization
 
-A modular Pyomo + Gurobi framework for co-optimizing electricity and chilled-water provision to a data center using nuclear heat, with five operating cases and support for both dispatch-only and capacity co-design optimization.
+A modular Pyomo + Gurobi framework for co-optimizing electricity and chilled-water provision to a data center using nuclear heat. Plan v2.6 covers four operating cases on a single common accounting basis, with a 61-run baseline + 5-dimension sensitivity grid for techno-economic boundary analysis.
 
 ## Overview
 
-This repository implements an optimization model that minimizes total system cost while meeting data center IT electric load and cooling demands using:
+The model minimizes Total Annualized Cost (TAC) while meeting data center IT load and cooling demand. Nuclear cogen (Case 2) routes main steam through the HP turbine first, then diverts a controlled mid-pressure extraction at 5–7 barg to a double-effect LiBr-H₂O absorption chiller for the DC cooling duty — a cascade, not a parallel main-steam tap, so high-grade steam is no longer wasted on a 6 °C cooling load.
 
-- **Primary heat source:** Nuclear reactor & steam loop with intermediate heat exchanger (IHX)
-- **Steam network:** High-pressure and low-pressure headers with flash vessel
-- **Power generation:** Steam turbine + optional Organic Rankine Cycle (ORC)
-- **Cooling:** Electric-driven chiller + double-effect absorption chiller (heat-driven)
-- **Storage:** Stratified chilled-water thermal energy storage (TES)
-- **Balance of plant:** Condensers, feedwater network, pumps, heat exchangers, auxiliaries
+- **Primary heat source:** BWRX-300 SMR (870 MWth / 300 MWe gross)
+- **Steam network:** Main steam → HP turbine → mid-pressure extraction tap → LP turbine + condenser
+- **Power generation:** HP+LP main steam turbine with Willans-line linearization on extraction
+- **Cooling (Case 2):** Double-effect LiBr-H₂O absorption chiller driven by HP extraction; VCC backup during P1-A crystallization windows
+- **Cooling (other cases):** Vapor-compression chiller only
+- **Storage (S3 sensitivity):** 100 MWh / 25 MW Li-ion BESS, binary on/off
+- **Reference fossil alternative (Case 3):** On-site NGCC, off-grid
 
-### Five Operating Cases
+### Four Operating Cases
 
-0. **Case 0 - Grid-only baseline:** Data center buys all electricity and cooling-driving power from the grid; no on-site reactor. Used as the TAC denominator for the *Premium of Co-generation* metric.
-1. **Case 1 - Turbine-only co-located reactor:** All reactor heat → turbine → electricity; cooling via electric chiller only.
-2. **Case 2 - Integrated ORC + absorption:** Split heat to turbine + ORC; absorption chiller uses diverted reactor heat.
-3. **Case 3 - Turbine + absorption (no ORC):** Turbine generates power; turbine exhaust steam drives absorption chiller.
-4. **Case 4 - On-site NGCC alternative:** Natural-gas combined-cycle plant supplies the data center in place of the reactor; benchmark for fossil-baseload comparison.
+0. **Case 0 — Grid-only baseline:** Data center buys all electricity from ERCOT and runs a VCC chiller; the TAC denominator for the Heat-Recovery Premium metric.
+1. **Case 1 — Nuclear, no heat recovery:** BWRX-300 + main turbine → electricity for IT and VCC; no cogen. Quantifies the gap between "build the reactor" and "use its waste heat too".
+2. **Case 2 — Nuclear + cascaded extraction + absorption (v2.6 head-line):** HP extraction at ~160 °C drives the absorption chiller. Willans line charges ~0.083 MWe/MWth diverted (Plan §A7 + §F.1).
+3. **Case 3 — On-site NGCC:** Natural-gas combined cycle (net η = 0.55) covers IT and VCC off-grid; benchmark for fossil baseload (was Case 4 in v2.5).
 
 ## Quick Start
 
@@ -43,21 +43,24 @@ pip install -r requirements.txt
 ### Basic Usage
 
 ```bash
-# Single-case solves (24-hour smoke test)
-python -m src.solve --case 0 --num-hours 24   # grid-only baseline
-python -m src.solve --case 1 --num-hours 24   # turbine only
-python -m src.solve --case 2 --num-hours 24   # ORC + absorption
-python -m src.solve --case 3 --num-hours 24   # turbine + absorption
-python -m src.solve --case 4 --num-hours 24   # NGCC alternative
-
-# Full 8760-hour annual run with capacity co-design
-python -m src.solve --case 2 --capacity-opt --num-hours 8760
-
-# Drive the full sensitivity grid (baseline + S1..S5, 51 solves)
-python scripts/run_all_analyses.py
+# Drive the full v2.6 sensitivity grid (baseline + S1..S5, 61 solves total)
+PYTHONPATH=. python scripts/run_all_analyses.py
 ```
 
 The grid driver writes per-run `summary.json` + compressed dispatch CSVs to `outputs/<group>/<run_id>/`, plus a flat `outputs/master_kpi_table.csv` and `outputs/manifest.json`.
+
+```python
+# Programmatic single-case solve
+from pathlib import Path
+from src.config import load_config
+from src.data import load_time_series
+from src.cases.case2 import solve_case2
+
+cfg = load_config(case_id=2, project_root=Path("."))
+ts = load_time_series(project_root=Path("."), year=2023, num_hours=8760)
+result = solve_case2(cfg, ts, pue=1.30)
+print(f"TAC = ${result.tac_usd_per_yr / 1e6:.1f} M/yr")
+```
 
 ### Configuration
 
@@ -65,10 +68,10 @@ All parameters are specified in YAML files in the `config/` directory:
 
 - **`base.yaml`** - Global defaults (time horizon, solver settings, physical parameters)
 - **`plant_case0.yaml`** - Grid-only baseline (no on-site reactor)
-- **`plant_case1.yaml`** - Equipment configuration for Case 1 (turbine only)
-- **`plant_case2.yaml`** - Equipment configuration for Case 2 (ORC + absorption)
-- **`plant_case3.yaml`** - Equipment configuration for Case 3 (turbine + absorption)
-- **`plant_case4.yaml`** - Equipment configuration for Case 4 (NGCC alternative)
+- **`plant_case1.yaml`** - Case 1 (nuclear, main turbine only, no heat recovery)
+- **`plant_case2.yaml`** - Case 2 (nuclear + cascaded HP extraction + double-effect absorption, Willans slope locked at 0.083 MWe/MWth)
+- **`plant_case3.yaml`** - Case 3 (NGCC on-site, off-grid)
+- **`capex_grid_s5.yaml`** - 5×5 SMR × absorption CAPEX grid for the S5 2D feasibility scan
 - **`costs.yaml`** - CAPEX, fixed & variable O&M, fuel costs, penalties
 
 ### Input Data
@@ -99,10 +102,10 @@ Nuclear-DC/
 ├── config/                    # YAML configuration
 │   ├── base.yaml              # Global settings
 │   ├── plant_case0.yaml       # Case 0 (grid-only baseline)
-│   ├── plant_case1.yaml       # Case 1 (turbine only)
-│   ├── plant_case2.yaml       # Case 2 (ORC + absorption)
-│   ├── plant_case3.yaml       # Case 3 (turbine + absorption)
-│   ├── plant_case4.yaml       # Case 4 (NGCC alternative)
+│   ├── plant_case1.yaml       # Case 1 (nuclear, no heat recovery)
+│   ├── plant_case2.yaml       # Case 2 (nuclear + cascaded HP extraction + absorption)
+│   ├── plant_case3.yaml       # Case 3 (NGCC on-site)
+│   ├── capex_grid_s5.yaml     # S5 5×5 SMR × absorption CAPEX grid
 │   └── costs.yaml             # Economic parameters
 ├── data/                      # Input time-series + raw fetchers
 │   ├── it_load.csv            # IT electric load
@@ -112,38 +115,23 @@ Nuclear-DC/
 │   ├── perf/                  # Performance curves (turbine, ORC, AB, EC)
 │   └── _raw/                  # Public-source fetchers (ERCOT, EIA, weather, ATB)
 ├── src/                       # Source code
-│   ├── io_config.py           # Configuration loading & validation (Pydantic)
-│   ├── io_data.py             # Data loading & preprocessing
-│   ├── sets_params.py         # Pyomo sets & parameters
-│   ├── model_core.py          # Model structure & variable declarations
-│   ├── pwl_helper.py          # Piecewise-linear constraint utilities (SOS2)
-│   ├── objective.py           # Total annualized cost objective
-│   ├── solve.py               # CLI & solver interface
-│   ├── cases/                 # Per-case build entry points (case0..case4)
-│   ├── constraints/           # Modular constraint modules
-│   │   ├── demand.py          # IT & cooling demand balances
-│   │   ├── steam_network.py   # IHX, HP/LP headers, flash vessel
-│   │   ├── routing.py         # Heat routing & case logic
-│   │   ├── turbine.py         # Turbine performance & ramping
-│   │   ├── orc.py             # ORC with recuperator & pump
-│   │   ├── absorption.py      # Absorption chiller (generator T/P)
-│   │   ├── electric_chiller.py # Electric chiller
-│   │   ├── storage.py         # TES dynamics & losses
-│   │   ├── condenser_fw.py    # Condenser & feedwater network
-│   │   ├── auxiliaries.py     # Parasitic loads (pumps, etc.)
-│   │   └── capacity.py        # Equipment sizing constraints
-│   └── results/               # Output processing
-│       ├── writers.py         # CSV/JSON export
-│       └── postprocess.py     # KPI calculation & reporting
+│   ├── config.py              # Pydantic configuration loader + S4 reactor / S5 CAPEX helpers
+│   ├── data.py                # Time-series loader (ERCOT LMP + NSRDB wet bulb + IT load + AEF)
+│   ├── kpi.py                 # Heat-Recovery Premium + LCOE/LCOC helpers
+│   ├── cases/                 # Per-case solve entry points (case0..case3, v2.6)
+│   │   ├── case0.py           # Grid-only baseline (closed-form LP)
+│   │   ├── case1.py           # Nuclear, no recovery (Pyomo MILP via builder)
+│   │   ├── case2.py           # Nuclear + cascaded extraction + absorption
+│   │   └── case3.py           # NGCC on-site (closed-form LP)
+│   └── milp/                  # Pyomo MILP builder for nuclear cases
+│       ├── builder.py         # Reactor + turbine Willans + absorption COP(T_wb) + BESS
+│       ├── solve.py           # Gurobi solver wrapper
+│       └── result.py          # NuclearCaseResult dataclass + extractor
 ├── scripts/                   # Run drivers
-│   └── run_all_analyses.py    # 51-run baseline + S1..S5 sensitivity grid
-├── tests/                     # Unit & integration tests
-├── notebooks/                 # Jupyter analysis notebooks
-│   ├── make_paper_figures.ipynb  # Figure suite driver
-│   ├── figure_helpers.py
-│   └── build_notebook.py
-├── figures/                   # Compiled paper figures
-│   └── fig1_schematic/        # LaTeX/TikZ schematic of the heat-and-power network
+│   └── run_all_analyses.py    # 61-run baseline + S1..S5 sensitivity grid (plan-v2.6)
+├── tests/                     # Unit & integration tests (pytest, 85 fast + ~8 integration)
+├── notebooks/                 # Jupyter analysis notebooks (regenerated per v2.6 sweep)
+├── AE_SMR_DC/                 # Applied Energy manuscript scaffold (cas-dc.cls)
 ├── docs/                      # Plan, model diagram, gap analysis, changelog
 └── outputs/                   # Solver outputs (git-ignored)
     ├── <group>/<run_id>/summary.json
