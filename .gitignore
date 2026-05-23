@@ -74,6 +74,32 @@ outputs/
 *.out
 figures/**/main.pdf
 
+# Additional LaTeX intermediates (cas-dc / biblatex / beamer / minted etc.)
+*.abs
+*.bcf
+*.lol
+*.run.xml
+*.dvi
+*.xdv
+*.snm
+*.nav
+*.vrb
+*.tex.bak
+*.synctex(busy)
+
+# =============================================================================
+# AE_SMR_DC manuscript (Applied Energy, cas-dc.cls)
+# Tracked in this repo as a regular subfolder (no nested .git).
+# Source (.tex / .bib / .cls / .sty / .bst) IS tracked; compiled PDFs and
+# tooling caches are NOT — recompile from source. Globals above cover most
+# LaTeX intermediates; below adds the per-folder outputs and tool caches.
+# =============================================================================
+AE_SMR_DC/**/main.pdf
+AE_SMR_DC/**/_minted-*/
+AE_SMR_DC/**/svg-inkscape/
+AE_SMR_DC/**/.texpadtmp/
+AE_SMR_DC/**/.latexmk/
+
 # Gurobi
 gurobi.log
 
