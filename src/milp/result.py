@@ -1,4 +1,4 @@
-"""Shared result dataclass + extractor for Cases 1-3 (nuclear MILP outputs)."""
+"""Shared result dataclass + extractor for v2.6 Cases 1-2 (nuclear MILP outputs)."""
 
 from __future__ import annotations
 
@@ -13,10 +13,10 @@ from src.data import TimeSeries
 
 @dataclass(frozen=True)
 class NuclearCaseResult:
-    """Outputs of a nuclear-case MILP solve (Cases 1, 2, or 3).
+    """Outputs of a nuclear-case MILP solve (Cases 1 or 2, v2.6).
 
-    ORC and absorption fields are zero-filled for cases that don't
-    enable them, so cross-case comparisons can use the same attributes.
+    Absorption fields are zero-filled for Case 1 (which has no cogen) so
+    cross-case comparisons can use the same attributes.
     """
 
     case_id: int
@@ -26,7 +26,6 @@ class NuclearCaseResult:
     Q_cool_demand_MWth: pd.Series
     P_rx_MWth: pd.Series
     P_turb_net_MW: pd.Series
-    P_orc_MW: pd.Series
     Q_to_abs_MWth: pd.Series
     Q_abs_cool_MWth: pd.Series
     P_VCC_elec_MW: pd.Series
@@ -60,7 +59,6 @@ def extract_result(
     Q_cool = _to_series(model.Q_cool_demand, T)
     P_rx = _to_series(model.P_rx, T)
     P_turb_net = _to_series(model.P_turb_net, T)
-    P_orc = _to_series(model.P_orc, T)
     Q_to_abs = _to_series(model.Q_to_abs, T)
     Q_abs_cool = _to_series(model.Q_abs_cool, T)
     P_vcc = _to_series(model.P_vcc, T)
@@ -72,14 +70,14 @@ def extract_result(
     dt = model._dt
 
     # Reactor lifecycle CO2 (UNECE 2022, 12 g/kWh_e) + grid AEF on imports
-    # minus offset on exports.
+    # minus offset on exports. v2.6 has no ORC, so the only nuclear-electric
+    # stream is P_turb_net.
     rx = cfg.case.reactor
     aef = _to_series(model.AEF, T)
     co2_rx_kg = (P_turb_net.sum() * dt * rx.co2_lifecycle_g_per_kwh_e) * annual_scale
-    co2_orc_kg = (P_orc.sum() * dt * rx.co2_lifecycle_g_per_kwh_e) * annual_scale
     co2_grid_kg = (P_grid_buy * dt * aef).sum() * annual_scale
     co2_offset_kg = (P_grid_sell * dt * aef).sum() * annual_scale
-    co2_tonnes = (co2_rx_kg + co2_orc_kg + co2_grid_kg - co2_offset_kg) / 1000.0
+    co2_tonnes = (co2_rx_kg + co2_grid_kg - co2_offset_kg) / 1000.0
 
     return NuclearCaseResult(
         case_id=int(cfg.case.case_id),
@@ -87,7 +85,6 @@ def extract_result(
         Q_cool_demand_MWth=Q_cool,
         P_rx_MWth=P_rx,
         P_turb_net_MW=P_turb_net,
-        P_orc_MW=P_orc,
         Q_to_abs_MWth=Q_to_abs,
         Q_abs_cool_MWth=Q_abs_cool,
         P_VCC_elec_MW=P_vcc,

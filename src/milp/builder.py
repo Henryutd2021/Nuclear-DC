@@ -1,21 +1,26 @@
-"""Pyomo MILP builder for Cases 1-3 (v2.5 §E + P1-A/B/C inline).
+"""Pyomo MILP builder for v2.6 Cases 1-2 (cascaded HP extraction, no ORC).
 
 Each case is built by selectively enabling equipment blocks via the
 ``cfg.case.equipment`` flags. Energy balances and the TAC objective are
-shared so cross-case comparisons stay on the same accounting basis (P1-C).
+shared so cross-case comparisons stay on the same accounting basis.
 
-Heat routing is intentionally a linear router model in Phase 2B:
+v2.6 heat routing (cascaded, NOT parallel):
 
-    Q_main_to_turbine[t] = P_rx[t] − Q_to_orc[t] − Q_to_absorption[t]
-    P_turb_gross[t] = η_turb × Q_main_to_turbine[t]
-    P_turb_net[t]   = (1 − aux_fraction) × P_turb_gross[t]
-    P_orc[t]        = η_orc × Q_to_orc[t]
-    Q_abs_cool[t]   = COP_abs(T_wb[t]) × Q_to_absorption[t]
+    Main steam → HP turbine → mid-pressure extraction tap
+                              ├─ part diverted to double-effect absorption
+                              └─ part continues to LP turbine + condenser
 
-This understates the steam-turbine reality (extractions don't fully eat
-turbine flow) but the conservative direction is the right error for a
-first-pass — biases against the cogen cases, so any Premium > 0 is robust.
-PWL turbine curves arrive in a later revision.
+    P_turb_gross_full(t) = rated_efficiency * P_rx(t)            # zero-extraction baseline
+    P_turb_gross(t)      = P_turb_gross_full(t)
+                           - willans_slope * Q_to_abs(t)         # Willans penalty
+    P_turb_net(t)        = (1 - aux_fraction) * P_turb_gross(t)
+    Q_abs_cool(t)        = COP_abs(T_wb(t)) * available(t) * Q_to_abs(t)
+
+Versus v2.5: the parallel topology ``eta × (P_rx − Q_to_orc − Q_to_abs)``
+is gone. Diverted steam at the HP-LP tap costs ~0.083 MWe per MWth (Plan
+§A7 + §F.1), an order of magnitude less than charging the full turbine
+efficiency against extracted heat. The ORC bottoming cycle is removed
+entirely.
 """
 
 from __future__ import annotations
@@ -34,18 +39,23 @@ def _absorption_cop(
     T_wb_C: float,
     cop_houston_baseline: float,
     derate_per_celsius: float,
+    cop_nameplate_cap: float,
     baseline_T_wb_C: float = 26.0,
 ) -> float:
-    """P1-A wet-bulb-driven COP for the double-effect absorption chiller.
+    """v2.6 time-varying COP for the double-effect absorption chiller.
 
-    Linear de-rating around the v2.5 Houston-baseline anchor:
+    Linear de-rating around the Houston-baseline anchor and capped at
+    nameplate (so cool wet-bulb hours don't extrapolate above 1.30):
 
-        COP(T_wb) = cop_houston_baseline − derate × (T_wb − 26 °C)
+        cop_lin = cop_houston_baseline − derate × (T_wb − 26 °C)
+        COP     = max(min(cop_lin, cop_nameplate_cap), 0.5)
 
-    Floor at 0.5 to avoid pathological negatives during very hot hours.
+    The 0.5 floor exists only as numerical insurance — Houston wet bulbs
+    never get hot enough in the NSRDB record to drag a real chiller that
+    low; the crystallization gate kicks in well before that.
     """
-    cop = cop_houston_baseline - derate_per_celsius * (T_wb_C - baseline_T_wb_C)
-    return max(cop, 0.5)
+    cop_lin = cop_houston_baseline - derate_per_celsius * (T_wb_C - baseline_T_wb_C)
+    return max(min(cop_lin, cop_nameplate_cap), 0.5)
 
 
 def _absorption_available(
@@ -53,9 +63,10 @@ def _absorption_available(
     cooling_water_approach_K: float,
     crystallization_cw_inlet_C: float,
 ) -> bool:
-    """P1-A crystallization gate: if cooling-water inlet exceeds the LiBr
-    crystallization threshold, the absorption unit must shut down (return False)
-    and the VCC backup picks up the load.
+    """P1-A crystallization gate.
+
+    If cooling-water inlet exceeds the LiBr crystallization threshold the
+    absorption unit must shut down and the VCC backup picks up the load.
     """
     cw_inlet = T_wb_C + cooling_water_approach_K
     return cw_inlet <= crystallization_cw_inlet_C
@@ -64,16 +75,16 @@ def _absorption_available(
 def build_model(
     cfg: RunConfig, ts: TimeSeries, pue: Optional[float] = None
 ) -> pyo.ConcreteModel:
-    """Construct the Pyomo model for a nuclear case (Cases 1, 2, or 3).
+    """Construct the Pyomo model for a nuclear case (Cases 1 or 2, v2.6).
 
     Returns:
         Concrete model ready for `pyo.SolverFactory(...).solve(model)`. The
         model carries scalar Expressions ``capex_annual``, ``fom_annual``,
         ``vom_annual``, ``fuel_annual``, ``grid_annual`` for post-processing.
     """
-    if cfg.case.case_id not in (1, 2, 3):
+    if cfg.case.case_id not in (1, 2):
         raise ValueError(
-            f"build_model handles Cases 1-3; got case_id={cfg.case.case_id}"
+            f"build_model handles v2.6 Cases 1-2 only; got case_id={cfg.case.case_id}"
         )
 
     eq = cfg.case.equipment
@@ -118,6 +129,7 @@ def build_model(
                 float(ts.wet_bulb_C.iloc[t]),
                 ab.cop_houston_baseline,
                 ab.derate_per_celsius_above_baseline,
+                ab.cop_nameplate,
             )
             for t in m.T
         }
@@ -136,17 +148,19 @@ def build_model(
             m.T, initialize=avail_t, within=pyo.NonNegativeReals
         )
 
-    # ---- Reactor (always required for Cases 1-3) ---------------------------
+    # ---- Reactor (always required for Cases 1-2) ---------------------------
     rx = cfg.case.reactor
     if rx is None:
-        raise ValueError("Cases 1-3 require a reactor block in plant_caseN.yaml")
+        raise ValueError("Cases 1-2 require a reactor block in plant_caseN.yaml")
     P_rx_cap = cap.reactor_thermal_capacity_MWth or rx.thermal_power_MWth
     P_rx_min = rx.min_load_fraction * P_rx_cap
     ramp_max_per_hour = rx.ramp_rate_pct_per_min / 100.0 * 60.0 * P_rx_cap
 
     m.P_rx = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(P_rx_min, P_rx_cap))
 
-    # P1-B ramp limits (no on/off binary — natural-circulation BWR stays online)
+    # A8 ramp limits (no on/off binary — natural-circulation BWR stays online
+    # above min_load_fraction, so explicit uptime/downtime binaries would
+    # never bind; reactor_cf below enforces the 12 h-class behavior in aggregate)
     def ramp_up(mdl, t):
         if t == mdl.T.first():
             return pyo.Constraint.Skip
@@ -160,36 +174,16 @@ def build_model(
     m.ramp_up = pyo.Constraint(m.T, rule=ramp_up)
     m.ramp_down = pyo.Constraint(m.T, rule=ramp_down)
 
-    # v2.5 §A15: enforce capacity factor on full-year runs.
-    # Treated as a soft annual-mean lower bound (sum P_rx >= CF × cap × T),
-    # not as per-hour forced outages — model is too coarse for explicit outages.
+    # v2.6 §A: enforce capacity factor on full-year runs.
+    # Soft annual-mean lower bound rather than forced outages — the model is
+    # too coarse for explicit outage scheduling.
     if ts.num_hours == 8760:
         m.reactor_cf = pyo.Constraint(
             expr=sum(m.P_rx[t] for t in m.T)
             >= rx.capacity_factor * P_rx_cap * ts.num_hours
         )
 
-    # ---- ORC steam tap (Case 2 only) ---------------------------------------
-    if eq.orc_enabled and cfg.case.orc is not None:
-        Q_orc_max = (
-            cap.orc_capacity_MWe / cfg.case.orc.net_efficiency
-            if cap.orc_capacity_MWe is not None
-            else P_rx_cap * 0.10
-        )
-        m.Q_to_orc = pyo.Var(
-            m.T, domain=pyo.NonNegativeReals, bounds=(0, Q_orc_max)
-        )
-        m.P_orc = pyo.Var(m.T, domain=pyo.NonNegativeReals)
-        m.orc_yield = pyo.Constraint(
-            m.T,
-            rule=lambda mdl, t: mdl.P_orc[t]
-            == cfg.case.orc.net_efficiency * mdl.Q_to_orc[t],
-        )
-    else:
-        m.Q_to_orc = pyo.Param(m.T, initialize=0.0)
-        m.P_orc = pyo.Param(m.T, initialize=0.0)
-
-    # ---- Absorption steam tap (Cases 2, 3) ---------------------------------
+    # ---- Absorption steam tap (Case 2 only) --------------------------------
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
         Q_abs_cool_max = cap.absorption_capacity_MWth or 100.0
         # Steam-side cap derived from worst case ratio
@@ -207,17 +201,17 @@ def build_model(
         m.Q_to_abs = pyo.Param(m.T, initialize=0.0)
         m.Q_abs_cool = pyo.Param(m.T, initialize=0.0)
 
-    # ---- Turbine: gross output from residual heat after extractions ---------
+    # ---- Turbine (cascaded HP extraction, v2.6 Willans line) ---------------
     tb = cfg.case.turbine
     if tb is None:
-        raise ValueError("Cases 1-3 require a turbine block in plant_caseN.yaml")
+        raise ValueError("Cases 1-2 require a turbine block in plant_caseN.yaml")
+    willans = tb.extraction_willans_slope_MWe_per_MWth
 
     m.P_turb_gross = pyo.Var(m.T, domain=pyo.NonNegativeReals)
     m.turb_eq = pyo.Constraint(
         m.T,
         rule=lambda mdl, t: mdl.P_turb_gross[t]
-        == tb.rated_efficiency
-        * (mdl.P_rx[t] - mdl.Q_to_orc[t] - mdl.Q_to_abs[t]),
+        == tb.rated_efficiency * mdl.P_rx[t] - willans * mdl.Q_to_abs[t],
     )
 
     # Net = gross less auxiliaries
@@ -228,10 +222,10 @@ def build_model(
         == (1.0 - tb.aux_load_fraction) * mdl.P_turb_gross[t],
     )
 
-    # ---- VCC (backup chiller in Cases 2, 3 or primary in Case 1) -----------
+    # ---- VCC (backup chiller in Case 2 or primary in Case 1) ---------------
     vcc = cfg.case.vcc
     if vcc is None:
-        raise ValueError("Cases 1-3 require a vcc block (backup chiller)")
+        raise ValueError("Cases 1-2 require a vcc block (backup chiller)")
     Q_vcc_max = cap.electric_chiller_capacity_MWth or 0.0
     m.P_vcc = pyo.Var(
         m.T, domain=pyo.NonNegativeReals, bounds=(0, Q_vcc_max / vcc.cop_houston)
@@ -244,7 +238,7 @@ def build_model(
         rule=lambda mdl, t: mdl.Q_vcc_cool[t] == vcc.cop_houston * mdl.P_vcc[t],
     )
 
-    # ---- Grid (v2.5 §A11 PCC interconnect limit) ---------------------------
+    # ---- Grid (v2.6 §A: PCC interconnect limit) ----------------------------
     pcc_cap = cap.pcc_capacity_MW or 300.0
     if eq.grid_import_enabled:
         m.P_grid_buy = pyo.Var(
@@ -301,7 +295,7 @@ def build_model(
         m.B_discharge = pyo.Param(m.T, initialize=0.0)
 
     # ---- Energy balances ---------------------------------------------------
-    # Absorption-chiller parasitic electric load (v2.5 §F.2: ~0.02 kWe/kWth)
+    # Absorption-chiller parasitic electric load (v2.6 §F.1: ~0.02 kWe/kWth)
     absorption_parasitic = (
         cfg.case.absorption.parasitic_kWe_per_kWth
         if (eq.absorption_chiller_enabled and cfg.case.absorption is not None)
@@ -311,7 +305,7 @@ def build_model(
     def electric_balance(mdl, t):
         absorption_aux = absorption_parasitic * mdl.Q_abs_cool[t]
         return (
-            mdl.P_turb_net[t] + mdl.P_orc[t] + mdl.P_grid_buy[t] + mdl.B_discharge[t]
+            mdl.P_turb_net[t] + mdl.P_grid_buy[t] + mdl.B_discharge[t]
             == mdl.P_IT[t]
             + mdl.P_vcc[t]
             + absorption_aux
@@ -326,7 +320,7 @@ def build_model(
 
     m.cool_balance = pyo.Constraint(m.T, rule=cooling_balance)
 
-    # ---- Objective: TAC (P1-C unified accounting) --------------------------
+    # ---- Objective: TAC (v2.6 unified accounting, ORC removed) -------------
     capex_annual_expr = 0.0
     fom_annual_expr = 0.0
     capex_annual_expr += rx.capex_usd_per_kWe * rx.electric_power_net_MWe * 1000.0 * crf
@@ -336,11 +330,6 @@ def build_model(
         fom_annual_expr += tb.fixed_om_usd_per_kWe_year * rx.electric_power_net_MWe * 1000.0
     capex_annual_expr += vcc.capex_usd_per_kWth * Q_vcc_max * 1000.0 * crf
     fom_annual_expr += vcc.fixed_om_usd_per_kWth_year * Q_vcc_max * 1000.0
-    if eq.orc_enabled and cfg.case.orc is not None:
-        orc = cfg.case.orc
-        orc_cap_MWe = cap.orc_capacity_MWe or P_rx_cap * 0.10 * orc.net_efficiency
-        capex_annual_expr += orc.capex_usd_per_kWe * orc_cap_MWe * 1000.0 * crf
-        fom_annual_expr += orc.fixed_om_usd_per_kWe_year * orc_cap_MWe * 1000.0
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
         ab = cfg.case.absorption
         abs_cap_MWth = cap.absorption_capacity_MWth or 100.0
@@ -353,11 +342,6 @@ def build_model(
         capex_annual_expr += bs.capex_usd_per_kwh * Cap_E * 1000.0 * crf
         fom_annual_expr += bs.fixed_om_usd_per_kw_year * Cap_P * 1000.0
 
-    vom_per_hour = (
-        rx.variable_om_usd_per_mwh_e * m.P_turb_net[m.T.first()]
-        + tb.variable_om_usd_per_mwh_e * m.P_turb_net[m.T.first()]
-        + vcc.variable_om_usd_per_mwh_th * m.Q_vcc_cool[m.T.first()]
-    )  # placeholder; real expression built below
     # Full VOM expression
     vom_annual_expr = (
         sum(
@@ -369,10 +353,6 @@ def build_model(
         * dt
         * annual_scale
     )
-    if eq.orc_enabled and cfg.case.orc is not None:
-        vom_annual_expr = vom_annual_expr + sum(
-            cfg.case.orc.variable_om_usd_per_mwh_e * m.P_orc[t] for t in m.T
-        ) * dt * annual_scale
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
         vom_annual_expr = vom_annual_expr + sum(
             cfg.case.absorption.variable_om_usd_per_mwh_th * m.Q_abs_cool[t]

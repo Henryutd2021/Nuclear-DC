@@ -1,9 +1,9 @@
-"""Case 1 — BWRX-300 + main turbine, no heat recovery (v2.5 §B).
+"""Case 1 — BWRX-300 + main turbine, no heat recovery (v2.6 §B).
 
 The reactor's full thermal output goes through the main turbine to make
-electricity for the data center; cooling is from a VCC chiller exactly like
-Case 0. This case quantifies how much value the cogen system (ORC +
-absorption) in Cases 2-3 adds on top of "just buying the reactor".
+electricity for the data center; cooling is from a VCC chiller exactly
+like Case 0. This case quantifies how much value the cascaded extraction
++ absorption in Case 2 adds on top of "just buying the reactor".
 """
 
 from __future__ import annotations

@@ -1,27 +1,27 @@
-"""Drive every plan-v2.5 run (baseline + S1..S5) and stage outputs/.
+"""Drive every plan-v2.6 run (baseline + S1..S5) and stage outputs/.
 
-Run grid (51 solves total, per plan §3 and §5 Phase 2):
+Run grid (61 solves total, per plan §3 and §5 Phase 2):
 
-  main_baseline   5 runs   Cases 0-4  | year 2023 | PUE 1.30 | reactor ATB-Mid
-  s1_pue          9 runs   Cases 1-3  | year 2023 | PUE in {1.10, 1.30, 1.50}
-                                                  | reactor ATB-Mid
-  s2_price       15 runs   Cases 0-4  | year in {2022, 2023, 2024} | PUE 1.30
-                                                  | reactor ATB-Mid
-  s3_battery     10 runs   Cases 0-4  | year 2023 | PUE 1.30
-                                                  | bess in {off, on}
-                                                  | (Cases 0/4 have no BESS block;
-                                                  rows duplicated for table shape)
-  s4_capex        9 runs   Cases 1-3  | year 2023 | PUE 1.30
-                                                  | reactor in {FOAK, ATB_Mid, NOAK}
-  s5_equipment    3 runs   Case 2     | year 2023 | PUE 1.30
-                                                  | (ORC, abs) CAPEX jointly
-                                                  scaled by {0.6, 1.0, 1.4}
+  main_baseline       4 runs   Cases 0-3  | year 2023 | PUE 1.30 | reactor ATB-Mid
+  s1_pue              6 runs   Cases 1-2  | year 2023 | PUE in {1.10, 1.30, 1.50}
+                                                      | reactor ATB-Mid
+  s2_price           12 runs   Cases 0-3  | year in {2022, 2023, 2024} | PUE 1.30
+                                                      | reactor ATB-Mid
+  s3_battery          8 runs   Cases 0-3  | year 2023 | PUE 1.30
+                                                      | bess in {off, on}
+                                                      | (Cases 0/3 have no BESS block;
+                                                      rows duplicated for table shape)
+  s4_capex            6 runs   Cases 1-2  | year 2023 | PUE 1.30
+                                                      | reactor in {FOAK, ATB_Mid, NOAK}
+  s5_feasibility_2d  25 runs   Case 2     | year 2023 | PUE 1.30
+                                                      | (SMR, absorption) CAPEX 5×5 grid
+                                                      driven by config/capex_grid_s5.yaml
 
 Outputs layout:
 
   outputs/<group>/<run_id>/summary.json     -- scalar KPIs + metadata
   outputs/<group>/<run_id>/dispatch.csv.gz  -- hourly time series (compressed)
-  outputs/master_kpi_table.csv              -- 51-row flat table
+  outputs/master_kpi_table.csv              -- 61-row flat table
   outputs/manifest.json                     -- run grid + execution stats
 """
 
@@ -35,14 +35,14 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Union
 
 import pandas as pd
+import yaml
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
 from src.cases.case0 import Case0Result, solve_case0  # noqa: E402
 from src.cases.case1 import solve_case1  # noqa: E402
 from src.cases.case2 import solve_case2  # noqa: E402
-from src.cases.case3 import solve_case3  # noqa: E402
-from src.cases.case4 import Case4Result, solve_case4  # noqa: E402
+from src.cases.case3 import Case3NgccResult, solve_case3  # noqa: E402
 from src.config import (  # noqa: E402
     RunConfig,
     load_config,
@@ -61,7 +61,6 @@ CASE_SOLVERS: dict[int, Callable] = {
     1: solve_case1,
     2: solve_case2,
     3: solve_case3,
-    4: solve_case4,
 }
 
 # ---------------------------------------------------------------------------
@@ -70,7 +69,7 @@ CASE_SOLVERS: dict[int, Callable] = {
 
 
 def _result_to_dispatch_df(
-    r: Union[Case0Result, Case4Result, NuclearCaseResult],
+    r: Union[Case0Result, Case3NgccResult, NuclearCaseResult],
 ) -> pd.DataFrame:
     """Stack the hourly Series carried by every result type into one frame."""
     cols: dict[str, pd.Series] = {}
@@ -85,7 +84,7 @@ def _result_to_dispatch_df(
         cols["P_grid_buy_MW"] = r.P_grid_buy_MW
         cols["grid_cost_usd_per_h"] = r.grid_cost_usd_per_h
         cols["grid_emissions_kg_co2_per_h"] = r.grid_emissions_kg_co2_per_h
-    elif isinstance(r, Case4Result):
+    elif isinstance(r, Case3NgccResult):
         cols["P_NGCC_elec_MW"] = r.P_NGCC_elec_MW
         cols["fuel_consumption_MMBtu_per_h"] = r.fuel_consumption_MMBtu_per_h
         cols["fuel_cost_usd_per_h"] = r.fuel_cost_usd_per_h
@@ -94,7 +93,6 @@ def _result_to_dispatch_df(
     else:  # NuclearCaseResult
         cols["P_rx_MWth"] = r.P_rx_MWth
         cols["P_turb_net_MW"] = r.P_turb_net_MW
-        cols["P_orc_MW"] = r.P_orc_MW
         cols["Q_to_abs_MWth"] = r.Q_to_abs_MWth
         cols["Q_abs_cool_MWth"] = r.Q_abs_cool_MWth
         cols["Q_VCC_cool_MWth"] = r.Q_VCC_cool_MWth
@@ -106,7 +104,7 @@ def _result_to_dispatch_df(
 
 
 def _result_to_scalars(
-    r: Union[Case0Result, Case4Result, NuclearCaseResult],
+    r: Union[Case0Result, Case3NgccResult, NuclearCaseResult],
     ts: TimeSeries,
     cfg: RunConfig,
 ) -> dict[str, Any]:
@@ -115,7 +113,7 @@ def _result_to_scalars(
     LCOE denominator = IT energy delivered (MWh_e/yr).
     LCOC denominator = cooling delivered (MWh_c/yr).
     LCOC numerator (Case 0): CAPEX+FOM+VOM(VCC) + grid cost attributable to VCC.
-    LCOC numerator (Cases 1-4): cooling-side equipment cost only (we don't try
+    LCOC numerator (Cases 1-3): cooling-side equipment cost only (we don't try
     to split shared electricity-sourcing cost across IT vs VCC, so the LCOC
     here is the cooling-equipment levelized cost — the comparable cross-case
     number is total TAC and the Heat-Recovery Premium).
@@ -164,7 +162,7 @@ def _result_to_scalars(
             r.co2_annual_tonnes * 1000.0 / it_energy_annual_MWh
             if it_energy_annual_MWh > 0 else float("nan")
         )
-    elif isinstance(r, Case4Result):
+    elif isinstance(r, Case3NgccResult):
         out["co2_annual_tonnes"] = float(r.co2_lifecycle_annual_tonnes)
         out["co2_direct_annual_tonnes"] = float(r.co2_direct_annual_tonnes)
         out["co2_lifecycle_annual_tonnes"] = float(r.co2_lifecycle_annual_tonnes)
@@ -181,9 +179,11 @@ def _result_to_scalars(
         out["co2_annual_tonnes"] = float(r.co2_annual_tonnes)
         out["fuel_annual_usd"] = float(r.fuel_annual_usd)
         out["grid_annual_usd"] = float(r.grid_annual_usd)
-        out["P_orc_annual_MWh"] = float(r.P_orc_MW.sum() * dt * annual_scale)
         out["Q_abs_cool_annual_MWh"] = float(
             r.Q_abs_cool_MWth.sum() * dt * annual_scale
+        )
+        out["Q_to_abs_annual_MWh"] = float(
+            r.Q_to_abs_MWth.sum() * dt * annual_scale
         )
         out["P_grid_buy_annual_MWh"] = float(
             r.P_grid_buy_MW.sum() * dt * annual_scale
@@ -201,30 +201,38 @@ def _result_to_scalars(
 
 
 # ---------------------------------------------------------------------------
-# Equipment-CAPEX override helper for S5
+# v2.6 S5 — joint SMR × absorption CAPEX override for the 2D feasibility grid
 # ---------------------------------------------------------------------------
 
 
-def with_equipment_capex(cfg: RunConfig, factor: float) -> RunConfig:
-    """Scale ORC and absorption installed CAPEX by ``factor`` (S5 robustness).
+def _load_s5_grid() -> dict[str, Any]:
+    """Read config/capex_grid_s5.yaml once and return the parsed dict."""
+    with (PROJECT_ROOT / "config" / "capex_grid_s5.yaml").open() as f:
+        return yaml.safe_load(f)
 
-    Plan §3: jointly scale ORC + absorption CAPEX by {0.6, 1.0, 1.4} to span
-    the ±40% combined uncertainty band (ORC 1,680..3,920 $/kWe and
-    absorption 450..1,050 $/kWth around the §F baselines 2,800 and 750).
 
-    Returns a new RunConfig; the input is untouched.
+def with_capex_pair(
+    cfg: RunConfig,
+    smr_capex_usd_per_kWe: float,
+    absorption_capex_usd_per_kWth: float,
+) -> RunConfig:
+    """Apply a (SMR, absorption) CAPEX pair to a Case 2 config.
+
+    This is the v2.6 S5 override — instead of scaling both cogen costs by
+    one factor (v2.5), we set them independently so the heatmap axes are
+    physically meaningful CAPEX numbers rather than dimensionless multipliers.
     """
     if cfg.case.case_id != 2:
-        raise ValueError("S5 robustness only applies to Case 2 in v2.5")
-    new_orc = cfg.case.orc.model_copy(
-        update={"capex_usd_per_kWe": cfg.case.orc.capex_usd_per_kWe * factor}
+        raise ValueError("S5 2D feasibility scan only applies to Case 2")
+    new_reactor = cfg.case.reactor.model_copy(
+        update={"capex_usd_per_kWe": smr_capex_usd_per_kWe}
     )
     new_abs = cfg.case.absorption.model_copy(
-        update={
-            "capex_usd_per_kWth": cfg.case.absorption.capex_usd_per_kWth * factor
-        }
+        update={"capex_usd_per_kWth": absorption_capex_usd_per_kWth}
     )
-    new_case = cfg.case.model_copy(update={"orc": new_orc, "absorption": new_abs})
+    new_case = cfg.case.model_copy(
+        update={"reactor": new_reactor, "absorption": new_abs}
+    )
     return cfg.model_copy(update={"case": new_case})
 
 
@@ -235,7 +243,7 @@ def with_equipment_capex(cfg: RunConfig, factor: float) -> RunConfig:
 
 @dataclass(frozen=True)
 class RunSpec:
-    """One row of the 51-run grid."""
+    """One row of the 61-run grid."""
 
     group: str        # 'main_baseline' | 's1_pue' | ...
     run_id: str       # filesystem-safe key, unique within group
@@ -243,8 +251,11 @@ class RunSpec:
     year: int
     pue: float
     reactor_scenario: Optional[str] = None   # 'FOAK' | 'ATB_Mid' | 'NOAK' | None
-    bess_on: bool = False                    # only meaningful for Cases 1-3
-    equipment_capex_factor: Optional[float] = None  # S5 only
+    bess_on: bool = False                    # only meaningful for Cases 1-2
+    smr_capex_usd_per_kWe: Optional[float] = None         # S5 only
+    absorption_capex_usd_per_kWth: Optional[float] = None # S5 only
+    smr_capex_tag: Optional[str] = None                   # S5 grid label
+    absorption_capex_tag: Optional[str] = None            # S5 grid label
 
     @property
     def output_dir(self) -> Path:
@@ -257,18 +268,27 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
     cfg = load_config(case_id=spec.case_id, project_root=PROJECT_ROOT)
 
     # --- Reactor CAPEX scenario (S4) ---------------------------------------
-    if spec.reactor_scenario is not None and spec.case_id in (1, 2, 3):
+    if spec.reactor_scenario is not None and spec.case_id in (1, 2):
         cfg = with_reactor_capex(cfg, spec.reactor_scenario, PROJECT_ROOT)
 
     # --- BESS toggle (S3) ---------------------------------------------------
-    bess_supported = spec.case_id in (1, 2, 3) and cfg.case.bess is not None
+    bess_supported = spec.case_id in (1, 2) and cfg.case.bess is not None
     bess_applied = spec.bess_on and bess_supported
     if bess_applied:
         cfg = with_bess(cfg, True)
 
-    # --- Equipment CAPEX scale (S5) ----------------------------------------
-    if spec.equipment_capex_factor is not None:
-        cfg = with_equipment_capex(cfg, spec.equipment_capex_factor)
+    # --- S5 SMR × absorption CAPEX pair (Case 2 only) ----------------------
+    if spec.smr_capex_usd_per_kWe is not None:
+        if spec.absorption_capex_usd_per_kWth is None:
+            raise ValueError(
+                "RunSpec.smr_capex_usd_per_kWe set without "
+                "absorption_capex_usd_per_kWth — both required for S5"
+            )
+        cfg = with_capex_pair(
+            cfg,
+            spec.smr_capex_usd_per_kWe,
+            spec.absorption_capex_usd_per_kWth,
+        )
 
     # --- Time series --------------------------------------------------------
     ts = load_time_series(project_root=PROJECT_ROOT, year=spec.year, num_hours=8760)
@@ -298,7 +318,10 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
             "bess_on_requested": spec.bess_on,
             "bess_supported": bess_supported,
             "bess_applied": bess_applied,
-            "equipment_capex_factor": spec.equipment_capex_factor,
+            "smr_capex_usd_per_kWe": spec.smr_capex_usd_per_kWe,
+            "absorption_capex_usd_per_kWth": spec.absorption_capex_usd_per_kWth,
+            "smr_capex_tag": spec.smr_capex_tag,
+            "absorption_capex_tag": spec.absorption_capex_tag,
             "num_hours": ts.num_hours,
             "solve_seconds": round(solve_seconds, 3),
         },
@@ -315,7 +338,10 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
         "pue": spec.pue,
         "reactor_scenario": spec.reactor_scenario,
         "bess_applied": bess_applied,
-        "equipment_capex_factor": spec.equipment_capex_factor,
+        "smr_capex_usd_per_kWe": spec.smr_capex_usd_per_kWe,
+        "absorption_capex_usd_per_kWth": spec.absorption_capex_usd_per_kWth,
+        "smr_capex_tag": spec.smr_capex_tag,
+        "absorption_capex_tag": spec.absorption_capex_tag,
         "solve_seconds": round(solve_seconds, 3),
         **{k: v for k, v in scalars.items() if not isinstance(v, dict)},
     }
@@ -327,11 +353,15 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
+_ALL_CASES = (0, 1, 2, 3)
+_NUCLEAR_CASES = (1, 2)
+
+
 def build_run_grid() -> list[RunSpec]:
     specs: list[RunSpec] = []
 
-    # ---- main_baseline: 5 cases, 2023, PUE 1.30, ATB-Mid ------------------
-    for cid in range(5):
+    # ---- main_baseline: 4 cases, 2023, PUE 1.30, ATB-Mid ------------------
+    for cid in _ALL_CASES:
         specs.append(
             RunSpec(
                 group="main_baseline",
@@ -339,12 +369,12 @@ def build_run_grid() -> list[RunSpec]:
                 case_id=cid,
                 year=2023,
                 pue=1.30,
-                reactor_scenario="ATB_Mid" if cid in (1, 2, 3) else None,
+                reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
             )
         )
 
-    # ---- S1 PUE: Cases 1-3 × {1.10, 1.30, 1.50}, 2023, ATB-Mid ------------
-    for cid in (1, 2, 3):
+    # ---- S1 PUE: Cases 1-2 × {1.10, 1.30, 1.50}, 2023, ATB-Mid ------------
+    for cid in _NUCLEAR_CASES:
         for pue in (1.10, 1.30, 1.50):
             pue_tag = f"{int(round(pue * 100)):03d}"
             specs.append(
@@ -358,9 +388,9 @@ def build_run_grid() -> list[RunSpec]:
                 )
             )
 
-    # ---- S2 ERCOT year regime: 5 cases × {2022, 2023, 2024} ---------------
+    # ---- S2 ERCOT year regime: 4 cases × {2022, 2023, 2024} ---------------
     for year in (2022, 2023, 2024):
-        for cid in range(5):
+        for cid in _ALL_CASES:
             specs.append(
                 RunSpec(
                     group="s2_price",
@@ -368,12 +398,12 @@ def build_run_grid() -> list[RunSpec]:
                     case_id=cid,
                     year=year,
                     pue=1.30,
-                    reactor_scenario="ATB_Mid" if cid in (1, 2, 3) else None,
+                    reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
                 )
             )
 
-    # ---- S3 BESS: 5 cases × {off, on}, 2023, ATB-Mid ----------------------
-    for cid in range(5):
+    # ---- S3 BESS: 4 cases × {off, on}, 2023, ATB-Mid ----------------------
+    for cid in _ALL_CASES:
         for bess_on in (False, True):
             tag = "on" if bess_on else "off"
             specs.append(
@@ -383,13 +413,13 @@ def build_run_grid() -> list[RunSpec]:
                     case_id=cid,
                     year=2023,
                     pue=1.30,
-                    reactor_scenario="ATB_Mid" if cid in (1, 2, 3) else None,
+                    reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
                     bess_on=bess_on,
                 )
             )
 
-    # ---- S4 Reactor CAPEX: Cases 1-3 × {FOAK, ATB_Mid, NOAK}, 2023 -------
-    for cid in (1, 2, 3):
+    # ---- S4 Reactor CAPEX: Cases 1-2 × {FOAK, ATB_Mid, NOAK}, 2023 -------
+    for cid in _NUCLEAR_CASES:
         for scen in ("FOAK", "ATB_Mid", "NOAK"):
             specs.append(
                 RunSpec(
@@ -402,19 +432,26 @@ def build_run_grid() -> list[RunSpec]:
                 )
             )
 
-    # ---- S5 Equipment CAPEX robustness: Case 2 × {0.6, 1.0, 1.4}, 2023 ----
-    for factor, tag in ((0.6, "low"), (1.0, "baseline"), (1.4, "high")):
-        specs.append(
-            RunSpec(
-                group="s5_equipment",
-                run_id=f"case2_eq_{tag}",
-                case_id=2,
-                year=2023,
-                pue=1.30,
-                reactor_scenario="ATB_Mid",
-                equipment_capex_factor=factor,
+    # ---- S5 SMR × absorption 2D feasibility grid: 5 × 5 = 25 runs ---------
+    grid = _load_s5_grid()
+    smr_axis = grid["axes"]["smr_capex_usd_per_kWe"]
+    abs_axis = grid["axes"]["absorption_capex_usd_per_kWth"]
+    for smr in smr_axis:
+        for ab in abs_axis:
+            specs.append(
+                RunSpec(
+                    group="s5_feasibility_2d",
+                    run_id=f"case2_smr_{smr['tag']}_abs_{ab['tag']}",
+                    case_id=2,
+                    year=2023,
+                    pue=1.30,
+                    # S5 sets SMR CAPEX directly (overrides the S4 scenario path)
+                    smr_capex_usd_per_kWe=float(smr["value"]),
+                    absorption_capex_usd_per_kWth=float(ab["value"]),
+                    smr_capex_tag=smr["tag"],
+                    absorption_capex_tag=ab["tag"],
+                )
             )
-        )
 
     return specs
 
@@ -428,11 +465,10 @@ def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Compute Heat-Recovery Premium against the per-(group, year, pue,
     reactor_scenario) Case-0 TAC. Premium for Case 0 itself is 0.
 
-    The matching key is (group, year, pue, reactor_scenario) so each
+    The matching key is (group, year, pue, bess_applied) so each
     sensitivity slice picks its own Case-0 denominator. For groups where
-    Case-0 doesn't vary (e.g. S1 PUE, where Case 0 is missing because we
-    don't sweep PUE for it), we fall back to the main_baseline Case-0 TAC
-    at the matching (year, pue) — which equals the natural denominator.
+    Case-0 doesn't vary (e.g. S1 PUE, S4 CAPEX, S5 2D), we fall back to
+    the (year, pue, False) Case-0 TAC or to main_baseline Case 0.
     """
     baseline_case0 = (
         df[df["case_id"] == 0]
@@ -449,7 +485,6 @@ def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
         key = (row["year"], row["pue"], row["bess_applied"])
         denom = baseline_case0.get(key)
         if denom is None:
-            # fall back to (year, pue, False) — Case 0 unaffected by BESS
             denom = baseline_case0.get((row["year"], row["pue"], False))
         if denom is None:
             denom = main_case0
@@ -478,7 +513,10 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
         "pue",
         "reactor_scenario",
         "bess_applied",
-        "equipment_capex_factor",
+        "smr_capex_usd_per_kWe",
+        "absorption_capex_usd_per_kWth",
+        "smr_capex_tag",
+        "absorption_capex_tag",
         "tac_usd_per_yr",
         "tac_case0_baseline_usd_per_yr",
         "heat_recovery_premium",
@@ -499,7 +537,7 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
         by_group.setdefault(s.group, []).append(s.run_id)
     total_seconds = float(sum(r.get("solve_seconds", 0.0) for r in rows))
     manifest = {
-        "plan_version": "v2.5",
+        "plan_version": "v2.6",
         "executed_at_utc": pd.Timestamp.utcnow().isoformat(),
         "num_runs": len(specs),
         "total_solve_seconds": round(total_seconds, 1),
@@ -516,11 +554,14 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
             ],
         },
         "notes": [
-            "Cases 0 and 4 are deterministic LP/closed-form; Cases 1-3 are "
+            "Cases 0 and 3 are deterministic LP/closed-form; Cases 1-2 are "
             "Pyomo MILP solved with Gurobi (LP relaxation in practice — no "
             "binaries are introduced by S3 BESS).",
-            "S3 BESS rows for Cases 0/4 carry bess_applied=False because "
+            "S3 BESS rows for Cases 0/3 carry bess_applied=False because "
             "those cases have no BESS block; rows preserved for table shape.",
+            "S5 fixes year=2023 / PUE=1.30 / ATB-Mid-equivalent baseline; "
+            "the 25 cells span SMR ∈ {2250..14700} $/kWe × absorption ∈ "
+            "{450..1200} $/kWth driven by config/capex_grid_s5.yaml.",
             "Premium is computed against the Case-0 TAC at matching "
             "(year, pue), falling back to (year, pue, bess=False) if needed.",
         ],
@@ -537,14 +578,14 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
 def main() -> None:
     OUTPUTS.mkdir(exist_ok=True)
     specs = build_run_grid()
-    print(f"Running {len(specs)} solves (plan-v2.5)\n")
+    print(f"Running {len(specs)} solves (plan-v2.6)\n")
     rows: list[dict[str, Any]] = []
     t0 = time.time()
     for i, s in enumerate(specs, 1):
         row = execute_run(s)
         rows.append(row)
         print(
-            f"[{i:>2}/{len(specs)}] {s.group:>14}/{s.run_id:<22} "
+            f"[{i:>2}/{len(specs)}] {s.group:>18}/{s.run_id:<32} "
             f"TAC={row['tac_usd_per_yr']/1e6:7.2f} M$ "
             f"({row['solve_seconds']:.1f}s)"
         )

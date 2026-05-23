@@ -18,8 +18,8 @@ from typing import Literal, Optional, Union
 import yaml  # noqa: F401  (used by with_reactor_capex)
 from pydantic import BaseModel, ConfigDict, Field
 
-CaseId = Literal[0, 1, 2, 3, 4]
-_VALID_CASE_IDS: set[int] = {0, 1, 2, 3, 4}
+CaseId = Literal[0, 1, 2, 3]
+_VALID_CASE_IDS: set[int] = {0, 1, 2, 3}
 
 
 # ---------------------------------------------------------------------------
@@ -93,13 +93,32 @@ class ReactorConfig(BaseModel):
 
 
 class TurbineConfig(BaseModel):
-    """Main steam turbine fed by reactor (Cases 1-3)."""
+    """Main HP+LP steam turbine fed by reactor (Cases 1-2, v2.6).
 
-    rated_efficiency: float = Field(gt=0.0, lt=1.0)   # at full main-steam load
+    v2.6 cascaded extraction: a mid-pressure tap (5-7 barg, ~160 °C) between
+    HP and LP stages can divert steam to the double-effect absorption
+    chiller. Diverted steam doesn't expand through the LP turbine, so it
+    costs electricity. The Willans-line linearization charges that loss
+    per MWth of extracted heat:
+
+        P_turb_net = rated_efficiency * P_rx
+                   - extraction_willans_slope_MWe_per_MWth * Q_to_absorption
+
+    Plan §A7 + §F.1: each kg/s extraction ≈ 2.0 MWth in and ~0.165 MWe out,
+    so 0.165 / 2.0 ≈ 0.083 MWe/MWth on the conservative side; matches the
+    expected HP/LP split for a BWRX-300 main turbine where extraction
+    occurs after HP work has already been captured.
+    """
+
+    rated_efficiency: float = Field(gt=0.0, lt=1.0)   # at full main-steam load, zero extraction
     capex_usd_per_kWe: float = Field(ge=0.0)          # 0 if bundled into reactor CAPEX
     fixed_om_usd_per_kWe_year: float = Field(ge=0.0)
     variable_om_usd_per_mwh_e: float = Field(ge=0.0)
     aux_load_fraction: float = Field(ge=0.0, lt=1.0)  # parasitic loads as fraction of gross
+    # v2.6 cascaded extraction: electricity penalty per unit of heat diverted
+    # to absorption at the mid-pressure tap. 0 means "no extraction allowed"
+    # (Case 1) and the absorption block must be disabled.
+    extraction_willans_slope_MWe_per_MWth: float = Field(0.0, ge=0.0, le=1.0)
 
 
 class OrcConfig(BaseModel):

@@ -1,4 +1,4 @@
-"""Tests for src.cases.case2 — full cogen MILP (reactor + turbine + ORC + abs + VCC backup)."""
+"""Tests for src.cases.case2 — v2.6 cascaded HP extraction + absorption + VCC backup."""
 
 from pathlib import Path
 
@@ -32,12 +32,15 @@ def test_case2_solve_returns_optimal(cfg, ts_2023_168h):
 
 
 def test_case2_electric_balance_closes(cfg, ts_2023_168h):
-    """P_turb_net + P_orc + P_grid_buy = P_IT + P_VCC + abs_parasitic + P_grid_sell."""
+    """P_turb_net + P_grid_buy = P_IT + P_VCC + abs_parasitic + P_grid_sell.
+
+    v2.6: no ORC stream; turbine Willans-line already nets the extraction
+    penalty into P_turb_net, so it appears once in the balance.
+    """
     r = solve_case2(cfg, ts_2023_168h)
     parasitic = cfg.case.absorption.parasitic_kWe_per_kWth * r.Q_abs_cool_MWth
     residual = (
         r.P_turb_net_MW
-        + r.P_orc_MW
         + r.P_grid_buy_MW
         - r.P_IT_MW
         - r.P_VCC_elec_MW
@@ -70,12 +73,13 @@ def test_case2_absorption_active_in_normal_hours(cfg, ts_2023_168h):
     assert abs_share > 0.6
 
 
-def test_case2_capex_includes_orc_and_absorption(cfg, ts_2023_168h):
-    """ORC + absorption CAPEX adds to the line vs Case 1 (same reactor)."""
+def test_case2_capex_includes_absorption(cfg, ts_2023_168h):
+    """v2.6: absorption CAPEX is the only cogen-side capital line over Case 1."""
     from src.cases.case1 import solve_case1
     cfg1 = load_config(case_id=1, project_root=PROJECT_ROOT)
     r1 = solve_case1(cfg1, ts_2023_168h)
     r2 = solve_case2(cfg, ts_2023_168h)
-    # Case 2 capex must exceed Case 1 capex by the ORC + abs annualized capex
+    # Case 2 capex minus Case 1 capex ≈ absorption annualized CAPEX.
+    # $750/kWth × 100,000 kWth × CRF (0.0922) ≈ $6.9 M/yr
     delta = r2.capex_annual_usd - r1.capex_annual_usd
-    assert delta > 7.0e6   # ORC $2,800/kWe × 8 MW × CRF + abs $750/kWth × 100 × CRF ≈ $9M
+    assert 5.5e6 < delta < 8.5e6

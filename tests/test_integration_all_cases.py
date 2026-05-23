@@ -1,6 +1,6 @@
-"""Phase 2B integration: 5-case Premium matrix and P1-A wet-bulb gate.
+"""v2.6 integration: 4-case Premium matrix and P1-A wet-bulb gate.
 
-Locks in cross-case behavior at the v2.5 baseline grid (3 ERCOT years
+Locks in cross-case behavior at the v2.6 baseline grid (3 ERCOT years
 × PUE 1.30 × ATB-Mid reactor CAPEX). Premium(Case 0, Case N) signs
 become regression checks: if a future code change accidentally flips
 one of them, this test catches it.
@@ -14,7 +14,6 @@ from src.cases.case0 import solve_case0
 from src.cases.case1 import solve_case1
 from src.cases.case2 import solve_case2
 from src.cases.case3 import solve_case3
-from src.cases.case4 import solve_case4
 from src.config import load_config
 from src.data import load_time_series
 from src.kpi import heat_recovery_premium
@@ -29,7 +28,7 @@ if not gurobi.available(exception_flag=False):
 
 
 def _solve_all(year: int, pue: float = 1.30, hours: int = 168):
-    """Solve all 5 cases for one (year, PUE) and return TAC dict."""
+    """Solve all 4 cases for one (year, PUE) and return TAC dict."""
     ts = load_time_series(project_root=PROJECT_ROOT, year=year, num_hours=hours)
     tacs = {}
     for case_id, solver in (
@@ -37,7 +36,6 @@ def _solve_all(year: int, pue: float = 1.30, hours: int = 168):
         (1, solve_case1),
         (2, solve_case2),
         (3, solve_case3),
-        (4, solve_case4),
     ):
         cfg = load_config(case_id=case_id, project_root=PROJECT_ROOT)
         r = solver(cfg, ts, pue=pue)
@@ -52,25 +50,24 @@ def test_all_cases_solve_and_return_positive_tac():
 
 
 def test_nuclear_cases_lose_to_case0_at_atb_mid_capex():
-    """At NREL ATB Moderate ($7,615/kWe), BWRX TAC dominates → Cases 1-3 lose to Case 0."""
+    """At NREL ATB Moderate ($7,615/kWe), BWRX CAPEX dominates → Cases 1-2 lose to Case 0."""
     tacs = _solve_all(2023)
-    for cid in (1, 2, 3):
+    for cid in (1, 2):
         prem = heat_recovery_premium(tacs[0], tacs[cid])
         assert prem < 0, f"Case {cid} unexpectedly cheaper than Case 0 at ATB-Mid"
 
 
-def test_case2_vs_case3_isolates_orc_value():
-    """Case 2 − Case 3 captures the ORC bottoming cycle's marginal contribution.
+def test_case2_beats_case1_via_cascaded_extraction():
+    """v2.6 cascaded extraction must reduce TAC vs no-heat-recovery Case 1.
 
-    At BWRX-300 scale (270 MWe net vs 200 MW DC peak), the reactor's surplus
-    electricity can already cover cooling via VCC, so the ORC's ~$2M/yr CAPEX
-    exceeds its electricity savings → Case 2 TAC > Case 3 TAC. This is the
-    paper finding that the ORC step doesn't pay at this DC scale.
+    Diverting steam at the mid-pressure tap costs ~0.083 MWe per MWth but
+    delivers ~COP×1.0 MWth of cooling that would otherwise need ~1/COP_VCC
+    MWe of compressor power. Net effect is positive at any realistic LMP.
     """
     tacs = _solve_all(2023)
-    assert tacs[2] > tacs[3], (
-        f"Expected Case 2 (with ORC) > Case 3 (no ORC) at BWRX/DC scale; "
-        f"got TAC_2={tacs[2]/1e6:.1f}M, TAC_3={tacs[3]/1e6:.1f}M"
+    assert tacs[2] < tacs[1], (
+        f"Expected Case 2 (cascaded extraction) < Case 1 (no recovery); "
+        f"got TAC_1={tacs[1]/1e6:.1f}M, TAC_2={tacs[2]/1e6:.1f}M"
     )
 
 

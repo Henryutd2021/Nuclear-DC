@@ -1,14 +1,16 @@
-"""Case 2 — BWRX-300 + main turbine + ORC + double-effect absorption (v2.5 §B).
+"""Case 2 — BWRX-300 + main turbine + cascaded HP extraction + absorption (v2.6 §B).
 
-Full heat-recovery configuration. The reactor produces main steam; the
-main turbine generates electricity from the bulk of it; medium-pressure
-extraction (~165 °C) drives a LiBr-H2O double-effect absorption chiller
-that supplies the DC chilled water; lower-pressure extraction (~120 °C)
-drives an ORC bottoming cycle that scavenges additional electricity. A
-small VCC chiller covers absorption outages (P1-A crystallization gate
-when Houston wet bulb is too high).
+v2.6 heat-recovery flagship. Main steam (287 °C / 7.17 MPa) enters the HP
+turbine and does electrical work first. A mid-pressure tap (5-7 barg,
+~160 °C) bleeds part of the flow to drive a double-effect LiBr-H2O
+absorption chiller; the rest continues through the LP turbine and
+condenser. The Willans-line linearization in src.milp.builder charges
+the electricity loss per MWth of extracted heat — cascaded, NOT parallel,
+so high-grade steam is no longer wasted on a 6 °C cooling duty.
 
-This is the "heat recovery upper bound" reference case.
+Versus v2.5: the ORC bottoming cycle is removed (added < 1 pp Premium at
+ATB-Mid CAPEX, kills the bottoming-cycle narrative). The crystallization
+gate (P1-A) and time-varying COP(T_wb) carry over unchanged.
 """
 
 from __future__ import annotations

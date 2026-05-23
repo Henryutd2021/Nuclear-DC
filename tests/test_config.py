@@ -74,6 +74,9 @@ def test_base_time_and_solver_loaded():
 
 
 def test_invalid_case_id_rejected():
+    """v2.6: valid set is {0, 1, 2, 3}; 4 and 5 must both be rejected."""
+    with pytest.raises(ValueError, match=r"case_id"):
+        load_config(case_id=4, project_root=PROJECT_ROOT)
     with pytest.raises(ValueError, match=r"case_id"):
         load_config(case_id=5, project_root=PROJECT_ROOT)
     with pytest.raises(ValueError, match=r"case_id"):

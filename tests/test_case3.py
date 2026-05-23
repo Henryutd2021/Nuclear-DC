@@ -1,4 +1,4 @@
-"""Tests for src.cases.case3 — turbine + absorption (no ORC)."""
+"""Tests for src.cases.case3 — NGCC on-site off-grid baseline (v2.6, was Case 4 in v2.5)."""
 
 from pathlib import Path
 
@@ -6,13 +6,9 @@ import pytest
 
 from src.cases.case3 import solve_case3
 from src.config import load_config
-from src.data import load_time_series
+from src.data import load_henry_hub_annual_mean, load_time_series
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-
-gurobi = pytest.importorskip("pyomo.opt").SolverFactory("gurobi")
-if not gurobi.available(exception_flag=False):
-    pytest.skip("Gurobi unavailable", allow_module_level=True)
 
 
 @pytest.fixture(scope="module")
@@ -25,45 +21,92 @@ def ts_2023_168h():
     return load_time_series(project_root=PROJECT_ROOT, year=2023, num_hours=168)
 
 
-def test_case3_solve_returns_optimal(cfg, ts_2023_168h):
-    r = solve_case3(cfg, ts_2023_168h)
-    assert r.tac_usd_per_yr > 0
-    assert r.case_id == 3
+def test_case3_loads_with_ngcc_enabled(cfg):
+    assert cfg.case.case_id == 3
+    assert cfg.case.equipment.ngcc_enabled is True
+    assert cfg.case.equipment.grid_import_enabled is False
+    assert cfg.case.ngcc is not None
+    assert cfg.case.vcc is not None
 
 
-def test_case3_no_orc(cfg, ts_2023_168h):
-    """ORC disabled → P_orc must be zero throughout."""
-    r = solve_case3(cfg, ts_2023_168h)
-    assert r.P_orc_MW.sum() == 0
+def test_case3_smoke_returns_result(cfg, ts_2023_168h):
+    result = solve_case3(cfg, ts_2023_168h)
+    assert result.tac_usd_per_yr > 0
 
 
-def test_case3_electric_balance_closes(cfg, ts_2023_168h):
-    """Same as Case 2 minus ORC; absorption parasitic still applies."""
-    r = solve_case3(cfg, ts_2023_168h)
-    parasitic = cfg.case.absorption.parasitic_kWe_per_kWth * r.Q_abs_cool_MWth
+def test_case3_off_grid_balance(cfg, ts_2023_168h):
+    """P_NGCC == P_IT + P_VCC every hour; no grid component."""
+    result = solve_case3(cfg, ts_2023_168h)
     residual = (
-        r.P_turb_net_MW
-        + r.P_grid_buy_MW
-        - r.P_IT_MW
-        - r.P_VCC_elec_MW
-        - parasitic
-        - r.P_grid_sell_MW
+        result.P_NGCC_elec_MW - result.P_IT_MW - result.P_VCC_elec_MW
     ).abs().max()
-    assert residual < 1e-4
+    assert residual < 1e-9
 
 
-def test_case3_cooling_balance_combines_abs_and_vcc(cfg, ts_2023_168h):
-    r = solve_case3(cfg, ts_2023_168h)
-    residual = (r.Q_abs_cool_MWth + r.Q_VCC_cool_MWth - r.Q_cool_demand_MWth).abs().max()
-    assert residual < 1e-4
+def test_case3_fuel_consumption_matches_efficiency(cfg, ts_2023_168h):
+    """Fuel [MMBtu/h] = P_NGCC [MW] * 3.412 / η_hhv."""
+    result = solve_case3(cfg, ts_2023_168h)
+    eta = cfg.case.ngcc.net_efficiency_hhv
+    expected = result.P_NGCC_elec_MW * 3.412 / eta
+    diff = (result.fuel_consumption_MMBtu_per_h - expected).abs().max()
+    assert diff < 1e-6
 
 
-def test_case3_capex_less_than_case2_at_same_year(cfg, ts_2023_168h):
-    """No ORC → Case 3 capex must be lower than Case 2 (same year, same PUE)."""
-    from src.cases.case2 import solve_case2
-    cfg2 = load_config(case_id=2, project_root=PROJECT_ROOT)
-    r2 = solve_case2(cfg2, ts_2023_168h)
-    r3 = solve_case3(cfg, ts_2023_168h)
-    # ORC annualized capex ≈ $2,800/kWe × 8 MW × 1000 × 0.0922 ≈ $2.07M/yr
-    delta = r2.capex_annual_usd - r3.capex_annual_usd
-    assert delta > 1.5e6
+def test_case3_fuel_cost_uses_year_resolved_henry_hub(cfg, ts_2023_168h):
+    """Fuel cost = (HH + basis) × MMBtu/h."""
+    result = solve_case3(cfg, ts_2023_168h)
+    hh = load_henry_hub_annual_mean(PROJECT_ROOT, 2023)
+    delivered = hh + cfg.case.ngcc.henry_hub_basis_usd_per_mmbtu
+    expected = result.fuel_consumption_MMBtu_per_h * delivered
+    diff = (result.fuel_cost_usd_per_h - expected).abs().max()
+    assert diff < 1e-6
+
+
+def test_case3_2022_fuel_more_expensive_than_2024(cfg):
+    """v2.6 S2: 2022 HH spike → Case 3 fuel cost ≈ 3× 2024."""
+    ts22 = load_time_series(project_root=PROJECT_ROOT, year=2022, num_hours=8760)
+    ts24 = load_time_series(project_root=PROJECT_ROOT, year=2024, num_hours=8760)
+    r22 = solve_case3(cfg, ts22)
+    r24 = solve_case3(cfg, ts24)
+    # 2022 mean HH $6.45 vs 2024 $2.19 → ratio ~ 2.9x
+    ratio = r22.fuel_annual_usd / r24.fuel_annual_usd
+    assert 2.0 < ratio < 4.0
+
+
+def test_case3_direct_emissions_match_emission_factor(cfg, ts_2023_168h):
+    """Direct CO2 [kg/h] = P_NGCC [MW] × 1h × CO2_direct [g/kWh] (g/kWh × MW × h = kg)."""
+    result = solve_case3(cfg, ts_2023_168h)
+    expected = (
+        result.P_NGCC_elec_MW
+        * cfg.base.time.delta_t
+        * cfg.case.ngcc.co2_direct_g_per_kwh_e
+    )
+    diff = (result.direct_emissions_kg_co2_per_h - expected).abs().max()
+    assert diff < 1e-6
+
+
+def test_case3_lifecycle_emissions_include_upstream_ch4(cfg, ts_2023_168h):
+    """Lifecycle CO2 includes upstream methane leakage (Alvarez 2018, +60 g/kWh)."""
+    result = solve_case3(cfg, ts_2023_168h)
+    assert result.co2_lifecycle_annual_tonnes > result.co2_direct_annual_tonnes
+    ratio = result.co2_lifecycle_annual_tonnes / result.co2_direct_annual_tonnes
+    # 360 direct + 60 upstream → lifecycle 420 → ratio 420/360 = 1.167
+    assert 1.10 < ratio < 1.25
+
+
+def test_case3_tac_components_sum_correctly(cfg, ts_2023_168h):
+    result = solve_case3(cfg, ts_2023_168h)
+    parts = (
+        result.capex_annual_usd
+        + result.fom_annual_usd
+        + result.vom_annual_usd
+        + result.fuel_annual_usd
+    )
+    assert parts == pytest.approx(result.tac_usd_per_yr, rel=1e-9)
+
+
+def test_case3_higher_pue_increases_fuel_and_tac(cfg, ts_2023_168h):
+    r110 = solve_case3(cfg, ts_2023_168h, pue=1.10)
+    r150 = solve_case3(cfg, ts_2023_168h, pue=1.50)
+    assert r150.fuel_annual_usd > r110.fuel_annual_usd
+    assert r150.tac_usd_per_yr > r110.tac_usd_per_yr
