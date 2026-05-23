@@ -45,6 +45,8 @@ env/
 # Jupyter
 .ipynb_checkpoints
 *.ipynb
+# Whitelist: v2.6 paper figure notebook (companion to make_v26_figures.py)
+!notebooks/make_v26_figures.ipynb
 
 # Testing
 .pytest_cache/
