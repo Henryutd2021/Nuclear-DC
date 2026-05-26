@@ -32,8 +32,8 @@ capacities:
   turbine_capacity_MWe:           300.0
   absorption_capacity_MWth:       100.0   # covers DC max cooling 79 MWth + headroom
   electric_chiller_capacity_MWth: 100.0   # backup during absorption crystallization outage
-  bess_capacity_MWh:              100.0   # v2.6 S3 BESS sensitivity (100 MWh / 25 MW)
-  bess_power_MW:                  25.0
+  bess_capacity_MWh:              100.0   # Plan §F.3: 100 MWh / 50 MW (C/2, 2 h storage)
+  bess_power_MW:                  50.0    # v2.7 fix: was 25 MW (C/4); plan locked at 50 MW
 
 # Reactor + turbine identical to Case 1
 reactor:

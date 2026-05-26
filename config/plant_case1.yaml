@@ -27,8 +27,8 @@ capacities:
   reactor_thermal_capacity_MWth: 870.0      # BWRX-300 nameplate
   turbine_capacity_MWe:          300.0      # gross; net ≈ 270 after auxiliaries
   electric_chiller_capacity_MWth: 120.0     # same VCC as Case 0
-  bess_capacity_MWh:             100.0      # v2.5 S3 BESS sensitivity (100 MWh / 25 MW)
-  bess_power_MW:                 25.0
+  bess_capacity_MWh:             100.0      # Plan §F.3: 100 MWh / 50 MW (C/2, 2 h storage)
+  bess_power_MW:                 50.0       # v2.7 fix: was 25 MW (C/4); plan locked at 50 MW
 
 vcc:
   cop_baseline:    3.5

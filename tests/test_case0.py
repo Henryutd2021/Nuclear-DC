@@ -71,6 +71,7 @@ def test_case0_tac_decomposition_sums_to_total(cfg, ts_2023_168h):
         + result.fom_annual_usd
         + result.vom_annual_usd
         + result.grid_annual_usd
+        + result.carbon_annual_usd
     )
     assert parts == pytest.approx(result.tac_usd_per_yr, rel=1e-9)
 

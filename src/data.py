@@ -18,9 +18,11 @@ class TimeSeries:
     """Aligned hourly inputs for a single ERCOT operating year.
 
     All Series are 0-indexed of length ``num_hours`` after any slicing.
-    ``henry_hub_usd_per_mmbtu`` is the year's annual mean Henry Hub spot
-    price (scalar), used by Case 4 for NGCC fuel cost across the v2.5
-    S2 year-regime sensitivity.
+    ``henry_hub_usd_per_mmbtu`` is the annual-mean Henry Hub spot price
+    kept for backward compatibility; Case 3 now drives NGCC fuel cost
+    from the hourly broadcast ``henry_hub_usd_per_mmbtu_hourly`` (EIA
+    daily HH ffilled to 24-h blocks), which captures within-year fuel
+    volatility — most notably the Jan 2024 cold-snap spike to $13.20.
     """
 
     year: int
@@ -30,6 +32,7 @@ class TimeSeries:
     price_import_usd_per_mwh: pd.Series
     carbon_intensity_g_per_kwh: pd.Series
     henry_hub_usd_per_mmbtu: float
+    henry_hub_usd_per_mmbtu_hourly: pd.Series
 
 
 def _read_column(path: Path, col: str, start: int, n: int) -> pd.Series:
@@ -107,7 +110,41 @@ def load_time_series(
             carbon_path, "carbon_intensity_g_per_kwh", start_hour, num_hours
         ),
         henry_hub_usd_per_mmbtu=load_henry_hub_annual_mean(root, year),
+        henry_hub_usd_per_mmbtu_hourly=_load_henry_hub_hourly(
+            root, year, start_hour, num_hours
+        ),
     )
+
+
+def _load_henry_hub_hourly(
+    project_root: Path, year: int, start_hour: int, num_hours: int
+) -> pd.Series:
+    """Broadcast EIA Henry Hub daily spot prices to an 8760 h hourly series.
+
+    The raw CSV (``data/economics/henry_hub_daily_2022_2024.csv``) has only
+    business days, so weekends and US federal holidays are forward-filled
+    (use the most recent traded day). Each daily value then repeats 24 times
+    to form an hourly series. Slice [start_hour, start_hour+num_hours) to
+    align with the LMP series.
+    """
+    path = project_root / "data" / "economics" / "henry_hub_daily_2022_2024.csv"
+    if not path.exists():
+        raise FileNotFoundError(f"Henry Hub daily file not found: {path}")
+    raw = pd.read_csv(path, parse_dates=["date"])
+    raw = raw.set_index("date")["price_usd_per_mmbtu"].sort_index()
+
+    full_days = pd.date_range(f"{year}-01-01", f"{year}-12-31", freq="D")
+    daily = raw.reindex(full_days).ffill().bfill()  # ffill weekends/holidays
+    if daily.isna().any():
+        raise ValueError(f"Henry Hub daily series has gaps after ffill for {year}")
+
+    hourly = daily.repeat(24).reset_index(drop=True).astype(float)
+    if len(hourly) < _HOURS_PER_YEAR:
+        raise ValueError(
+            f"Henry Hub hourly broadcast produced {len(hourly)} values, "
+            f"expected at least {_HOURS_PER_YEAR}"
+        )
+    return hourly.iloc[start_hour : start_hour + num_hours].reset_index(drop=True)
 
 
 def load_henry_hub_annual_mean(

@@ -6,9 +6,13 @@ time:
 
 solver:
   name: gurobi
-  mip_gap: 0.0001     # 0.01% optimality gap
+  mip_gap: 0.0001     # 0.01% optimality gap (LPs ignore this)
   time_limit: null    # No time limit (null = unlimited)
-  threads: -1         # Use all available threads
+  # threads: 0 = Gurobi default (use all cores). Override per-process
+  # to ~4 when running 16 parallel workers — see run_all_analyses.py
+  # and ~/.claude memory reference_workstation-specs.
+  threads: 16
+  method: 2           # Barrier — fastest LP method on this hardware
   log_to_console: true
   log_to_file: true
   seed: 42            # Reproducibility

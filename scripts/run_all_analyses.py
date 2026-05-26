@@ -28,8 +28,10 @@ Outputs layout:
 from __future__ import annotations
 
 import json
+import os
 import time
 import warnings
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Optional, Union
@@ -47,10 +49,16 @@ from src.config import (  # noqa: E402
     RunConfig,
     load_config,
     with_bess,
+    with_carbon_price,
     with_reactor_capex,
 )
 from src.data import TimeSeries, load_time_series  # noqa: E402
-from src.kpi import heat_recovery_premium  # noqa: E402
+from src.kpi import (  # noqa: E402
+    carbon_abatement_cost_usd_per_tco2,
+    epbt_years,
+    heat_recovery_premium,
+    water_footprint_l_per_mwh,
+)
 from src.milp.result import NuclearCaseResult  # noqa: E402
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -139,8 +147,19 @@ def _result_to_scalars(
         "capex_annual_usd": float(r.capex_annual_usd),
         "fom_annual_usd": float(r.fom_annual_usd),
         "vom_annual_usd": float(r.vom_annual_usd),
+        "carbon_annual_usd": float(r.carbon_annual_usd),
+        "carbon_price_usd_per_tco2": float(
+            cfg.base.physics.carbon_price_usd_per_tco2
+        ),
         "pue": float(r.pue),
     }
+
+    # Annual energies needed for KPI #7 (EPBT) and KPI #8 (water footprint).
+    p_turb_net_annual = 0.0
+    p_ngcc_annual = 0.0
+    p_grid_buy_annual = 0.0
+    installed_mwe_for_epbt = 0.0
+    epbt_tech: Optional[str] = None
 
     if isinstance(r, Case0Result):
         out["co2_annual_tonnes"] = float(r.co2_annual_tonnes)
@@ -162,6 +181,8 @@ def _result_to_scalars(
             r.co2_annual_tonnes * 1000.0 / it_energy_annual_MWh
             if it_energy_annual_MWh > 0 else float("nan")
         )
+        p_grid_buy_annual = float(r.P_grid_buy_MW.sum() * dt * annual_scale)
+        # EPBT undefined for grid-only case — no on-site plant to amortize.
     elif isinstance(r, Case3NgccResult):
         out["co2_annual_tonnes"] = float(r.co2_lifecycle_annual_tonnes)
         out["co2_direct_annual_tonnes"] = float(r.co2_direct_annual_tonnes)
@@ -175,6 +196,9 @@ def _result_to_scalars(
             r.co2_lifecycle_annual_tonnes * 1000.0 / it_energy_annual_MWh
             if it_energy_annual_MWh > 0 else float("nan")
         )
+        p_ngcc_annual = float(r.P_NGCC_elec_MW.sum() * dt * annual_scale)
+        installed_mwe_for_epbt = float(r.ngcc_capacity_MWe)
+        epbt_tech = "ngcc"
     else:  # NuclearCaseResult
         out["co2_annual_tonnes"] = float(r.co2_annual_tonnes)
         out["fuel_annual_usd"] = float(r.fuel_annual_usd)
@@ -196,6 +220,32 @@ def _result_to_scalars(
             r.co2_annual_tonnes * 1000.0 / it_energy_annual_MWh
             if it_energy_annual_MWh > 0 else float("nan")
         )
+        p_turb_net_annual = float(r.P_turb_net_MW.sum() * dt * annual_scale)
+        p_grid_buy_annual = float(r.P_grid_buy_MW.sum() * dt * annual_scale)
+        installed_mwe_for_epbt = float(cfg.case.reactor.electric_power_net_MWe)
+        epbt_tech = "nuclear_bwr"
+
+    # ---- KPI #7 — EPBT (years) ---------------------------------------------
+    if epbt_tech is not None:
+        annual_e_out = (
+            p_turb_net_annual if epbt_tech == "nuclear_bwr" else p_ngcc_annual
+        )
+        out["epbt_years"] = epbt_years(
+            installed_mwe=installed_mwe_for_epbt,
+            annual_electric_output_mwh=annual_e_out,
+            technology=epbt_tech,
+        )
+    else:
+        out["epbt_years"] = None
+
+    # ---- KPI #8 — Water footprint (L/MWh_e delivered) -----------------------
+    out["water_l_per_mwh_e"] = water_footprint_l_per_mwh(
+        it_energy_annual_mwh=it_energy_annual_MWh,
+        p_turb_net_annual_mwh=p_turb_net_annual,
+        p_ngcc_annual_mwh=p_ngcc_annual,
+        p_grid_buy_annual_mwh=p_grid_buy_annual,
+        q_cool_annual_mwh=cool_energy_annual_MWh,
+    )
 
     return out
 
@@ -243,9 +293,9 @@ def with_capex_pair(
 
 @dataclass(frozen=True)
 class RunSpec:
-    """One row of the 61-run grid."""
+    """One row of the 73-run grid (v2.7: 61 v2.6 runs + 12 S6 carbon-price)."""
 
-    group: str        # 'main_baseline' | 's1_pue' | ...
+    group: str        # 'main_baseline' | 's1_pue' | ... | 's6_carbon_price'
     run_id: str       # filesystem-safe key, unique within group
     case_id: int
     year: int
@@ -256,6 +306,7 @@ class RunSpec:
     absorption_capex_usd_per_kWth: Optional[float] = None # S5 only
     smr_capex_tag: Optional[str] = None                   # S5 grid label
     absorption_capex_tag: Optional[str] = None            # S5 grid label
+    carbon_price_usd_per_tco2: float = 0.0                # S6 sensitivity
 
     @property
     def output_dir(self) -> Path:
@@ -266,6 +317,16 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
     """Build the cfg, solve, write artifacts, and return the scalar row."""
     t0 = time.time()
     cfg = load_config(case_id=spec.case_id, project_root=PROJECT_ROOT)
+
+    # Honor the parallel-driver threads override so each worker gets a
+    # bounded Threads value and parallel workers don't oversubscribe SMT.
+    threads_override = os.environ.get("NDC_THREADS_PER_SOLVE")
+    if threads_override is not None:
+        new_solver = cfg.base.solver.model_copy(
+            update={"threads": int(threads_override)}
+        )
+        new_base = cfg.base.model_copy(update={"solver": new_solver})
+        cfg = cfg.model_copy(update={"base": new_base})
 
     # --- Reactor CAPEX scenario (S4) ---------------------------------------
     if spec.reactor_scenario is not None and spec.case_id in (1, 2):
@@ -289,6 +350,10 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
             spec.smr_capex_usd_per_kWe,
             spec.absorption_capex_usd_per_kWth,
         )
+
+    # --- S6 carbon price ---------------------------------------------------
+    if spec.carbon_price_usd_per_tco2 > 0:
+        cfg = with_carbon_price(cfg, spec.carbon_price_usd_per_tco2)
 
     # --- Time series --------------------------------------------------------
     ts = load_time_series(project_root=PROJECT_ROOT, year=spec.year, num_hours=8760)
@@ -322,6 +387,7 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
             "absorption_capex_usd_per_kWth": spec.absorption_capex_usd_per_kWth,
             "smr_capex_tag": spec.smr_capex_tag,
             "absorption_capex_tag": spec.absorption_capex_tag,
+            "carbon_price_usd_per_tco2": spec.carbon_price_usd_per_tco2,
             "num_hours": ts.num_hours,
             "solve_seconds": round(solve_seconds, 3),
         },
@@ -343,7 +409,14 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
         "smr_capex_tag": spec.smr_capex_tag,
         "absorption_capex_tag": spec.absorption_capex_tag,
         "solve_seconds": round(solve_seconds, 3),
-        **{k: v for k, v in scalars.items() if not isinstance(v, dict)},
+        **{
+            k: v
+            for k, v in scalars.items()
+            # carbon_price_usd_per_tco2 is set explicitly from spec below, so
+            # do not let the scalars dict overwrite it with the cfg-side value.
+            if not isinstance(v, dict) and k != "carbon_price_usd_per_tco2"
+        },
+        "carbon_price_usd_per_tco2": spec.carbon_price_usd_per_tco2,
     }
     return row
 
@@ -453,6 +526,24 @@ def build_run_grid() -> list[RunSpec]:
                 )
             )
 
+    # ---- S6 Carbon price: Cases 0-3 × {$0, $50, $100}/tCO2 (v2.7 new) -----
+    # Answers Plan §2.0.5 reviewer ask "at what carbon price does Premium flip
+    # positive?" The $0 row duplicates main_baseline numbers for table shape.
+    for price in (0.0, 50.0, 100.0):
+        price_tag = f"co2_{int(round(price))}"
+        for cid in _ALL_CASES:
+            specs.append(
+                RunSpec(
+                    group="s6_carbon_price",
+                    run_id=f"case{cid}_{price_tag}",
+                    case_id=cid,
+                    year=2023,
+                    pue=1.30,
+                    reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
+                    carbon_price_usd_per_tco2=price,
+                )
+            )
+
     return specs
 
 
@@ -462,43 +553,60 @@ def build_run_grid() -> list[RunSpec]:
 
 
 def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute Heat-Recovery Premium against the per-(group, year, pue,
-    reactor_scenario) Case-0 TAC. Premium for Case 0 itself is 0.
+    """Compute Heat-Recovery Premium + Carbon-Abatement Cost vs Case 0.
 
-    The matching key is (group, year, pue, bess_applied) so each
-    sensitivity slice picks its own Case-0 denominator. For groups where
-    Case-0 doesn't vary (e.g. S1 PUE, S4 CAPEX, S5 2D), we fall back to
-    the (year, pue, False) Case-0 TAC or to main_baseline Case 0.
+    Both metrics use the same (year, pue, bess_applied) matching to Case 0,
+    falling back to (year, pue, False) and finally to main_baseline Case 0.
+
+    Heat-Recovery Premium = (TAC_case0 - TAC_case) / TAC_case0
+    Carbon-Abatement Cost ($/tCO2) = (TAC_case - TAC_case0) / (CO2_case0 - CO2_case)
     """
-    baseline_case0 = (
-        df[df["case_id"] == 0]
-        .set_index(["year", "pue", "bess_applied"])["tac_usd_per_yr"]
-        .to_dict()
-    )
-    main_case0 = float(
-        df[
-            (df["group"] == "main_baseline") & (df["case_id"] == 0)
-        ]["tac_usd_per_yr"].iloc[0]
-    )
+    # v2.7: include carbon_price in the matching key so S6 rows pair with the
+    # Case-0 baseline at the same carbon price (Premium and Abatement Cost both
+    # need a price-matched denominator to be meaningful).
+    key_cols = ["year", "pue", "bess_applied", "carbon_price_usd_per_tco2"]
+    case0_rows = df[df["case_id"] == 0].set_index(key_cols)
+    baseline_tac = case0_rows["tac_usd_per_yr"].to_dict()
+    baseline_co2 = case0_rows["co2_annual_tonnes"].to_dict()
+    main_case0 = df[(df["group"] == "main_baseline") & (df["case_id"] == 0)].iloc[0]
+    main_tac = float(main_case0["tac_usd_per_yr"])
+    main_co2 = float(main_case0["co2_annual_tonnes"])
 
-    def _premium(row) -> float:
-        key = (row["year"], row["pue"], row["bess_applied"])
-        denom = baseline_case0.get(key)
-        if denom is None:
-            denom = baseline_case0.get((row["year"], row["pue"], False))
-        if denom is None:
-            denom = main_case0
-        return heat_recovery_premium(denom, row["tac_usd_per_yr"])
+    def _lookup(row, table: dict, main_fallback: float) -> float:
+        key = (
+            row["year"], row["pue"], row["bess_applied"],
+            row["carbon_price_usd_per_tco2"],
+        )
+        # Fallbacks: (1) same year/pue at carbon=0, (2) main baseline value.
+        v = table.get(key)
+        if v is None:
+            v = table.get((row["year"], row["pue"], False, 0.0))
+        if v is None:
+            v = main_fallback
+        return float(v)
 
     df = df.copy()
     df["tac_case0_baseline_usd_per_yr"] = df.apply(
-        lambda r: baseline_case0.get(
-            (r["year"], r["pue"], r["bess_applied"]),
-            baseline_case0.get((r["year"], r["pue"], False), main_case0),
+        lambda r: _lookup(r, baseline_tac, main_tac), axis=1
+    )
+    df["co2_case0_baseline_tonnes"] = df.apply(
+        lambda r: _lookup(r, baseline_co2, main_co2), axis=1
+    )
+    df["heat_recovery_premium"] = df.apply(
+        lambda r: heat_recovery_premium(
+            r["tac_case0_baseline_usd_per_yr"], r["tac_usd_per_yr"]
         ),
         axis=1,
     )
-    df["heat_recovery_premium"] = df.apply(_premium, axis=1)
+    df["carbon_abatement_cost_usd_per_tco2"] = df.apply(
+        lambda r: carbon_abatement_cost_usd_per_tco2(
+            tac_baseline_usd_per_yr=r["tac_case0_baseline_usd_per_yr"],
+            tac_case_usd_per_yr=r["tac_usd_per_yr"],
+            co2_baseline_tonnes=r["co2_case0_baseline_tonnes"],
+            co2_case_tonnes=r["co2_annual_tonnes"],
+        ),
+        axis=1,
+    )
     return df
 
 
@@ -513,6 +621,7 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
         "pue",
         "reactor_scenario",
         "bess_applied",
+        "carbon_price_usd_per_tco2",
         "smr_capex_usd_per_kWe",
         "absorption_capex_usd_per_kWth",
         "smr_capex_tag",
@@ -520,10 +629,13 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
         "tac_usd_per_yr",
         "tac_case0_baseline_usd_per_yr",
         "heat_recovery_premium",
+        "carbon_abatement_cost_usd_per_tco2",
         "lcoe_usd_per_mwh_e",
         "lcoc_usd_per_mwh_c",
         "co2_annual_tonnes",
         "co2_per_mwh_kg",
+        "epbt_years",
+        "water_l_per_mwh_e",
     ]
     cols = leading + [c for c in df.columns if c not in leading]
     df = df[cols]
@@ -575,20 +687,66 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _resolve_parallelism() -> tuple[int, int]:
+    """Choose (workers, threads_per_solve) for the 73-run grid.
+
+    Defaults are tuned for the Threadripper PRO 5995WX (64 physical
+    cores). Both can be overridden via env vars; the product is clamped
+    to physical core count to avoid SMT oversubscription:
+
+        NDC_WORKERS              parallel processes (default 16)
+        NDC_THREADS_PER_SOLVE    Gurobi Threads per worker (default 4)
+
+    Set ``NDC_WORKERS=1`` to disable parallelism (single-process mode).
+    """
+    physical_cores = (os.cpu_count() or 64) // 2  # account for SMT
+    workers = int(os.environ.get("NDC_WORKERS", "16"))
+    threads_per_solve = int(os.environ.get("NDC_THREADS_PER_SOLVE", "4"))
+    if workers > 1 and workers * threads_per_solve > physical_cores:
+        # Auto-clamp threads so we stay within physical-core budget.
+        threads_per_solve = max(1, physical_cores // workers)
+    return workers, threads_per_solve
+
+
 def main() -> None:
     OUTPUTS.mkdir(exist_ok=True)
     specs = build_run_grid()
-    print(f"Running {len(specs)} solves (plan-v2.6)\n")
+    workers, threads_per_solve = _resolve_parallelism()
+    # Push threads-per-solve to child workers via env (parent solve also
+    # reads it — see execute_run). Setting it here means workers inherit.
+    os.environ["NDC_THREADS_PER_SOLVE"] = str(threads_per_solve)
+
+    mode_tag = (
+        f"sequential" if workers <= 1
+        else f"parallel ({workers} workers × {threads_per_solve} threads)"
+    )
+    print(f"Running {len(specs)} solves (plan-v2.6) — {mode_tag}\n")
+
     rows: list[dict[str, Any]] = []
     t0 = time.time()
-    for i, s in enumerate(specs, 1):
-        row = execute_run(s)
-        rows.append(row)
-        print(
-            f"[{i:>2}/{len(specs)}] {s.group:>18}/{s.run_id:<32} "
-            f"TAC={row['tac_usd_per_yr']/1e6:7.2f} M$ "
-            f"({row['solve_seconds']:.1f}s)"
-        )
+
+    if workers <= 1:
+        for i, s in enumerate(specs, 1):
+            row = execute_run(s)
+            rows.append(row)
+            print(
+                f"[{i:>2}/{len(specs)}] {s.group:>18}/{s.run_id:<32} "
+                f"TAC={row['tac_usd_per_yr']/1e6:7.2f} M$ "
+                f"({row['solve_seconds']:.1f}s)"
+            )
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            fut_to_spec = {pool.submit(execute_run, s): s for s in specs}
+            for i, fut in enumerate(as_completed(fut_to_spec), 1):
+                s = fut_to_spec[fut]
+                row = fut.result()
+                rows.append(row)
+                print(
+                    f"[{i:>2}/{len(specs)}] {s.group:>18}/{s.run_id:<32} "
+                    f"TAC={row['tac_usd_per_yr']/1e6:7.2f} M$ "
+                    f"({row['solve_seconds']:.1f}s)"
+                )
+
     print(f"\nTotal wall time: {time.time() - t0:.1f} s")
     df = write_master_table(rows)
     write_manifest(specs, rows)

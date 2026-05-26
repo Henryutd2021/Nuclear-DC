@@ -40,6 +40,7 @@ class NuclearCaseResult:
     vom_annual_usd: float
     fuel_annual_usd: float
     grid_annual_usd: float
+    carbon_annual_usd: float
     tac_usd_per_yr: float
     co2_annual_tonnes: float
 
@@ -97,6 +98,7 @@ def extract_result(
         vom_annual_usd=float(pyo.value(model.vom_annual)),
         fuel_annual_usd=float(pyo.value(model.fuel_annual)),
         grid_annual_usd=float(pyo.value(model.grid_annual)),
+        carbon_annual_usd=float(pyo.value(model.carbon_annual)),
         tac_usd_per_yr=float(pyo.value(model.objective)),
         co2_annual_tonnes=co2_tonnes,
     )

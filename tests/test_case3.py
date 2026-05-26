@@ -6,7 +6,7 @@ import pytest
 
 from src.cases.case3 import solve_case3
 from src.config import load_config
-from src.data import load_henry_hub_annual_mean, load_time_series
+from src.data import load_time_series
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -52,14 +52,28 @@ def test_case3_fuel_consumption_matches_efficiency(cfg, ts_2023_168h):
     assert diff < 1e-6
 
 
-def test_case3_fuel_cost_uses_year_resolved_henry_hub(cfg, ts_2023_168h):
-    """Fuel cost = (HH + basis) × MMBtu/h."""
+def test_case3_fuel_cost_uses_hourly_henry_hub(cfg, ts_2023_168h):
+    """Fuel cost = (HH_hourly + basis) × MMBtu/h, broadcasting daily HH."""
     result = solve_case3(cfg, ts_2023_168h)
-    hh = load_henry_hub_annual_mean(PROJECT_ROOT, 2023)
-    delivered = hh + cfg.case.ngcc.henry_hub_basis_usd_per_mmbtu
-    expected = result.fuel_consumption_MMBtu_per_h * delivered
+    delivered_hourly = (
+        ts_2023_168h.henry_hub_usd_per_mmbtu_hourly
+        + cfg.case.ngcc.henry_hub_basis_usd_per_mmbtu
+    )
+    expected = result.fuel_consumption_MMBtu_per_h * delivered_hourly
     diff = (result.fuel_cost_usd_per_h - expected).abs().max()
     assert diff < 1e-6
+
+
+def test_case3_annual_mean_delivered_fuel_is_reported(cfg, ts_2023_168h):
+    """delivered_fuel_usd_per_mmbtu scalar = mean of the hourly delivered series."""
+    result = solve_case3(cfg, ts_2023_168h)
+    delivered_hourly = (
+        ts_2023_168h.henry_hub_usd_per_mmbtu_hourly
+        + cfg.case.ngcc.henry_hub_basis_usd_per_mmbtu
+    )
+    assert result.delivered_fuel_usd_per_mmbtu == pytest.approx(
+        float(delivered_hourly.mean()), rel=1e-6
+    )
 
 
 def test_case3_2022_fuel_more_expensive_than_2024(cfg):
@@ -101,6 +115,7 @@ def test_case3_tac_components_sum_correctly(cfg, ts_2023_168h):
         + result.fom_annual_usd
         + result.vom_annual_usd
         + result.fuel_annual_usd
+        + result.carbon_annual_usd
     )
     assert parts == pytest.approx(result.tac_usd_per_yr, rel=1e-9)
 

@@ -57,6 +57,7 @@ class Case3NgccResult:
     fom_annual_usd: float
     vom_annual_usd: float
     fuel_annual_usd: float
+    carbon_annual_usd: float
     tac_usd_per_yr: float
     co2_direct_annual_tonnes: float
     co2_lifecycle_annual_tonnes: float
@@ -117,9 +118,16 @@ def solve_case3(
         )
 
     # ---- Fuel ---------------------------------------------------------------
+    # v2.7: drive NGCC fuel cost from the *hourly* HH broadcast (EIA daily
+    # ffilled to 24-h blocks) rather than the annual mean. Captures the
+    # Jan 2024 cold-snap spike to $13/MMBtu, which the year-mean $2.19
+    # silently averaged into Case 3 in v2.6.
     fuel_MMBtu_h = P_NGCC * _MMBTU_PER_MWh / ngcc.net_efficiency_hhv
-    delivered_fuel = ts.henry_hub_usd_per_mmbtu + ngcc.henry_hub_basis_usd_per_mmbtu
-    fuel_cost_h = fuel_MMBtu_h * delivered_fuel
+    delivered_fuel_h = (
+        ts.henry_hub_usd_per_mmbtu_hourly + ngcc.henry_hub_basis_usd_per_mmbtu
+    )
+    fuel_cost_h = fuel_MMBtu_h * delivered_fuel_h
+    delivered_fuel_mean = float(delivered_fuel_h.mean())
 
     # ---- Emissions ----------------------------------------------------------
     direct_kg_h = P_NGCC * dt * ngcc.co2_direct_g_per_kwh_e
@@ -142,12 +150,19 @@ def solve_case3(
         + vcc.variable_om_usd_per_mwh_th * Q_cool.sum() * dt * annual_scale
     )
     fuel_annual = fuel_cost_h.sum() * annual_scale
-    tac = capex_annual + fom_annual + vom_annual + fuel_annual
 
     co2_direct_annual_tonnes = direct_kg_h.sum() * annual_scale / 1000.0
     co2_lifecycle_annual_tonnes = (
         (direct_kg_h + upstream_kg_h).sum() * annual_scale / 1000.0
     )
+
+    # v2.7 §S6: carbon cost applied to lifecycle (direct + upstream methane)
+    # emissions. Lifecycle is the policy-relevant denominator because CBAM,
+    # EU ETS Scope 1+3, and most US state programs price upstream leakage.
+    carbon_price = cfg.base.physics.carbon_price_usd_per_tco2
+    carbon_annual = carbon_price * co2_lifecycle_annual_tonnes
+
+    tac = capex_annual + fom_annual + vom_annual + fuel_annual + carbon_annual
 
     return Case3NgccResult(
         P_IT_MW=P_IT,
@@ -161,11 +176,12 @@ def solve_case3(
         ngcc_capacity_MWe=NGCC_capacity,
         vcc_capacity_MWth=Q_capacity,
         pue=pue_used,
-        delivered_fuel_usd_per_mmbtu=delivered_fuel,
+        delivered_fuel_usd_per_mmbtu=delivered_fuel_mean,
         capex_annual_usd=capex_annual,
         fom_annual_usd=fom_annual,
         vom_annual_usd=vom_annual,
         fuel_annual_usd=fuel_annual,
+        carbon_annual_usd=carbon_annual,
         tac_usd_per_yr=tac,
         co2_direct_annual_tonnes=co2_direct_annual_tonnes,
         co2_lifecycle_annual_tonnes=co2_lifecycle_annual_tonnes,

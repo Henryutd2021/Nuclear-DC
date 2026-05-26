@@ -378,11 +378,25 @@ def build_model(
         * annual_scale
     )
 
+    # v2.7 §S6: carbon cost = price × net annual CO2 (tonnes).
+    # Mirrors result.extract_result's accounting so the optimizer sees the
+    # same emissions number that ends up in summary.json. Net = reactor LCA
+    # + imported grid AEF − exported grid AEF (export credits the dirtier
+    # ERCOT marginal mix that the cogen displaces).
+    carbon_price = cfg.base.physics.carbon_price_usd_per_tco2
+    co2_net_kg_expr = (
+        sum(rx.co2_lifecycle_g_per_kwh_e * m.P_turb_net[t] for t in m.T)
+        + sum(m.AEF[t] * m.P_grid_buy[t] for t in m.T)
+        - sum(m.AEF[t] * m.P_grid_sell[t] for t in m.T)
+    ) * dt * annual_scale
+    carbon_annual_expr = carbon_price * co2_net_kg_expr / 1000.0  # → $/yr
+
     m.capex_annual = pyo.Expression(expr=capex_annual_expr)
     m.fom_annual = pyo.Expression(expr=fom_annual_expr)
     m.vom_annual = pyo.Expression(expr=vom_annual_expr)
     m.fuel_annual = pyo.Expression(expr=fuel_annual_expr)
     m.grid_annual = pyo.Expression(expr=grid_annual_expr)
+    m.carbon_annual = pyo.Expression(expr=carbon_annual_expr)
 
     m.objective = pyo.Objective(
         expr=(
@@ -391,6 +405,7 @@ def build_model(
             + m.vom_annual
             + m.fuel_annual
             + m.grid_annual
+            + m.carbon_annual
         ),
         sense=pyo.minimize,
     )

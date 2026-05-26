@@ -196,10 +196,17 @@ class SolverConfig(BaseModel):
     name: Literal["gurobi", "highs", "cbc"]
     mip_gap: float = Field(gt=0.0, lt=1.0)
     time_limit: Optional[float] = None
-    threads: int = -1
+    # threads: 0 = Gurobi default (use all cores). Set explicitly when
+    # solving in parallel processes to avoid SMT oversubscription.
+    threads: int = 0
     log_to_console: bool = True
     log_to_file: bool = True
     seed: int = 42
+    # LP method: -1 auto, 0 primal simplex, 1 dual simplex, 2 barrier,
+    # 3 concurrent, 4 deterministic concurrent. Barrier (2) is the
+    # default on this workstation — see ~/.claude memory
+    # reference_workstation-specs for the tuning rationale.
+    method: int = Field(2, ge=-1, le=5)
 
 
 class PhysicsConfig(BaseModel):
@@ -207,6 +214,10 @@ class PhysicsConfig(BaseModel):
 
     pue_default: float = Field(1.5, ge=1.0)
     cooling_chain_efficiency: float = Field(0.9, gt=0.0, le=1.0)
+    # v2.7 §S6: optional carbon price applied to net annual CO2 in the TAC
+    # objective. Default 0 keeps every pre-v2.7 result unchanged; S6 sensitivity
+    # drives this via with_carbon_price().
+    carbon_price_usd_per_tco2: float = Field(0.0, ge=0.0)
 
 
 class OptimizationConfig(BaseModel):
@@ -313,6 +324,26 @@ _REACTOR_CAPEX_SCENARIOS: dict[str, str] = {
     "ATB_Mid": "ATB_Mid",
     "NOAK": "NOAK",
 }
+
+
+def with_carbon_price(cfg: RunConfig, price_usd_per_tco2: float) -> RunConfig:
+    """Return a copy of ``cfg`` with the carbon price set to ``price_usd_per_tco2``.
+
+    Used by the v2.7 S6 sensitivity to sweep the policy lever {$0, $50, $100}
+    without editing yamls. The price enters the TAC objective in builder.py
+    (Cases 1-2) and the post-solve TAC in case0.py / case3.py.
+
+    Raises ValueError if the price is negative.
+    """
+    if price_usd_per_tco2 < 0:
+        raise ValueError(
+            f"carbon_price_usd_per_tco2 must be ≥ 0, got {price_usd_per_tco2!r}"
+        )
+    new_physics = cfg.base.physics.model_copy(
+        update={"carbon_price_usd_per_tco2": price_usd_per_tco2}
+    )
+    new_base = cfg.base.model_copy(update={"physics": new_physics})
+    return cfg.model_copy(update={"base": new_base})
 
 
 def with_reactor_capex(

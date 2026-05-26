@@ -33,5 +33,5 @@ def solve_case2(
     if cfg.case.case_id != 2:
         raise ValueError(f"solve_case2 requires case_id=2, got {cfg.case.case_id}")
     model = build_model(cfg, ts, pue=pue)
-    solve_model(model, solver_name=solver_name)
+    solve_model(model, solver_name=solver_name, solver_config=cfg.base.solver)
     return extract_result(model, cfg, ts)

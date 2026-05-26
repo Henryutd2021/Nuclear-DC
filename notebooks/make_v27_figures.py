@@ -1,29 +1,37 @@
-"""Generate every v2.6 paper figure into outputs/figures/.
+"""Generate every v2.7 paper figure into outputs/figures/.
 
-Reads outputs/master_kpi_table.csv (61 rows from scripts/run_all_analyses.py)
+Reads outputs/master_kpi_table.csv (73 rows from scripts/run_all_analyses.py)
 and the Case 2 hourly dispatch from outputs/main_baseline/case2/dispatch.csv.gz,
-then renders Fig 2–9 + the Graphical Abstract following the sci-figure skill
+then renders Fig 2–11 + the Graphical Abstract following the sci-figure skill
 (palette, saturation rules, no titles, PDF+SVG+PNG triplet export).
+
+v2.7 deltas vs v2.6:
+  - Fig 10 — new: S6 carbon-price crossover (\$0/\$50/\$100/tCO2 across all 4
+    cases) with Premium=0 vertical lines marking the policy break-even.
+  - Fig 11 — new: 8-KPI compact panel (LCOE / EPBT / water / abatement cost),
+    confirming the plan §0.5 D promise that all eight KPIs are populated.
+  - Graphical Abstract — now a two-panel composition that pairs the S5 2D
+    viability map (where) with the S6 carbon-price ladder (when).
+  - Underlying data: BESS power capacity 25 → 50 MW (Plan §F.3 fix),
+    Henry-Hub fuel cost now hourly (Plan §F.2), and the carbon-price
+    sensitivity adds a new TAC term in Cases 1-2 via cfg.base.physics.
 
 Fig 1 is the TikZ system schematic and stays in LaTeX — not produced here.
 
 Run from project root:
 
-    PYTHONPATH=. python notebooks/make_v26_figures.py
-
-A parallel notebooks/make_v26_figures.ipynb wraps the same logic in
-notebook cells for interactive inspection.
+    PYTHONPATH=. python notebooks/make_v27_figures.py
 """
 
 # %% [markdown]
-# # v2.6 paper figure pipeline
+# # v2.7 paper figure pipeline
 #
-# Builds the eight main figures plus a Graphical Abstract for the plan-v2.6
-# Applied Energy manuscript. Each figure exports PDF + SVG + PNG via the
-# sci-figure helper `save_triplet`.
+# Builds 10 main figures plus a Graphical Abstract for the plan-v2.7 Applied
+# Energy manuscript. Each figure exports PDF + SVG + PNG via the sci-figure
+# helper `save_triplet`.
 #
-# Inputs: `outputs/master_kpi_table.csv` and `outputs/main_baseline/case2/dispatch.csv.gz`.
-# Outputs: `outputs/figures/fig{2..9}_*.{pdf,svg,png}` plus
+# Inputs: `outputs/master_kpi_table.csv` (73 rows) and `outputs/main_baseline/case2/dispatch.csv.gz`.
+# Outputs: `outputs/figures/fig{2..11}_*.{pdf,svg,png}` plus
 # `outputs/figures/graphical_abstract.{pdf,svg,png}`.
 
 # %%
@@ -614,11 +622,204 @@ def fig9_s5_feasibility_2d() -> None:
 fig9_s5_feasibility_2d()
 
 # %% [markdown]
-# ## Graphical Abstract — Fig 9 simplified for poster-size export
+# ## Fig 10 — S6: Carbon-price crossover (4 cases × \$0/\$50/\$100/tCO2)
+#
+# Headline v2.7 figure. Each case's TAC is plotted as a linear function of
+# carbon price (the model is linear by construction: carbon cost = price ×
+# net annual CO2). Lines that slope DOWN belong to net-negative carriers
+# (Cases 1-2, nuclear export displaces ERCOT marginal mix); lines that
+# slope UP belong to net-positive carriers (Cases 0, 3). The vertical
+# dashes mark where Case 1/2/3 lines cross Case 0 — the carbon-price
+# break-even with the grid-only baseline.
+
+# %%
+def fig10_s6_carbon_price() -> None:
+    s6 = df[df.group == "s6_carbon_price"].copy()
+    s6 = s6.sort_values(["case_id", "carbon_price_usd_per_tco2"])
+
+    fig, ax = plt.subplots(figsize=(4.4, 3.3))
+
+    # Plot the 3 actual data points per case, then extrapolate linearly to
+    # carbon = $250 so the crossovers visualise on-canvas.
+    x_extrap = np.linspace(0, 250, 256)
+    crossings: dict[int, float] = {}
+    case0_at_x = None
+
+    for cid in (0, 1, 2, 3):
+        sub = s6[s6.case_id == cid]
+        x = sub.carbon_price_usd_per_tco2.values
+        y = sub.tac_usd_per_yr.values / 1e6
+        # Slope is exact because TAC is linear in carbon price by construction.
+        slope = (y[-1] - y[0]) / (x[-1] - x[0])
+        intercept = y[0]
+        y_extrap = intercept + slope * x_extrap
+
+        ax.plot(x_extrap, y_extrap,
+                color=CASE_COLOR[cid], linewidth=1.3, zorder=2,
+                label=CASE_LABEL[cid])
+        ax.scatter(x, y, marker=CASE_MARKER[cid], s=42,
+                   facecolor=CASE_COLOR[cid], edgecolor="#000000",
+                   linewidth=0.6, zorder=4)
+
+        if cid == 0:
+            case0_at_x = (intercept, slope)
+        else:
+            c0_int, c0_slope = case0_at_x
+            denom = (slope - c0_slope)
+            if abs(denom) > 1e-9:
+                cross_price = (c0_int - intercept) / denom
+                if 0 < cross_price < 260:
+                    crossings[cid] = cross_price
+
+    # Group near-identical Case 1 / Case 2 crossovers into one annotation
+    # (they sit within ~$1/tCO2 because the cogen Premium ≈ pure-nuclear).
+    cid_groups: list[tuple[list[int], float]] = []
+    used: set[int] = set()
+    for cid in (1, 2, 3):
+        if cid not in crossings or cid in used:
+            continue
+        partners = [cid]
+        used.add(cid)
+        for other in (1, 2, 3):
+            if other in crossings and other not in used and abs(
+                crossings[other] - crossings[cid]
+            ) < 3.0:
+                partners.append(other)
+                used.add(other)
+        cid_groups.append(
+            (sorted(partners), float(np.mean([crossings[c] for c in partners])))
+        )
+
+    for cids, p_cross in cid_groups:
+        c0_int, c0_slope = case0_at_x
+        tac_cross = c0_int + c0_slope * p_cross
+        primary = cids[-1]  # darker hue if grouped (C2 > C1)
+        ax.axvline(p_cross, color=CASE_COLOR[primary],
+                   linestyle=":", linewidth=1.0, alpha=0.85, zorder=1)
+        label = "/".join(f"C{c}" for c in cids) + f": \\${p_cross:.0f}"
+        ax.annotate(
+            label,
+            xy=(p_cross, tac_cross),
+            xytext=(7, 9 if 2 in cids else -14),
+            textcoords="offset points",
+            fontsize=6.5, color=CASE_COLOR[primary],
+            ha="left", va="center",
+        )
+
+    # Shade the "nuclear cheaper than grid" region (right of last crossover).
+    if crossings:
+        p_max = max(crossings.values())
+        ax.axvspan(p_max, 250, alpha=0.07,
+                   color=PALETTE["stroke_teal"], zorder=0)
+        # Tag anchored in axes coords so it never collides with data lines.
+        x_norm = ((p_max + 250) / 2) / 250
+        ax.text(x_norm, 0.965, "Nuclear $<$ grid",
+                transform=ax.transAxes, ha="center", va="top",
+                fontsize=6, color=PALETTE["stroke_teal"], style="italic")
+
+    ax.set_xlim(0, 250)
+    ax.set_xlabel(r"Carbon price (\$/tCO$_2$)")
+    ax.set_ylabel(r"TAC (M\$/yr)")
+    ax.set_axisbelow(True)
+    ax.grid(axis="both", alpha=0.25, linestyle="--", linewidth=0.5)
+
+    # Legend below the data area — keeps the plot uncluttered.
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2,
+              frameon=False, fontsize=6, handlelength=1.6,
+              columnspacing=1.2)
+
+    fig.tight_layout()
+    save_triplet(fig, "fig10_s6_carbon_price", str(FIGURES))
+    plt.close(fig)
+
+fig10_s6_carbon_price()
+
+# %% [markdown]
+# ## Fig 11 — 8-KPI compact panel (LCOE / EPBT / Water / Abatement)
+#
+# Compact 2 × 2 grid covering the four KPIs that v2.6 left empty (Plan §0.5
+# D #6–#8 plus LCOE for context). Bars colored by case, ATB-Mid 2023 baseline.
+
+# %%
+def fig11_kpi_panel() -> None:
+    base = df[df.group == "main_baseline"].sort_values("case_id").reset_index(drop=True)
+    cases = base.case_id.astype(int).values
+    labels = [f"C{c}" for c in cases]
+    colors = [CASE_COLOR[c] for c in cases]
+
+    fig, axes = plt.subplots(2, 2, figsize=(5.6, 4.2))
+
+    # (a) LCOE — $/MWh_e delivered
+    lcoe = base.lcoe_usd_per_mwh_e.values
+    axes[0, 0].bar(labels, lcoe, color=colors, edgecolor="#000000", linewidth=0.6)
+    for x, v in zip(labels, lcoe):
+        axes[0, 0].text(x, v + 5, f"{v:.0f}", ha="center", va="bottom",
+                        fontsize=6, color="#000000")
+    axes[0, 0].set_ylabel(r"LCOE (\$/MWh$_\mathrm{e}$)")
+    axes[0, 0].set_axisbelow(True)
+    axes[0, 0].grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+    add_panel_label(axes[0, 0], "a")
+
+    # (b) EPBT — years (Case 0 has no on-site plant → empty bar)
+    epbt = base.epbt_years.fillna(0).values
+    bars = axes[0, 1].bar(labels, epbt, color=colors, edgecolor="#000000", linewidth=0.6)
+    for x, v, raw in zip(labels, epbt, base.epbt_years.values):
+        if np.isnan(raw):
+            axes[0, 1].text(x, 0.02, "n/a", ha="center", va="bottom",
+                            fontsize=6, color="#666")
+        else:
+            axes[0, 1].text(x, v + 0.02, f"{v:.2f}", ha="center", va="bottom",
+                            fontsize=6, color="#000000")
+    axes[0, 1].set_ylabel(r"EPBT (years)")
+    axes[0, 1].set_axisbelow(True)
+    axes[0, 1].grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+    add_panel_label(axes[0, 1], "b")
+
+    # (c) Water footprint — L/MWh_e delivered (log scale: nuclear ~10× others)
+    water = base.water_l_per_mwh_e.values
+    axes[1, 0].bar(labels, water, color=colors, edgecolor="#000000", linewidth=0.6)
+    axes[1, 0].set_yscale("log")
+    for x, v in zip(labels, water):
+        axes[1, 0].text(x, v * 1.18, f"{v:,.0f}", ha="center", va="bottom",
+                        fontsize=6, color="#000000")
+    axes[1, 0].set_ylabel(r"Water (L/MWh$_\mathrm{e}$, log)")
+    axes[1, 0].set_axisbelow(True)
+    axes[1, 0].grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5, which="both")
+    add_panel_label(axes[1, 0], "c")
+
+    # (d) Carbon abatement cost — $/tCO2 avoided (Cases 0,3 → n/a)
+    abate = base.carbon_abatement_cost_usd_per_tco2.fillna(0).values
+    raw_abate = base.carbon_abatement_cost_usd_per_tco2.values
+    axes[1, 1].bar(labels, abate, color=colors, edgecolor="#000000", linewidth=0.6)
+    for x, v, raw in zip(labels, abate, raw_abate):
+        if np.isnan(raw):
+            axes[1, 1].text(x, 5, "n/a", ha="center", va="bottom",
+                            fontsize=6, color="#666")
+        else:
+            axes[1, 1].text(x, v + 5, f"\\${v:.0f}", ha="center", va="bottom",
+                            fontsize=6, color="#000000")
+    axes[1, 1].set_ylabel(r"Abatement (\$/tCO$_2$)")
+    axes[1, 1].set_axisbelow(True)
+    axes[1, 1].grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+    add_panel_label(axes[1, 1], "d")
+
+    for ax in axes.flat:
+        ax.set_xlabel("")
+
+    fig.tight_layout()
+    save_triplet(fig, "fig11_kpi_panel", str(FIGURES))
+    plt.close(fig)
+
+fig11_kpi_panel()
+
+# %% [markdown]
+# ## Graphical Abstract — 2-panel (S5 viability map + S6 carbon-price ladder)
 
 # %%
 def graphical_abstract() -> None:
     apply_sci_style("poster")
+
+    # ---- Left panel data: S5 SMR×absorption viability heatmap ----------
     s5 = df[df.group == "s5_feasibility_2d"].copy()
     smr_order = ["NOAK", "Low_Mid", "ATB_Mid", "High_Mid", "FOAK"]
     abs_order = ["Bare_Low", "Mid_Low", "Baseline", "Mid_High", "Turnkey_High"]
@@ -636,15 +837,43 @@ def graphical_abstract() -> None:
     vmax = max(abs(data.min()), abs(data.max()), 30)
     norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
 
-    fig, ax = plt.subplots(figsize=(7.2, 6.0))
-    im = ax.imshow(data, cmap=cmap, norm=norm, aspect="auto")
+    # ---- Right panel data: S6 carbon-price crossover -------------------
+    s6 = df[df.group == "s6_carbon_price"].copy().sort_values(
+        ["case_id", "carbon_price_usd_per_tco2"]
+    )
+    x_extrap = np.linspace(0, 250, 256)
+    case_lines: dict[int, tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
+    case0_at_x: tuple[float, float] | None = None
+    crossings: dict[int, float] = {}
+    for cid in (0, 1, 2, 3):
+        sub = s6[s6.case_id == cid]
+        x = sub.carbon_price_usd_per_tco2.values
+        y = sub.tac_usd_per_yr.values / 1e6
+        slope = (y[-1] - y[0]) / (x[-1] - x[0])
+        intercept = y[0]
+        case_lines[cid] = (x_extrap, intercept + slope * x_extrap, x, y)
+        if cid == 0:
+            case0_at_x = (intercept, slope)
+        else:
+            c0_int, c0_slope = case0_at_x
+            denom = (slope - c0_slope)
+            if abs(denom) > 1e-9:
+                p_cross = (c0_int - intercept) / denom
+                if 0 < p_cross < 260:
+                    crossings[cid] = p_cross
+
+    # ---- Compose -----------------------------------------------------------
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(12.0, 5.6),
+                                    gridspec_kw={"width_ratios": [1.0, 1.0]})
+
+    # Left: S5 heatmap
+    im = axL.imshow(data, cmap=cmap, norm=norm, aspect="auto")
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             v = data[i, j]
-            ax.text(j, i, f"{v:+.0f}%", ha="center", va="center",
-                    fontsize=14,
-                    color="white" if abs(v) > 0.6 * vmax else "#000000")
-    ax.contour(
+            axL.text(j, i, f"{v:+.0f}%", ha="center", va="center", fontsize=12,
+                     color="white" if abs(v) > 0.6 * vmax else "#000000")
+    axL.contour(
         np.arange(data.shape[1]),
         np.arange(data.shape[0]),
         data,
@@ -653,19 +882,79 @@ def graphical_abstract() -> None:
         linewidths=2.0,
         linestyles="--",
     )
-    ax.set_xticks(np.arange(len(abs_order)))
-    ax.set_xticklabels([f"${v}" for v in abs_vals])
-    ax.set_yticks(np.arange(len(smr_order)))
-    ax.set_yticklabels([f"${v:,}" for v in smr_vals])
-    ax.set_xlabel(r"Absorption CAPEX (\$/kW$_\mathrm{c}$)")
-    ax.set_ylabel(r"SMR CAPEX (\$/kW$_\mathrm{e}$)")
-    ax.set_xticks(np.arange(-0.5, len(abs_order), 1), minor=True)
-    ax.set_yticks(np.arange(-0.5, len(smr_order), 1), minor=True)
-    ax.grid(which="minor", color="white", linewidth=2.0)
-    ax.tick_params(which="minor", length=0)
+    axL.set_xticks(np.arange(len(abs_order)))
+    axL.set_xticklabels([f"${v}" for v in abs_vals], fontsize=11)
+    axL.set_yticks(np.arange(len(smr_order)))
+    axL.set_yticklabels([f"${v:,}" for v in smr_vals], fontsize=11)
+    axL.set_xlabel(r"Absorption CAPEX (\$/kW$_\mathrm{c}$)", fontsize=13)
+    axL.set_ylabel(r"SMR CAPEX (\$/kW$_\mathrm{e}$)", fontsize=13)
+    axL.set_xticks(np.arange(-0.5, len(abs_order), 1), minor=True)
+    axL.set_yticks(np.arange(-0.5, len(smr_order), 1), minor=True)
+    axL.grid(which="minor", color="white", linewidth=2.0)
+    axL.tick_params(which="minor", length=0)
+    add_panel_label(axL, "a", x=-0.16, y=1.04, fontsize=15)
+    cbar = fig.colorbar(im, ax=axL, fraction=0.046, pad=0.04)
+    cbar.set_label("Heat-Recovery Premium (%)", fontsize=12)
 
-    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label("Heat-Recovery Premium (%)", fontsize=16)
+    # Right: S6 carbon-price crossover
+    for cid in (0, 1, 2, 3):
+        x_e, y_e, x_pts, y_pts = case_lines[cid]
+        axR.plot(x_e, y_e,
+                 color=CASE_COLOR[cid], linewidth=2.0, zorder=2,
+                 label=f"C{cid}")
+        axR.scatter(x_pts, y_pts, marker=CASE_MARKER[cid], s=80,
+                    facecolor=CASE_COLOR[cid], edgecolor="#000000",
+                    linewidth=0.8, zorder=4)
+    # Group near-identical Case 1 / Case 2 crossovers — same rule as Fig 10.
+    cid_groups: list[tuple[list[int], float]] = []
+    used: set[int] = set()
+    for cid in (1, 2, 3):
+        if cid not in crossings or cid in used:
+            continue
+        partners = [cid]
+        used.add(cid)
+        for other in (1, 2, 3):
+            if other in crossings and other not in used and abs(
+                crossings[other] - crossings[cid]
+            ) < 3.0:
+                partners.append(other)
+                used.add(other)
+        cid_groups.append(
+            (sorted(partners), float(np.mean([crossings[c] for c in partners])))
+        )
+
+    for cids, p_cross in cid_groups:
+        c0_int, c0_slope = case0_at_x
+        tac_cross = c0_int + c0_slope * p_cross
+        primary = cids[-1]
+        axR.axvline(p_cross, color=CASE_COLOR[primary],
+                    linestyle=":", linewidth=1.4, alpha=0.85, zorder=1)
+        label = "/".join(f"C{c}" for c in cids) + f": \\${p_cross:.0f}"
+        axR.annotate(
+            label,
+            xy=(p_cross, tac_cross),
+            xytext=(10, 12 if 2 in cids else -22),
+            textcoords="offset points",
+            fontsize=11, color=CASE_COLOR[primary], ha="left",
+        )
+    if crossings:
+        p_max = max(crossings.values())
+        axR.axvspan(p_max, 250, alpha=0.07,
+                    color=PALETTE["stroke_teal"], zorder=0)
+        x_norm = ((p_max + 250) / 2) / 250
+        axR.text(x_norm, 0.965, "Nuclear $<$ grid",
+                 transform=axR.transAxes, ha="center", va="top",
+                 fontsize=11, color=PALETTE["stroke_teal"], style="italic")
+
+    axR.set_xlim(0, 250)
+    axR.set_xlabel(r"Carbon price (\$/tCO$_2$)", fontsize=13)
+    axR.set_ylabel(r"TAC (M\$/yr)", fontsize=13)
+    axR.set_axisbelow(True)
+    axR.grid(alpha=0.25, linestyle="--", linewidth=0.6)
+    axR.legend(loc="upper left", frameon=False, fontsize=11,
+               handlelength=1.4, ncol=2)
+    add_panel_label(axR, "b", x=-0.16, y=1.04, fontsize=15)
+
     fig.tight_layout()
     save_triplet(fig, "graphical_abstract", str(FIGURES))
     plt.close(fig)

@@ -47,6 +47,7 @@ class Case0Result:
     fom_annual_usd: float
     vom_annual_usd: float
     grid_annual_usd: float
+    carbon_annual_usd: float
     tac_usd_per_yr: float
     co2_annual_tonnes: float
 
@@ -118,7 +119,12 @@ def solve_case0(
     grid_annual = grid_cost_h.sum() * annual_scale
     co2_annual_tonnes = emissions_kg_h.sum() * annual_scale / 1000.0
 
-    tac = capex_annual + fom_annual + vom_annual + grid_annual
+    # v2.7 §S6: carbon cost applied to net grid-AEF emissions. Case 0 has no
+    # on-site generation so the only CO2 source is imported grid electricity.
+    carbon_price = cfg.base.physics.carbon_price_usd_per_tco2
+    carbon_annual = carbon_price * co2_annual_tonnes
+
+    tac = capex_annual + fom_annual + vom_annual + grid_annual + carbon_annual
 
     return Case0Result(
         P_IT_MW=P_IT,
@@ -133,6 +139,7 @@ def solve_case0(
         fom_annual_usd=fom_annual,
         vom_annual_usd=vom_annual,
         grid_annual_usd=grid_annual,
+        carbon_annual_usd=carbon_annual,
         tac_usd_per_yr=tac,
         co2_annual_tonnes=co2_annual_tonnes,
     )
