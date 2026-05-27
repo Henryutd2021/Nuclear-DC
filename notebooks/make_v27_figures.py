@@ -1,8 +1,8 @@
 """Generate every v2.7 paper figure into outputs/figures/.
 
-Reads outputs/master_kpi_table.csv (73 rows from scripts/run_all_analyses.py)
+Reads outputs/master_kpi_table.csv (76 rows from scripts/run_all_analyses.py)
 and the Case 2 hourly dispatch from outputs/main_baseline/case2/dispatch.csv.gz,
-then renders Fig 2–11 + the Graphical Abstract following the sci-figure skill
+then renders Fig 1–11 + the Graphical Abstract following the sci-figure skill
 (palette, saturation rules, no titles, PDF+SVG+PNG triplet export).
 
 v2.7 deltas vs v2.6:
@@ -16,7 +16,8 @@ v2.7 deltas vs v2.6:
     Henry-Hub fuel cost now hourly (Plan §F.2), and the carbon-price
     sensitivity adds a new TAC term in Cases 1-2 via cfg.base.physics.
 
-Fig 1 is the TikZ system schematic and stays in LaTeX — not produced here.
+Fig 1 is generated here so its palette, line weights and typography match the
+quantitative result figures.
 
 Run from project root:
 
@@ -26,12 +27,12 @@ Run from project root:
 # %% [markdown]
 # # v2.7 paper figure pipeline
 #
-# Builds 10 main figures plus a Graphical Abstract for the plan-v2.7 Applied
+# Builds 11 main figures plus a Graphical Abstract for the plan-v2.7 Applied
 # Energy manuscript. Each figure exports PDF + SVG + PNG via the sci-figure
 # helper `save_triplet`.
 #
-# Inputs: `outputs/master_kpi_table.csv` (73 rows) and `outputs/main_baseline/case2/dispatch.csv.gz`.
-# Outputs: `outputs/figures/fig{2..11}_*.{pdf,svg,png}` plus
+# Inputs: `outputs/master_kpi_table.csv` (76 rows) and `outputs/main_baseline/case2/dispatch.csv.gz`.
+# Outputs: `outputs/figures/fig{1..11}_*.{pdf,svg,png}` plus
 # `outputs/figures/graphical_abstract.{pdf,svg,png}`.
 
 # %%
@@ -47,6 +48,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Patch
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 from matplotlib.lines import Line2D
 
@@ -68,6 +70,24 @@ FIGURES.mkdir(parents=True, exist_ok=True)
 
 apply_sci_style("ae_single")  # 7pt body for 89mm AE single column
 
+SINGLE_W = 3.45
+DOUBLE_W = 7.0
+EDGE_LW = 0.75
+GRID_KW = dict(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+
+CASE_LINE = {
+    0: "#555555",
+    1: PALETTE["accent_teal"],
+    2: PALETTE["stroke_teal"],
+    3: PALETTE["stroke_clay"],
+}
+CASE_FILL = {
+    0: PALETTE["fill_gray"],
+    1: PALETTE["fill_blue"],
+    2: PALETTE["case1"],
+    3: PALETTE["fill_orange"],
+}
+
 # %% [markdown]
 # ## Data loading
 
@@ -87,12 +107,144 @@ CASE_LABEL = {
     3: "Case 3 — NGCC on-site",
 }
 CASE_COLOR = {
-    0: PALETTE["case0"],
-    1: PALETTE["case1"],
-    2: PALETTE["case2"],
-    3: PALETTE["case4"],  # repurpose case4 hue for new Case 3 NGCC (warm/dirty)
+    0: CASE_LINE[0],
+    1: CASE_LINE[1],
+    2: CASE_LINE[2],
+    3: CASE_LINE[3],
 }
 CASE_MARKER = {0: "o", 1: "s", 2: "D", 3: "^"}
+
+# %% [markdown]
+# ## Fig 1 — Case 2 plant schematic
+
+# %%
+def _draw_box(
+    ax: plt.Axes,
+    xy: tuple[float, float],
+    width: float,
+    height: float,
+    label: str,
+    facecolor: str,
+    edgecolor: str,
+    fontsize: float = 6.2,
+) -> FancyBboxPatch:
+    box = FancyBboxPatch(
+        xy,
+        width,
+        height,
+        boxstyle="round,pad=0.04,rounding_size=0.025",
+        facecolor=facecolor,
+        edgecolor=edgecolor,
+        linewidth=0.75,
+    )
+    ax.add_patch(box)
+    ax.text(
+        xy[0] + width / 2,
+        xy[1] + height / 2,
+        label,
+        ha="center",
+        va="center",
+        fontsize=fontsize,
+        color="#111111",
+        linespacing=1.08,
+    )
+    return box
+
+
+def _arrow(
+    ax: plt.Axes,
+    start: tuple[float, float],
+    end: tuple[float, float],
+    color: str,
+    *,
+    style: str = "-|>",
+    rad: float = 0.0,
+    lw: float = 1.0,
+    alpha: float = 1.0,
+) -> None:
+    ax.add_patch(
+        FancyArrowPatch(
+            start,
+            end,
+            arrowstyle=style,
+            mutation_scale=8,
+            connectionstyle=f"arc3,rad={rad}",
+            linewidth=lw,
+            color=color,
+            alpha=alpha,
+            shrinkA=3,
+            shrinkB=3,
+        )
+    )
+
+
+def fig1_system_schematic() -> None:
+    heat = PALETTE["stroke_clay"]
+    elec = PALETTE["stroke_navy"]
+    cool = PALETTE["stroke_teal"]
+    edge = "#323232"
+
+    fig, ax = plt.subplots(figsize=(SINGLE_W, 2.38))
+    ax.set_xlim(0, 10.0)
+    ax.set_ylim(0.0, 5.45)
+    ax.axis("off")
+
+    boxes = {
+        "rx": _draw_box(ax, (0.30, 4.35), 1.35, 0.64, "BWRX-300\nreactor\n$P_{rx}$",
+                        PALETTE["fill_blue"], edge),
+        "hp": _draw_box(ax, (2.05, 4.35), 1.12, 0.64, "HP turbine\n$P_{tg}$",
+                        PALETTE["fill_blue"], edge),
+        "lp": _draw_box(ax, (3.78, 4.35), 1.35, 0.64, "LP turbine\n+ condenser",
+                        PALETTE["fill_blue"], edge),
+        "abs": _draw_box(ax, (1.95, 2.30), 1.75, 0.78, "Double-effect\nLiBr-H$_2$O\nabsorber",
+                         PALETTE["fill_orange"], edge, fontsize=5.8),
+        "vcc": _draw_box(ax, (4.45, 2.08), 1.22, 0.70, "VCC\nbackup",
+                         PALETTE["fill_salmon"], edge),
+        "grid": _draw_box(ax, (4.25, 0.72), 1.42, 0.64, "ERCOT grid\nPCC 300 MW",
+                          PALETTE["fill_gray"], edge, fontsize=5.9),
+        "bess": _draw_box(ax, (6.55, 0.72), 1.40, 0.64, "BESS\n100 MWh\n50 MW",
+                          "#F3E3A4", edge, fontsize=5.8),
+        "dc": _draw_box(ax, (7.75, 2.58), 1.85, 0.95, "Data center\n200 MW$_e$",
+                        "#E6E6E6", edge, fontsize=6.5),
+    }
+
+    # Heat / steam path.
+    _arrow(ax, (1.65, 4.67), (2.05, 4.67), heat)
+    _arrow(ax, (3.17, 4.67), (3.78, 4.67), heat)
+    ax.text(1.86, 5.08, "steam", fontsize=5.3, color=heat, ha="center")
+    _arrow(ax, (2.62, 4.35), (2.62, 3.08), heat, rad=0.0)
+    ax.text(2.74, 3.74, "extraction", fontsize=5.5, color=heat,
+            ha="left", va="center")
+
+    # Electric path and bidirectional grid/storage exchanges.
+    _arrow(ax, (5.13, 4.67), (7.75, 3.42), elec, rad=-0.18)
+    ax.text(6.45, 4.20, "electricity", fontsize=5.6, color=elec,
+            ha="center", va="center")
+    _arrow(ax, (5.55, 1.36), (7.75, 2.77), elec, style="<|-|>", rad=-0.08)
+    _arrow(ax, (7.25, 1.36), (8.35, 2.58), elec, style="<|-|>", rad=0.05)
+
+    # Chilled-water delivery from absorption and backup VCC.
+    _arrow(ax, (3.70, 2.84), (7.75, 3.05), cool, rad=-0.08)
+    _arrow(ax, (5.67, 2.34), (7.75, 2.78), cool, rad=0.08)
+    ax.text(5.95, 3.18, "chilled water", fontsize=5.6, color=cool,
+            ha="center")
+
+    # Compact legend.
+    legend_handles = [
+        Line2D([0], [0], color=heat, lw=1.2, label="heat / steam"),
+        Line2D([0], [0], color=elec, lw=1.2, label="electricity"),
+        Line2D([0], [0], color=cool, lw=1.2, label="chilled water"),
+    ]
+    ax.legend(handles=legend_handles, loc="lower left", bbox_to_anchor=(0.0, -0.03),
+              frameon=False, ncol=3, fontsize=5.8, handlelength=1.5,
+              columnspacing=0.9)
+
+    fig.tight_layout(pad=0.12)
+    save_triplet(fig, "fig1_system_schematic", str(FIGURES))
+    plt.close(fig)
+
+
+fig1_system_schematic()
 
 # %% [markdown]
 # ## Fig 2 — TAC cost stack (4 cases, 2023 ATB-Mid baseline)
@@ -119,30 +271,31 @@ def fig2_tac_stack() -> None:
     grid_pos = np.where(grid > 0, grid, 0.0)
     grid_neg = np.where(grid < 0, grid, 0.0)  # already negative
 
-    fig, ax = plt.subplots(figsize=(3.8, 2.8))
+    fig, ax = plt.subplots(figsize=(SINGLE_W, 2.7))
     x = np.arange(len(cases))
     bw = 0.62
 
     # Stack positive components
     bot = np.zeros_like(capex)
     components = [
-        ("Capital × CRF", capex, PALETTE["comp_capital"]),
-        ("Fixed O&M", fom, PALETTE["comp_om"]),
-        ("Variable O&M", vom, PALETTE["fill_gray"]),
-        ("Fuel", fuel, PALETTE["comp_fuel"]),
-        ("Grid import", grid_pos, PALETTE["comp_grid_buy"]),
+        ("Capital × CRF", capex, PALETTE["comp_capital"], 0.92),
+        ("Fixed O&M", fom, PALETTE["comp_om"], 0.92),
+        ("Variable O&M", vom, PALETTE["fill_gray"], 0.92),
+        ("Fuel", fuel, PALETTE["comp_fuel"], 0.88),
+        ("Grid import", grid_pos, PALETTE["stroke_clay"], 0.50),
     ]
-    for lab, vals, color in components:
+    for lab, vals, color, alpha in components:
         if vals.sum() < 1e-3:
             continue
         ax.bar(x, vals, bottom=bot, width=bw, color=color, edgecolor="#000000",
-               linewidth=0.6, label=lab)
+               linewidth=EDGE_LW, alpha=alpha, label=lab)
         bot = bot + vals
 
     # Below-zero grid export bar (revenue offset)
     if (grid_neg < 0).any():
         ax.bar(x, grid_neg, width=bw,
-               color=PALETTE["comp_grid_sell"], edgecolor="#000000", linewidth=0.6,
+               color=PALETTE["accent_teal"], edgecolor="#000000", linewidth=EDGE_LW,
+               alpha=0.75,
                label="Grid export (revenue)")
 
     # Net TAC line marker on top of each bar
@@ -168,9 +321,9 @@ def fig2_tac_stack() -> None:
     ax.set_xticklabels(labels)
     ax.set_ylabel(r"Annualised cost (M\$/yr)")
     ax.set_axisbelow(True)
-    ax.grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=3,
-              frameon=False, columnspacing=1.0, handlelength=1.4)
+    ax.grid(**GRID_KW)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=2,
+              frameon=False, columnspacing=0.8, handlelength=1.2)
 
     fig.tight_layout()
     save_triplet(fig, "fig2_tac_stack", str(FIGURES))
@@ -191,29 +344,20 @@ def fig3_cost_carbon() -> None:
     s2["tac_m"] = s2.tac_usd_per_yr / 1e6
     s2["co2_kt"] = s2.co2_annual_tonnes / 1e3
 
-    fig, ax = plt.subplots(figsize=(3.6, 2.8))
-    # Predefined offset directions for year tags so 3 years per case don't pile up
-    year_offsets = {2022: (4, 6), 2023: (4, -8), 2024: (-12, -10)}
+    fig, ax = plt.subplots(figsize=(SINGLE_W, 2.65))
     for cid in (0, 1, 2, 3):
         sub = s2[s2.case_id == cid].sort_values("year")
         ax.plot(sub.tac_m, sub.co2_kt,
-                color=CASE_COLOR[cid], linewidth=0.8, alpha=0.5, zorder=2)
+                color=CASE_LINE[cid], linewidth=0.9, alpha=0.65, zorder=2)
         ax.scatter(sub.tac_m, sub.co2_kt,
                    marker=CASE_MARKER[cid], s=55,
-                   facecolor=CASE_COLOR[cid], edgecolor="#000000", linewidth=0.6,
+                   facecolor=CASE_FILL[cid], edgecolor=CASE_LINE[cid], linewidth=0.9,
                    zorder=3, label=CASE_LABEL[cid])
-        # Annotate only the 2022 endpoint per case so year clusters don't pile up
-        head = sub[sub.year == 2022].iloc[0]
-        ax.annotate(f"{int(head.year)}–{int(sub.year.max())}",
-                    xy=(head.tac_m, head.co2_kt),
-                    xytext=(6, 6),
-                    textcoords="offset points",
-                    fontsize=5.5, color="#444444")
 
     ax.set_xlabel(r"TAC (M\$/yr)")
     ax.set_ylabel(r"Annual CO$_2$ (kt CO$_2$/yr)")
     ax.set_axisbelow(True)
-    ax.grid(axis="both", alpha=0.3, linestyle="--", linewidth=0.5)
+    ax.grid(**GRID_KW)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=2,
               frameon=False, fontsize=6, columnspacing=0.7, handlelength=1.0)
 
@@ -267,7 +411,7 @@ def fig4_case2_dispatch() -> None:
         ax.set_xlabel("Hour of week")
         ax.set_ylabel(r"Power / heat (MW)")
         ax.set_axisbelow(True)
-        ax.grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+        ax.grid(**GRID_KW)
 
         # Secondary axis (right): cooling streams + extraction flow.
         ax_r = ax.twinx()
@@ -285,8 +429,9 @@ def fig4_case2_dispatch() -> None:
         ax_r.set_ylim(bottom=0)
         ax_r.spines["right"].set_visible(True)
 
-        ax.text(0.02, 0.92, name, transform=ax.transAxes, fontsize=7,
-                fontweight="bold", color="#222222")
+        ax.text(0.02, 0.08, name, transform=ax.transAxes, fontsize=7,
+                fontweight="bold", color="#222222",
+                bbox=dict(facecolor="white", edgecolor="none", alpha=0.78, pad=1.2))
 
         # Collect handles once (winter has all)
         if not handle_specs:
@@ -336,15 +481,16 @@ fig4_case2_dispatch()
 def fig5_s1_pue() -> None:
     s1 = df[df.group == "s1_pue"].sort_values(["case_id", "pue"]).copy()
 
-    fig, ax = plt.subplots(figsize=(3.6, 2.6))
+    fig, ax = plt.subplots(figsize=(SINGLE_W, 2.45))
     for cid in (1, 2):
         sub = s1[s1.case_id == cid]
         ax.plot(sub.pue, sub.premium_pct,
                 marker=CASE_MARKER[cid], markersize=6,
-                color=CASE_COLOR[cid], linewidth=1.6,
-                markerfacecolor=CASE_COLOR[cid],
-                markeredgecolor="#000000", markeredgewidth=0.6,
-                label=CASE_LABEL[cid])
+                color=CASE_LINE[cid], linewidth=1.5,
+                markerfacecolor=CASE_FILL[cid],
+                markeredgecolor=CASE_LINE[cid], markeredgewidth=0.9,
+                label={1: "C1 nuclear, no recovery",
+                       2: "C2 nuclear + absorption"}[cid])
 
     ax.axhline(0, color=PALETTE["accent_teal"], linestyle="--",
                linewidth=1.0, alpha=0.8, label="Premium = 0")
@@ -352,8 +498,10 @@ def fig5_s1_pue() -> None:
     ax.set_ylabel("Heat-Recovery Premium (%)")
     ax.set_xticks([1.10, 1.30, 1.50])
     ax.set_axisbelow(True)
-    ax.grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
-    ax.legend(loc="best", frameon=False, fontsize=6.5)
+    ax.grid(**GRID_KW)
+    ax.legend(loc="center right", bbox_to_anchor=(0.98, 0.60),
+              frameon=False, fontsize=5.8, handlelength=1.4,
+              borderaxespad=0.0, labelspacing=0.35)
     fig.tight_layout()
     save_triplet(fig, "fig5_s1_pue", str(FIGURES))
     plt.close(fig)
@@ -376,7 +524,7 @@ def fig6_s2_year_regime() -> None:
     x = np.arange(len(years))
     bar_w = 0.18
 
-    fig, ax = plt.subplots(figsize=(4.0, 2.8))
+    fig, ax = plt.subplots(figsize=(SINGLE_W, 2.75))
     for i, cid in enumerate(cases):
         vals = [
             s2[(s2.year == y) & (s2.case_id == cid)].premium_pct.iloc[0]
@@ -384,7 +532,7 @@ def fig6_s2_year_regime() -> None:
         ]
         offset = (i - (len(cases) - 1) / 2) * bar_w
         ax.bar(x + offset, vals, width=bar_w,
-               color=CASE_COLOR[cid], edgecolor="#000000", linewidth=0.6,
+               color=CASE_FILL[cid], edgecolor=CASE_LINE[cid], linewidth=EDGE_LW,
                label=CASE_LABEL[cid])
 
     ax.axhline(0, color="#000000", linewidth=0.7)
@@ -393,7 +541,7 @@ def fig6_s2_year_regime() -> None:
     ax.set_xlabel("ERCOT year")
     ax.set_ylabel("Heat-Recovery Premium (%)")
     ax.set_axisbelow(True)
-    ax.grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+    ax.grid(**GRID_KW)
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.35), ncol=2,
               frameon=False, fontsize=6, columnspacing=0.8, handlelength=1.1)
     fig.tight_layout()
@@ -433,29 +581,30 @@ def fig7_s3_bess() -> None:
 
     cases = wide.index.tolist()
     labels = [f"C{c}" for c in cases]
-    colors = [CASE_COLOR[c] for c in cases]
+    fill_colors = [CASE_FILL[c] for c in cases]
+    edge_colors = [CASE_LINE[c] for c in cases]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6.4, 2.6))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(SINGLE_W, 3.35))
 
     # Panel a — ΔTAC with BESS
-    ax1.bar(labels, wide.delta_M.values, color=colors,
-            edgecolor="#000000", linewidth=0.6)
+    ax1.bar(labels, wide.delta_M.values, color=fill_colors,
+            edgecolor=edge_colors, linewidth=EDGE_LW)
     ax1.axhline(0, color="#000000", linewidth=0.7)
     ax1.set_ylabel(r"$\Delta$TAC with BESS (M\$/yr)")
     ax1.set_xlabel("Case")
     ax1.set_axisbelow(True)
-    ax1.grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
-    add_panel_label(ax1, "a")
+    ax1.grid(**GRID_KW)
+    add_panel_label(ax1, "a", x=-0.10, y=1.02)
 
     # Panel b — $/tCO2 abated
-    ax2.bar(labels, wide.abate_usd_per_tco2.values, color=colors,
-            edgecolor="#000000", linewidth=0.6)
+    ax2.bar(labels, wide.abate_usd_per_tco2.values, color=fill_colors,
+            edgecolor=edge_colors, linewidth=EDGE_LW)
     ax2.axhline(0, color="#000000", linewidth=0.7)
     ax2.set_ylabel(r"Carbon abatement (\$/tCO$_2$)")
     ax2.set_xlabel("Case")
     ax2.set_axisbelow(True)
-    ax2.grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
-    add_panel_label(ax2, "b")
+    ax2.grid(**GRID_KW)
+    add_panel_label(ax2, "b", x=-0.10, y=1.02)
 
     fig.tight_layout()
     save_triplet(fig, "fig7_s3_bess", str(FIGURES))
@@ -476,7 +625,7 @@ def fig8_s4_capex_1d() -> None:
     x = np.arange(len(scen_order))
     bar_w = 0.36
 
-    fig, ax = plt.subplots(figsize=(3.4, 2.4))
+    fig, ax = plt.subplots(figsize=(SINGLE_W, 2.45))
     for i, cid in enumerate((1, 2)):
         vals = [
             s4[(s4.reactor_scenario == s) & (s4.case_id == cid)].premium_pct.iloc[0]
@@ -484,12 +633,20 @@ def fig8_s4_capex_1d() -> None:
         ]
         offset = (i - 0.5) * bar_w
         ax.bar(x + offset, vals, width=bar_w,
-               color=CASE_COLOR[cid], edgecolor="#000000", linewidth=0.6,
+               color=CASE_FILL[cid], edgecolor=CASE_LINE[cid], linewidth=EDGE_LW,
                label=CASE_LABEL[cid])
         for xi, v in zip(x + offset, vals):
-            ax.text(xi, v - 8 if v < 0 else v + 4, f"{v:+.0f}%",
-                    ha="center", va="top" if v < 0 else "bottom",
-                    fontsize=5.5, color="#000000")
+            if v < -40:
+                y_lab = v + 14
+                va = "bottom"
+            elif v < 0:
+                y_lab = v - 7
+                va = "top"
+            else:
+                y_lab = v + 4
+                va = "bottom"
+            ax.text(xi, y_lab, f"{v:+.0f}%",
+                    ha="center", va=va, fontsize=5.5, color="#000000")
 
     ax.axhline(0, color="#000000", linewidth=0.7)
     ax.set_xticks(x)
@@ -497,8 +654,9 @@ def fig8_s4_capex_1d() -> None:
     ax.set_xlabel(r"BWRX-300 OCC (\$/kW$_\mathrm{e}$)")
     ax.set_ylabel("Heat-Recovery Premium (%)")
     ax.set_axisbelow(True)
-    ax.grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+    ax.grid(**GRID_KW)
     ax.legend(loc="lower right", frameon=False, fontsize=6)
+    ax.set_ylim(-530, 25)
     fig.tight_layout()
     save_triplet(fig, "fig8_s4_capex_1d", str(FIGURES))
     plt.close(fig)
@@ -538,7 +696,7 @@ def fig9_s5_feasibility_2d() -> None:
     vmax = max(abs(data.min()), abs(data.max()), 30)
     norm = TwoSlopeNorm(vmin=-vmax, vcenter=0, vmax=vmax)
 
-    fig, ax = plt.subplots(figsize=(4.2, 3.6))
+    fig, ax = plt.subplots(figsize=(4.8, 3.75))
     im = ax.imshow(data, cmap=cmap, norm=norm, aspect="auto")
 
     # Cell value labels
@@ -591,12 +749,20 @@ def fig9_s5_feasibility_2d() -> None:
         "purple_circle": (PALETTE["accent_purple"], "v"),
     }
     legend_handles: list[Line2D] = []
+    anchor_offsets = {
+        "red_circle": (-0.24, 0.22),
+        "green_circle": (0.24, -0.22),
+        "yellow_circle": (0.24, 0.22),
+        "blue_circle": (-0.24, -0.22),
+        "purple_circle": (0.24, 0.22),
+    }
     for a in grid["anchors"]:
         i = smr_order.index(a["smr_tag"])
         j = abs_order.index(a["absorption_tag"])
         color, marker = anchor_style.get(a["marker"], ("#000000", "x"))
-        ax.scatter(j, i, marker=marker, s=120,
-                   facecolor=color, edgecolor="#000000", linewidth=1.0,
+        dx, dy = anchor_offsets.get(a["marker"], (0.24, 0.22))
+        ax.scatter(j + dx, i + dy, marker=marker, s=82,
+                   facecolor=color, edgecolor="#000000", linewidth=0.9,
                    zorder=5)
         # Short label for the legend strip (drop the parenthetical aside)
         short = a["label"].split("(")[0].strip()
@@ -637,7 +803,7 @@ def fig10_s6_carbon_price() -> None:
     s6 = df[df.group == "s6_carbon_price"].copy()
     s6 = s6.sort_values(["case_id", "carbon_price_usd_per_tco2"])
 
-    fig, ax = plt.subplots(figsize=(4.4, 3.3))
+    fig, ax = plt.subplots(figsize=(SINGLE_W, 2.85))
 
     # Plot the 3 actual data points per case, then extrapolate linearly to
     # carbon = $250 so the crossovers visualise on-canvas.
@@ -655,11 +821,11 @@ def fig10_s6_carbon_price() -> None:
         y_extrap = intercept + slope * x_extrap
 
         ax.plot(x_extrap, y_extrap,
-                color=CASE_COLOR[cid], linewidth=1.3, zorder=2,
+                color=CASE_LINE[cid], linewidth=1.3, zorder=2,
                 label=CASE_LABEL[cid])
         ax.scatter(x, y, marker=CASE_MARKER[cid], s=42,
-                   facecolor=CASE_COLOR[cid], edgecolor="#000000",
-                   linewidth=0.6, zorder=4)
+                   facecolor=CASE_FILL[cid], edgecolor=CASE_LINE[cid],
+                   linewidth=0.9, zorder=4)
 
         if cid == 0:
             case0_at_x = (intercept, slope)
@@ -694,7 +860,7 @@ def fig10_s6_carbon_price() -> None:
         c0_int, c0_slope = case0_at_x
         tac_cross = c0_int + c0_slope * p_cross
         primary = cids[-1]  # darker hue if grouped (C2 > C1)
-        ax.axvline(p_cross, color=CASE_COLOR[primary],
+        ax.axvline(p_cross, color=CASE_LINE[primary],
                    linestyle=":", linewidth=1.0, alpha=0.85, zorder=1)
         label = "/".join(f"C{c}" for c in cids) + f": \\${p_cross:.0f}"
         ax.annotate(
@@ -702,7 +868,7 @@ def fig10_s6_carbon_price() -> None:
             xy=(p_cross, tac_cross),
             xytext=(7, 9 if 2 in cids else -14),
             textcoords="offset points",
-            fontsize=6.5, color=CASE_COLOR[primary],
+            fontsize=6.5, color=CASE_LINE[primary],
             ha="left", va="center",
         )
 
@@ -717,11 +883,11 @@ def fig10_s6_carbon_price() -> None:
                 transform=ax.transAxes, ha="center", va="top",
                 fontsize=6, color=PALETTE["stroke_teal"], style="italic")
 
-    ax.set_xlim(0, 250)
+    ax.set_xlim(-5, 250)
     ax.set_xlabel(r"Carbon price (\$/tCO$_2$)")
     ax.set_ylabel(r"TAC (M\$/yr)")
     ax.set_axisbelow(True)
-    ax.grid(axis="both", alpha=0.25, linestyle="--", linewidth=0.5)
+    ax.grid(axis="y", alpha=0.25, linestyle="--", linewidth=0.5)
 
     # Legend below the data area — keeps the plot uncluttered.
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2,
@@ -745,24 +911,25 @@ def fig11_kpi_panel() -> None:
     base = df[df.group == "main_baseline"].sort_values("case_id").reset_index(drop=True)
     cases = base.case_id.astype(int).values
     labels = [f"C{c}" for c in cases]
-    colors = [CASE_COLOR[c] for c in cases]
+    colors = [CASE_FILL[c] for c in cases]
+    edge_colors = [CASE_LINE[c] for c in cases]
 
     fig, axes = plt.subplots(2, 2, figsize=(5.6, 4.2))
 
     # (a) LCOE — $/MWh_e delivered
     lcoe = base.lcoe_usd_per_mwh_e.values
-    axes[0, 0].bar(labels, lcoe, color=colors, edgecolor="#000000", linewidth=0.6)
+    axes[0, 0].bar(labels, lcoe, color=colors, edgecolor=edge_colors, linewidth=EDGE_LW)
     for x, v in zip(labels, lcoe):
         axes[0, 0].text(x, v + 5, f"{v:.0f}", ha="center", va="bottom",
                         fontsize=6, color="#000000")
     axes[0, 0].set_ylabel(r"LCOE (\$/MWh$_\mathrm{e}$)")
     axes[0, 0].set_axisbelow(True)
-    axes[0, 0].grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+    axes[0, 0].grid(**GRID_KW)
     add_panel_label(axes[0, 0], "a")
 
     # (b) EPBT — years (Case 0 has no on-site plant → empty bar)
     epbt = base.epbt_years.fillna(0).values
-    bars = axes[0, 1].bar(labels, epbt, color=colors, edgecolor="#000000", linewidth=0.6)
+    bars = axes[0, 1].bar(labels, epbt, color=colors, edgecolor=edge_colors, linewidth=EDGE_LW)
     for x, v, raw in zip(labels, epbt, base.epbt_years.values):
         if np.isnan(raw):
             axes[0, 1].text(x, 0.02, "n/a", ha="center", va="bottom",
@@ -772,12 +939,12 @@ def fig11_kpi_panel() -> None:
                             fontsize=6, color="#000000")
     axes[0, 1].set_ylabel(r"EPBT (years)")
     axes[0, 1].set_axisbelow(True)
-    axes[0, 1].grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+    axes[0, 1].grid(**GRID_KW)
     add_panel_label(axes[0, 1], "b")
 
-    # (c) Water footprint — L/MWh_e delivered (log scale: nuclear ~10× others)
-    water = base.water_l_per_mwh_e.values
-    axes[1, 0].bar(labels, water, color=colors, edgecolor="#000000", linewidth=0.6)
+    # (c) Water footprint — total L/MWh_e (v2.7 3-tier; subpanel uses total)
+    water = base.water_total_l_per_mwh_e.values
+    axes[1, 0].bar(labels, water, color=colors, edgecolor=edge_colors, linewidth=EDGE_LW)
     axes[1, 0].set_yscale("log")
     for x, v in zip(labels, water):
         axes[1, 0].text(x, v * 1.18, f"{v:,.0f}", ha="center", va="bottom",
@@ -790,7 +957,7 @@ def fig11_kpi_panel() -> None:
     # (d) Carbon abatement cost — $/tCO2 avoided (Cases 0,3 → n/a)
     abate = base.carbon_abatement_cost_usd_per_tco2.fillna(0).values
     raw_abate = base.carbon_abatement_cost_usd_per_tco2.values
-    axes[1, 1].bar(labels, abate, color=colors, edgecolor="#000000", linewidth=0.6)
+    axes[1, 1].bar(labels, abate, color=colors, edgecolor=edge_colors, linewidth=EDGE_LW)
     for x, v, raw in zip(labels, abate, raw_abate):
         if np.isnan(raw):
             axes[1, 1].text(x, 5, "n/a", ha="center", va="bottom",
@@ -800,17 +967,322 @@ def fig11_kpi_panel() -> None:
                             fontsize=6, color="#000000")
     axes[1, 1].set_ylabel(r"Abatement (\$/tCO$_2$)")
     axes[1, 1].set_axisbelow(True)
-    axes[1, 1].grid(axis="y", alpha=0.3, linestyle="--", linewidth=0.5)
+    axes[1, 1].grid(**GRID_KW)
     add_panel_label(axes[1, 1], "d")
 
     for ax in axes.flat:
         ax.set_xlabel("")
 
     fig.tight_layout()
-    save_triplet(fig, "fig11_kpi_panel", str(FIGURES))
+    save_triplet(fig, "fig_si_kpi_panel", str(FIGURES))
     plt.close(fig)
 
 fig11_kpi_panel()
+
+# %% [markdown]
+# ## Fig 4-bis (v2.7) — Absorption Chiller Value Decomposition (Plan §6 Patch 1)
+#
+# Waterfall decomposition of the marginal value of adding absorption to a
+# nuclear-only Case 1 system. Components from src/results/value_decomposition.py
+# (read via outputs/figures/value_decomp_case2.csv).
+
+# %%
+def fig4bis_value_decomp() -> None:
+    decomp_path = OUTPUTS / "figures" / "value_decomp_case2.csv"
+    if not decomp_path.exists():
+        print(f"[fig4bis] missing {decomp_path}; skipping")
+        return
+    vd = pd.read_csv(decomp_path)
+    base_row = vd[vd.matching_key == "main_baseline/base"].iloc[0]
+
+    # Waterfall order: net = sum of these (positive adds, negative subtracts)
+    components = [
+        ("VCC\nsaved",
+         base_row.vcc_elec_saved_usd_per_yr / 1e6),
+        ("Power\nlost",
+         base_row.turbine_gen_lost_usd_per_yr / 1e6),
+        ("Abs.\nCAPEX",
+         base_row.absorption_capex_fom_usd_per_yr / 1e6),
+        ("Gate\nbackup",
+         base_row.crystal_cutoff_backup_usd_per_yr / 1e6),
+        ("Water\ncost",
+         base_row.extra_water_cost_usd_per_yr / 1e6),
+    ]
+    net = base_row.net_value_of_absorption_usd_per_yr / 1e6
+    residual = base_row.residual_usd_per_yr / 1e6
+
+    fig, ax = plt.subplots(figsize=(SINGLE_W, 2.75))
+
+    # Cumulative running total for the waterfall
+    cum = 0.0
+    x_pos = []
+    heights = []
+    bottoms = []
+    colors = []
+    for name, val in components:
+        x_pos.append(name)
+        heights.append(val)
+        bottoms.append(cum)
+        colors.append(
+            PALETTE["accent_teal"] if val > 0 else PALETTE["fill_salmon"]
+        )
+        cum += val
+
+    ax.bar(
+        x_pos, heights, bottom=bottoms, color=colors,
+        edgecolor="#000000", linewidth=EDGE_LW, width=0.58, alpha=0.88,
+    )
+
+    # Net result as a final summary bar
+    x_pos.append("Net vs\nCase 1")
+    heights.append(net)
+    bottoms.append(0.0)
+    net_color = (
+        PALETTE["accent_teal"] if net > 0 else PALETTE["fill_salmon"]
+    )
+    ax.bar(
+        ["Net vs\nCase 1"], [net], color=net_color,
+        edgecolor="#000000", linewidth=EDGE_LW, width=0.58, alpha=0.88,
+    )
+
+    # Annotate only values large enough to read cleanly in print. Near-zero
+    # components are visible as bars but left unlabeled to avoid a collision
+    # cluster in the top margin.
+    for x, h, b in zip(x_pos[:-1], heights[:-1], bottoms[:-1]):
+        y = b + h
+        if abs(h) > 0.5:
+            # Inline label just past the bar end
+            offset = 0.30 if h >= 0 else -0.30
+            ax.text(
+                x, y + offset, f"\\${h:+.1f}M",
+                ha="center", va="center", fontsize=6.0, color="#000000",
+            )
+
+    # Final summary bar label
+    net_color_label = "#000000"
+    ax.text(
+        x_pos[-1], net + (0.30 if net >= 0 else -0.30),
+        f"\\${net:+.1f}M",
+        ha="center", va="center", fontsize=6.5, color=net_color_label,
+        fontweight="bold",
+    )
+
+    # Residual annotation (model-side leakage Δ for honesty), top-right corner
+    if abs(residual) >= 1.0:
+        ax.text(
+            0.98, 0.94,
+            f"Residual \\${residual:+.1f}M/yr",
+            transform=ax.transAxes, fontsize=5.5, color="#666666",
+            ha="right", va="top",
+        )
+
+    ax.axhline(0, color="#000000", linewidth=0.7)
+    ax.set_ylabel("Δ vs Case 1 TAC (M\\$/yr)")
+    ax.set_axisbelow(True)
+    ax.grid(**GRID_KW)
+    plt.setp(ax.get_xticklabels(), fontsize=6.0)
+    # Give some headroom so the leader-line text has somewhere to live
+    ymin = min(min(bottoms), -6.0)
+    ymax = max(heights) + 1.2
+    ax.set_ylim(ymin, ymax)
+
+    fig.tight_layout()
+    save_triplet(fig, "fig4bis_value_decomp", str(FIGURES))
+    plt.close(fig)
+
+fig4bis_value_decomp()
+
+# %% [markdown]
+# ## Fig 11 (v2.7) — S7 WACC vs CAPEX learning leverage (Plan §6 Patch 3)
+#
+# Side-by-side ΔPremium comparison: the WACC mini-scan (5% → 10%) vs the
+# S4 CAPEX learning trajectory (FOAK → NOAK), both holding Case 0 at the
+# ATB baseline so each bar isolates one lever.
+
+# %%
+def fig11_s7_wacc_leverage() -> None:
+    # S7 rows
+    s7 = df[df.group == "s7_wacc"].sort_values("wacc_effective")
+    # S4 rows (Case 2 only — match the S7 Case 2 lens)
+    s4 = (
+        df[(df.group == "s4_capex") & (df.case_id == 2)]
+        .copy()
+        .sort_values(
+            "reactor_scenario", key=lambda s: s.map({"FOAK": 0, "ATB_Mid": 1, "NOAK": 2})
+        )
+    )
+
+    if s7.empty or s4.empty:
+        print("[fig11] missing s7 or s4 rows; skipping")
+        return
+
+    # Premium points (percentage)
+    wacc_pts = list(zip(s7.wacc_effective.values, s7.premium_pct.values))
+    capex_pts = list(zip(s4.reactor_scenario.values, s4.premium_pct.values))
+
+    # ΔPremium spans
+    wacc_min = min(p for _, p in wacc_pts)
+    wacc_max = max(p for _, p in wacc_pts)
+    capex_min = min(p for _, p in capex_pts)
+    capex_max = max(p for _, p in capex_pts)
+
+    fig, axes = plt.subplots(2, 1, figsize=(SINGLE_W, 3.4), sharey=True)
+
+    # Left: WACC sweep (5% / 6.7% / 10%)
+    waccs = [w * 100 for w, _ in wacc_pts]
+    prems_wacc = [p for _, p in wacc_pts]
+    colors_wacc = [
+        PALETTE["accent_teal"] if p > prems_wacc[1] else
+        (PALETTE["fill_salmon"] if p < prems_wacc[1] else PALETTE["fill_gray"])
+        for p in prems_wacc
+    ]
+    bars_l = axes[0].bar(
+        [f"{w:.1f}%" for w in waccs], prems_wacc,
+        color=colors_wacc, edgecolor="#000000", linewidth=EDGE_LW, width=0.6,
+    )
+    for b, v in zip(bars_l, prems_wacc):
+        axes[0].text(
+            b.get_x() + b.get_width() / 2,
+            v + (8 if v < 0 else -8),
+            f"{v:.0f}%",
+            ha="center", va="center", fontsize=7, color="#000000",
+        )
+    span_w = wacc_max - wacc_min
+    axes[0].text(0.00, 1.04, f"a  WACC sweep (span {span_w:+.0f} pp)",
+                 transform=axes[0].transAxes, ha="left", va="bottom",
+                 fontsize=7, fontweight="bold")
+    axes[0].set_ylabel("Heat-Recovery Premium (%)")
+    axes[0].set_xlabel("WACC")
+    axes[0].axhline(0, color="#000000", linewidth=0.6, linestyle=":")
+    axes[0].grid(**GRID_KW)
+    axes[0].set_axisbelow(True)
+
+    # Right: CAPEX sweep (FOAK / ATB_Mid / NOAK)
+    labels_capex = [s.replace("ATB_Mid", "ATB-Mid") for s, _ in capex_pts]
+    prems_capex = [p for _, p in capex_pts]
+    colors_capex = [
+        PALETTE["accent_teal"] if p > prems_capex[1] else
+        (PALETTE["fill_salmon"] if p < prems_capex[1] else PALETTE["fill_gray"])
+        for p in prems_capex
+    ]
+    bars_r = axes[1].bar(
+        labels_capex, prems_capex,
+        color=colors_capex, edgecolor="#000000", linewidth=EDGE_LW, width=0.6,
+    )
+    for b, v in zip(bars_r, prems_capex):
+        axes[1].text(
+            b.get_x() + b.get_width() / 2,
+            v + (8 if v < 0 else -8),
+            f"{v:.0f}%",
+            ha="center", va="center", fontsize=7, color="#000000",
+        )
+    span_c = capex_max - capex_min
+    axes[1].text(0.00, 1.04, f"b  CAPEX learning (span {span_c:+.0f} pp)",
+                 transform=axes[1].transAxes, ha="left", va="bottom",
+                 fontsize=7, fontweight="bold")
+    axes[1].set_xlabel("SMR CAPEX scenario")
+    axes[1].axhline(0, color="#000000", linewidth=0.6, linestyle=":")
+    axes[1].grid(**GRID_KW)
+    axes[1].set_axisbelow(True)
+
+    # Sync y-limits so the comparison is fair
+    ymin = min(min(prems_wacc), min(prems_capex))
+    ymax = max(max(prems_wacc), max(prems_capex))
+    pad = 0.06 * (ymax - ymin)
+    for ax in axes:
+        ax.set_ylim(ymin - pad, ymax + pad)
+
+    # Caption hook: which lever wins?
+    ratio = span_c / span_w if span_w != 0 else float("inf")
+    note = (
+        f"CAPEX learning provides {ratio:.1f}× the Premium leverage of WACC reduction"
+        if ratio > 1.0 else
+        f"WACC reduction provides {1.0 / ratio:.1f}× the Premium leverage of CAPEX learning"
+    )
+    fig.text(
+        0.5, -0.01, note, ha="center", fontsize=6.5, color="#000000",
+        style="italic",
+    )
+
+    fig.tight_layout(rect=(0.0, 0.06, 1.0, 0.98))
+    save_triplet(fig, "fig11_s7_wacc_leverage", str(FIGURES))
+    plt.close(fig)
+
+fig11_s7_wacc_leverage()
+
+# %% [markdown]
+# ## SI Water — 4 cases × 3-tier water footprint stacked (Plan §6 Patch 2)
+#
+# Direct site (DC cooling-tower + absorption Q_reject) vs indirect generation
+# (Macknick 2012 per-source factors) vs scarcity-weighted (Aqueduct ERCOT
+# South 0.65 baseline). Surfaces the v2.7 counterintuitive finding that Case
+# 2's absorption chiller raises *direct* site water even while it lowers
+# indirect generation water.
+
+# %%
+def fig_si_water_3tier() -> None:
+    base = df[df.group == "main_baseline"].sort_values("case_id").reset_index(drop=True)
+    cases = base.case_id.astype(int).values
+    labels = [f"C{c}" for c in cases]
+
+    direct = base.water_direct_site_l_per_mwh_e.values
+    indirect = base.water_indirect_generation_l_per_mwh_e.values
+    total = base.water_total_l_per_mwh_e.values
+    scarcity = base.water_scarcity_m3_world_eq_per_mwh_e.values
+
+    fig, axes = plt.subplots(1, 2, figsize=(6.4, 3.0),
+                              gridspec_kw={"width_ratios": [1.0, 1.0]})
+
+    # Left: stacked direct + indirect (linear scale; uses two colors)
+    axes[0].bar(labels, direct, color=PALETTE["fill_blue"],
+                edgecolor="#000000", linewidth=EDGE_LW, width=0.62,
+                label="Direct site (DC cooling tower)")
+    axes[0].bar(labels, indirect, bottom=direct, color=PALETTE["fill_salmon"],
+                edgecolor="#000000", linewidth=EDGE_LW, width=0.62,
+                label="Indirect generation (Macknick)")
+    for i, (d, t) in enumerate(zip(direct, total)):
+        axes[0].text(i, t + max(total) * 0.025,
+                     f"{t:,.0f}", ha="center", va="bottom",
+                     fontsize=6, color="#000000")
+        if d > 1.0:
+            axes[0].text(i, d / 2, f"{d:.0f}", ha="center", va="center",
+                         fontsize=5.5, color="#FFFFFF")
+    axes[0].set_ylabel("Water (L/MWh$_\\mathrm{e\\,IT}$)")
+    axes[0].set_axisbelow(True)
+    axes[0].grid(**GRID_KW)
+    axes[0].legend(loc="upper center", fontsize=5.5, frameon=False,
+                    ncol=1, bbox_to_anchor=(0.5, -0.10))
+    add_panel_label(axes[0], "a")
+
+    # Right: scarcity-weighted (m3 world-eq / MWh_e_IT)
+    bars = axes[1].bar(labels, scarcity, color=[CASE_FILL[c] for c in cases],
+                        edgecolor=[CASE_LINE[c] for c in cases], linewidth=EDGE_LW, width=0.62)
+    for b, v in zip(bars, scarcity):
+        axes[1].text(b.get_x() + b.get_width() / 2,
+                     v + max(scarcity) * 0.025,
+                     f"{v:.2f}", ha="center", va="bottom",
+                     fontsize=6, color="#000000")
+    axes[1].set_ylabel("Scarcity-weighted\n(m$^3$ world-eq/MWh$_\\mathrm{e\\,IT}$)")
+    axes[1].set_axisbelow(True)
+    axes[1].grid(**GRID_KW)
+    add_panel_label(axes[1], "b")
+
+    # Below the figure, surface the absorption-vs-VCC reversal as caption hook
+    delta_direct = direct[2] - direct[1]   # Case 2 - Case 1 (direct site)
+    delta_indirect = indirect[2] - indirect[1]
+    note = (
+        f"Case 2 vs Case 1: direct site {delta_direct:+.1f}, "
+        f"indirect generation {delta_indirect:+.0f} L/MWh$_\\mathrm{{e\\,IT}}$ — "
+        f"absorption chiller trades indirect for direct water"
+    )
+    fig.text(0.5, -0.06, note, ha="center", fontsize=6.5, color="#000000",
+             style="italic")
+
+    fig.tight_layout()
+    save_triplet(fig, "fig_si_water_3tier", str(FIGURES))
+    plt.close(fig)
+
+fig_si_water_3tier()
 
 # %% [markdown]
 # ## Graphical Abstract — 2-panel (S5 viability map + S6 carbon-price ladder)
@@ -900,11 +1372,11 @@ def graphical_abstract() -> None:
     for cid in (0, 1, 2, 3):
         x_e, y_e, x_pts, y_pts = case_lines[cid]
         axR.plot(x_e, y_e,
-                 color=CASE_COLOR[cid], linewidth=2.0, zorder=2,
+                 color=CASE_LINE[cid], linewidth=2.0, zorder=2,
                  label=f"C{cid}")
         axR.scatter(x_pts, y_pts, marker=CASE_MARKER[cid], s=80,
-                    facecolor=CASE_COLOR[cid], edgecolor="#000000",
-                    linewidth=0.8, zorder=4)
+                    facecolor=CASE_FILL[cid], edgecolor=CASE_LINE[cid],
+                    linewidth=1.0, zorder=4)
     # Group near-identical Case 1 / Case 2 crossovers — same rule as Fig 10.
     cid_groups: list[tuple[list[int], float]] = []
     used: set[int] = set()
@@ -927,7 +1399,7 @@ def graphical_abstract() -> None:
         c0_int, c0_slope = case0_at_x
         tac_cross = c0_int + c0_slope * p_cross
         primary = cids[-1]
-        axR.axvline(p_cross, color=CASE_COLOR[primary],
+        axR.axvline(p_cross, color=CASE_LINE[primary],
                     linestyle=":", linewidth=1.4, alpha=0.85, zorder=1)
         label = "/".join(f"C{c}" for c in cids) + f": \\${p_cross:.0f}"
         axR.annotate(
@@ -935,7 +1407,7 @@ def graphical_abstract() -> None:
             xy=(p_cross, tac_cross),
             xytext=(10, 12 if 2 in cids else -22),
             textcoords="offset points",
-            fontsize=11, color=CASE_COLOR[primary], ha="left",
+            fontsize=11, color=CASE_LINE[primary], ha="left",
         )
     if crossings:
         p_max = max(crossings.values())
@@ -950,7 +1422,7 @@ def graphical_abstract() -> None:
     axR.set_xlabel(r"Carbon price (\$/tCO$_2$)", fontsize=13)
     axR.set_ylabel(r"TAC (M\$/yr)", fontsize=13)
     axR.set_axisbelow(True)
-    axR.grid(alpha=0.25, linestyle="--", linewidth=0.6)
+    axR.grid(axis="y", alpha=0.25, linestyle="--", linewidth=0.6)
     axR.legend(loc="upper left", frameon=False, fontsize=11,
                handlelength=1.4, ncol=2)
     add_panel_label(axR, "b", x=-0.16, y=1.04, fontsize=15)

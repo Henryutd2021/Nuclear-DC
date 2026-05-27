@@ -51,6 +51,7 @@ from src.config import (  # noqa: E402
     with_bess,
     with_carbon_price,
     with_reactor_capex,
+    with_wacc,
 )
 from src.data import TimeSeries, load_time_series  # noqa: E402
 from src.kpi import (  # noqa: E402
@@ -158,6 +159,7 @@ def _result_to_scalars(
     p_turb_net_annual = 0.0
     p_ngcc_annual = 0.0
     p_grid_buy_annual = 0.0
+    q_abs_cool_annual = 0.0     # v2.7: needed for 3-tier water split (Case 2)
     installed_mwe_for_epbt = 0.0
     epbt_tech: Optional[str] = None
 
@@ -222,6 +224,7 @@ def _result_to_scalars(
         )
         p_turb_net_annual = float(r.P_turb_net_MW.sum() * dt * annual_scale)
         p_grid_buy_annual = float(r.P_grid_buy_MW.sum() * dt * annual_scale)
+        q_abs_cool_annual = float(r.Q_abs_cool_MWth.sum() * dt * annual_scale)
         installed_mwe_for_epbt = float(cfg.case.reactor.electric_power_net_MWe)
         epbt_tech = "nuclear_bwr"
 
@@ -238,14 +241,27 @@ def _result_to_scalars(
     else:
         out["epbt_years"] = None
 
-    # ---- KPI #8 — Water footprint (L/MWh_e delivered) -----------------------
-    out["water_l_per_mwh_e"] = water_footprint_l_per_mwh(
+    # ---- KPI #8 — Water footprint, 3-tier (v2.7) ---------------------------
+    wf = water_footprint_l_per_mwh(
         it_energy_annual_mwh=it_energy_annual_MWh,
         p_turb_net_annual_mwh=p_turb_net_annual,
         p_ngcc_annual_mwh=p_ngcc_annual,
         p_grid_buy_annual_mwh=p_grid_buy_annual,
         q_cool_annual_mwh=cool_energy_annual_MWh,
+        q_abs_cool_annual_mwh=q_abs_cool_annual,
     )
+    if wf is None:
+        out["water_total_l_per_mwh_e"] = None
+        out["water_direct_site_l_per_mwh_e"] = None
+        out["water_indirect_generation_l_per_mwh_e"] = None
+        out["water_scarcity_m3_world_eq_per_mwh_e"] = None
+    else:
+        out["water_total_l_per_mwh_e"] = wf.total_l_per_mwh_e
+        out["water_direct_site_l_per_mwh_e"] = wf.direct_site_l_per_mwh_e
+        out["water_indirect_generation_l_per_mwh_e"] = wf.indirect_generation_l_per_mwh_e
+        out["water_scarcity_m3_world_eq_per_mwh_e"] = (
+            wf.scarcity_weighted_m3_world_eq_per_mwh_e
+        )
 
     return out
 
@@ -293,9 +309,9 @@ def with_capex_pair(
 
 @dataclass(frozen=True)
 class RunSpec:
-    """One row of the 73-run grid (v2.7: 61 v2.6 runs + 12 S6 carbon-price)."""
+    """One row of the 76-run grid (v2.7: 61 v2.6 + 12 S6 carbon-price + 3 S7 WACC)."""
 
-    group: str        # 'main_baseline' | 's1_pue' | ... | 's6_carbon_price'
+    group: str        # 'main_baseline' | 's1_pue' | ... | 's6_carbon_price' | 's7_wacc'
     run_id: str       # filesystem-safe key, unique within group
     case_id: int
     year: int
@@ -307,6 +323,7 @@ class RunSpec:
     smr_capex_tag: Optional[str] = None                   # S5 grid label
     absorption_capex_tag: Optional[str] = None            # S5 grid label
     carbon_price_usd_per_tco2: float = 0.0                # S6 sensitivity
+    wacc_override: Optional[float] = None                 # S7 sensitivity (v2.7)
 
     @property
     def output_dir(self) -> Path:
@@ -355,6 +372,10 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
     if spec.carbon_price_usd_per_tco2 > 0:
         cfg = with_carbon_price(cfg, spec.carbon_price_usd_per_tco2)
 
+    # --- S7 WACC override (v2.7) -------------------------------------------
+    if spec.wacc_override is not None:
+        cfg = with_wacc(cfg, spec.wacc_override)
+
     # --- Time series --------------------------------------------------------
     ts = load_time_series(project_root=PROJECT_ROOT, year=spec.year, num_hours=8760)
 
@@ -388,6 +409,9 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
             "smr_capex_tag": spec.smr_capex_tag,
             "absorption_capex_tag": spec.absorption_capex_tag,
             "carbon_price_usd_per_tco2": spec.carbon_price_usd_per_tco2,
+            "wacc_override": spec.wacc_override,
+            "wacc_effective": float(cfg.financial.WACC_nominal),
+            "crf_effective": float(cfg.financial.capital_recovery_factor),
             "num_hours": ts.num_hours,
             "solve_seconds": round(solve_seconds, 3),
         },
@@ -408,6 +432,8 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
         "absorption_capex_usd_per_kWth": spec.absorption_capex_usd_per_kWth,
         "smr_capex_tag": spec.smr_capex_tag,
         "absorption_capex_tag": spec.absorption_capex_tag,
+        "wacc_effective": float(cfg.financial.WACC_nominal),
+        "crf_effective": float(cfg.financial.capital_recovery_factor),
         "solve_seconds": round(solve_seconds, 3),
         **{
             k: v
@@ -526,7 +552,7 @@ def build_run_grid() -> list[RunSpec]:
                 )
             )
 
-    # ---- S6 Carbon price: Cases 0-3 × {$0, $50, $100}/tCO2 (v2.7 new) -----
+    # ---- S6 Carbon price: Cases 0-3 × {$0, $50, $100}/tCO2 (v2.6.5) -------
     # Answers Plan §2.0.5 reviewer ask "at what carbon price does Premium flip
     # positive?" The $0 row duplicates main_baseline numbers for table shape.
     for price in (0.0, 50.0, 100.0):
@@ -543,6 +569,26 @@ def build_run_grid() -> list[RunSpec]:
                     carbon_price_usd_per_tco2=price,
                 )
             )
+
+    # ---- S7 WACC mini-scan: Case 2 only × {5%, 6.7%, 10%} (v2.7 new) ------
+    # Tests the policy-leverage claim: is the ΔPremium from a 5%→10% WACC
+    # spread larger or smaller than the ΔPremium from FOAK→NOAK CAPEX?
+    # 5%   → DOE LPO Section 1703 loan guarantee / regulated asset base
+    # 6.7% → NREL ATB 2024 baseline (matches main_baseline)
+    # 10%  → merchant project risk premium (no LPO, private financing)
+    for wacc in (0.05, 0.067, 0.10):
+        wacc_tag = f"wacc_{int(round(wacc * 1000))}"  # e.g. wacc_50, wacc_67, wacc_100
+        specs.append(
+            RunSpec(
+                group="s7_wacc",
+                run_id=f"case2_{wacc_tag}",
+                case_id=2,
+                year=2023,
+                pue=1.30,
+                reactor_scenario="ATB_Mid",
+                wacc_override=wacc,
+            )
+        )
 
     return specs
 
@@ -563,7 +609,9 @@ def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     # v2.7: include carbon_price in the matching key so S6 rows pair with the
     # Case-0 baseline at the same carbon price (Premium and Abatement Cost both
-    # need a price-matched denominator to be meaningful).
+    # need a price-matched denominator to be meaningful). S7 WACC scan compares
+    # Case 2 against the constant ATB-baseline Case 0 (different WACC's per row
+    # would mean Case 0 also needs a WACC scan — out of scope for the mini-scan).
     key_cols = ["year", "pue", "bess_applied", "carbon_price_usd_per_tco2"]
     case0_rows = df[df["case_id"] == 0].set_index(key_cols)
     baseline_tac = case0_rows["tac_usd_per_yr"].to_dict()
@@ -622,6 +670,8 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
         "reactor_scenario",
         "bess_applied",
         "carbon_price_usd_per_tco2",
+        "wacc_effective",
+        "crf_effective",
         "smr_capex_usd_per_kWe",
         "absorption_capex_usd_per_kWth",
         "smr_capex_tag",
@@ -635,7 +685,10 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
         "co2_annual_tonnes",
         "co2_per_mwh_kg",
         "epbt_years",
-        "water_l_per_mwh_e",
+        "water_total_l_per_mwh_e",
+        "water_direct_site_l_per_mwh_e",
+        "water_indirect_generation_l_per_mwh_e",
+        "water_scarcity_m3_world_eq_per_mwh_e",
     ]
     cols = leading + [c for c in df.columns if c not in leading]
     df = df[cols]
@@ -649,7 +702,7 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
         by_group.setdefault(s.group, []).append(s.run_id)
     total_seconds = float(sum(r.get("solve_seconds", 0.0) for r in rows))
     manifest = {
-        "plan_version": "v2.6",
+        "plan_version": "v2.7",
         "executed_at_utc": pd.Timestamp.utcnow().isoformat(),
         "num_runs": len(specs),
         "total_solve_seconds": round(total_seconds, 1),
@@ -664,6 +717,12 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
                 "summary.json (scalar KPIs + metadata)",
                 "dispatch.csv.gz (8760 hourly rows)",
             ],
+            "post_processed": [
+                "outputs/figures/value_decomp_case2.csv "
+                "(Plan v2.7 Patch 1 — absorption-chiller waterfall)",
+                "outputs/figures/water_3tier.csv "
+                "(Plan v2.7 Patch 2 — direct/indirect/scarcity-weighted)",
+            ],
         },
         "notes": [
             "Cases 0 and 3 are deterministic LP/closed-form; Cases 1-2 are "
@@ -674,8 +733,14 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
             "S5 fixes year=2023 / PUE=1.30 / ATB-Mid-equivalent baseline; "
             "the 25 cells span SMR ∈ {2250..14700} $/kWe × absorption ∈ "
             "{450..1200} $/kWth driven by config/capex_grid_s5.yaml.",
+            "S6 sweeps carbon price {$0, $50, $100}/tCO2 across all four cases.",
+            "S7 (v2.7) sweeps WACC {5%, 6.7%, 10%} on Case 2 only; CRF is "
+            "recomputed from i*(1+i)^20/((1+i)^20-1) for each row.",
             "Premium is computed against the Case-0 TAC at matching "
-            "(year, pue), falling back to (year, pue, bess=False) if needed.",
+            "(year, pue, carbon_price), falling back to (year, pue, bess=False) "
+            "if needed. S7 rows compare against the ATB-baseline Case 0 (the "
+            "WACC scan deliberately holds the baseline fixed so the ΔPremium "
+            "isolates the financing lever).",
         ],
     }
     with (OUTPUTS / "manifest.json").open("w") as f:

@@ -346,6 +346,33 @@ def with_carbon_price(cfg: RunConfig, price_usd_per_tco2: float) -> RunConfig:
     return cfg.model_copy(update={"base": new_base})
 
 
+def with_wacc(cfg: RunConfig, wacc: float) -> RunConfig:
+    """Return a copy of ``cfg`` with the WACC overridden and CRF recomputed.
+
+    Plan v2.7 S7 mini-sensitivity: sweep WACC ∈ {5%, 6.7%, 10%} on Case 2 to
+    test whether financing cost is a larger lever on Premium than the 6.5×
+    FOAK→NOAK CAPEX learning trajectory. Each WACC value re-computes the
+    Capital Recovery Factor over the 20-year project life:
+
+        CRF(i, n) = i * (1+i)^n / ((1+i)^n - 1)
+
+    so every CAPEX×CRF term in cases/builder picks up the new annualization
+    automatically (no further code paths need to read WACC directly).
+    """
+    if wacc <= 0.0 or wacc >= 1.0:
+        raise ValueError(f"wacc must be in (0, 1), got {wacc!r}")
+    n = cfg.financial.project_lifetime_years
+    factor = (1.0 + wacc) ** n
+    crf = wacc * factor / (factor - 1.0)
+    new_financial = cfg.financial.model_copy(
+        update={
+            "WACC_nominal": wacc,
+            "capital_recovery_factor": crf,
+        }
+    )
+    return cfg.model_copy(update={"financial": new_financial})
+
+
 def with_reactor_capex(
     cfg: RunConfig,
     scenario: str,

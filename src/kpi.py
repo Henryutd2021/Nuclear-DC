@@ -7,10 +7,18 @@
   5. Annual CO2 (passthrough)
   6. Carbon abatement cost ($/tCO2 avoided vs Case 0)
   7. EPBT (years, energy payback time — Lenzen 2008 / IAEA 2018 method)
-  8. Water footprint (L/MWh_e — NREL Macknick 2012 consumption factors)
+  8. Water footprint, three-tier (v2.7 upgrade):
+        8a. Direct site water (L/MWh_e_IT) — cooling-tower makeup at the DC
+            (VCC + absorption-chiller Q_reject side)
+        8b. Indirect generation water (L/MWh_e_IT) — Macknick 2012 weighted
+            by the power-source mix
+        8c. Scarcity-weighted total (m3 world-eq/MWh_e_IT) — multiplied by
+            the AWARE / Aqueduct scarcity factor for the host basin (ERCOT
+            South Hub baseline 0.65; world-mean reference = 1.0)
 
 KPIs 6-8 were marked "Deferred to Phase 2" through v2.6; v2.7 closes that
-gap so the 8-KPI promise in the §0.5 D table is mechanically backed.
+gap so the 8-KPI promise in the §0.5 D table is mechanically backed and
+splits #8 into three policy-readable layers.
 """
 
 from __future__ import annotations
@@ -41,7 +49,21 @@ WATER_L_PER_KWH: dict[str, float] = {
     "ngcc_cooling_tower":    0.78,   # Macknick 2012 median NGCC w/ tower
     "ercot_grid_blend":      1.42,   # Macknick 2012 ERCOT generation mix
     "vcc_hybrid_cooling":    0.10,   # per MWh_c — VCC tower water for DC duty
+    # v2.7: per MWh_c of cooling produced by the absorption chiller, the
+    # cooling tower must reject Q_cool + Q_input ≈ Q_cool * (1 + 1/COP_abs).
+    # With double-effect COP_abs ≈ 1.2 (Houston annual mean), that's ~1.83×
+    # the heat rejected per unit cooling vs ~1.0× for VCC — but absorption
+    # uses a wet-cooling tower at lower delta-T so its makeup water per MWh
+    # rejected matches the VCC factor. Net: ~1.83× the site water per MWh_c
+    # delivered. We capture this as a higher per-MWh_c factor:
+    "absorption_cooling_reject": 0.183,  # = 0.10 * (1 + 1/1.2), v2.7 patch
 }
+
+# v2.7: Aqueduct / AWARE-style basin scarcity factor for the Case 2 anchor
+# location (ERCOT South Hub / Houston). World average is 1.0; ERCOT South
+# baseline ~0.65 (moderate scarcity, conservative midpoint between Aqueduct
+# baseline-water-stress and AWARE). Used only by KPI #8c.
+AQUEDUCT_SCARCITY_FACTOR_ERCOT_SOUTH = 0.65
 
 
 @dataclass(frozen=True)
@@ -163,35 +185,82 @@ def epbt_years(
     return embodied_mwh / annual_electric_output_mwh
 
 
+@dataclass(frozen=True)
+class WaterFootprint:
+    """Three-tier water KPI (Plan v2.7 Patch 2).
+
+    All three layers normalised to IT energy delivered so they're directly
+    comparable across cases. The L→m3 conversion happens only in
+    ``scarcity_weighted_m3_world_eq_per_mwh_e`` (so the scarcity tier is
+    in m3-world-eq while the other two are in litres).
+    """
+
+    direct_site_l_per_mwh_e: float
+    indirect_generation_l_per_mwh_e: float
+    total_l_per_mwh_e: float
+    scarcity_weighted_m3_world_eq_per_mwh_e: float
+
+
 def water_footprint_l_per_mwh(
     it_energy_annual_mwh: float,
     p_turb_net_annual_mwh: float = 0.0,
     p_ngcc_annual_mwh: float = 0.0,
     p_grid_buy_annual_mwh: float = 0.0,
     q_cool_annual_mwh: float = 0.0,
-) -> Optional[float]:
-    """KPI #8 — water consumption per MWh_e delivered (NREL Macknick 2012).
+    q_abs_cool_annual_mwh: float = 0.0,
+    scarcity_factor: float = AQUEDUCT_SCARCITY_FACTOR_ERCOT_SOUTH,
+) -> Optional[WaterFootprint]:
+    """KPI #8 (v2.7 three-tier) — water consumption per MWh_e_IT delivered.
 
-    Aggregates four water streams and normalises by IT energy delivered:
+    Decomposes the footprint into three policy-readable layers:
 
-      L_total = factor_nuclear  × P_turb_net_total
-              + factor_ngcc     × P_NGCC_total
-              + factor_grid     × P_grid_buy_total
-              + factor_vcc      × Q_cool_total
-      L_per_MWh = L_total / IT_energy_total
+      W_direct_site      = factor_vcc * (Q_cool_total - Q_abs_cool_total)
+                         + factor_absorption_reject * Q_abs_cool_total
+      W_indirect_gen     = factor_nuclear * P_turb_net_total
+                         + factor_ngcc    * P_NGCC_total
+                         + factor_grid    * P_grid_buy_total
+      W_total            = W_direct_site + W_indirect_gen
+      W_scarcity_weighted = (W_total / 1000) * scarcity_factor   # m3-world-eq
+
+    The split between VCC and absorption on the cooling side is the key
+    v2.7 finding: an absorption chiller forced to reject Q_cool*(1+1/COP)
+    consumes more cooling-tower makeup per MWh_c than a VCC of the same
+    duty, so Case 2 may *raise* site water even while it lowers indirect
+    generation water by displacing grid imports.
 
     Exporting nuclear electricity *still consumes water at the tower* even
     when the kWh goes to ERCOT instead of IT, so we charge the full
-    P_turb_net rather than the IT-share. Normalising by IT_energy then
-    overstates the footprint vs a "delivered-MWh basis" — but this matches
-    Macknick's plant-level accounting which is what reviewers will check.
+    P_turb_net rather than the IT-share. Returns ``None`` if
+    ``it_energy_annual_mwh`` is non-positive.
     """
     if it_energy_annual_mwh <= 0:
         return None
-    l_total = (
-        WATER_L_PER_KWH["nuclear_cooling_tower"] * p_turb_net_annual_mwh * 1000.0
-        + WATER_L_PER_KWH["ngcc_cooling_tower"]  * p_ngcc_annual_mwh    * 1000.0
-        + WATER_L_PER_KWH["ercot_grid_blend"]    * p_grid_buy_annual_mwh * 1000.0
-        + WATER_L_PER_KWH["vcc_hybrid_cooling"]  * q_cool_annual_mwh    * 1000.0
+
+    q_vcc_only = max(0.0, q_cool_annual_mwh - q_abs_cool_annual_mwh)
+
+    # Direct site water: VCC tower + absorption-chiller Q_reject tower.
+    # Macknick factors are L/kWh, so multiply MWh by 1000.
+    w_direct_l = (
+        WATER_L_PER_KWH["vcc_hybrid_cooling"]         * q_vcc_only             * 1000.0
+        + WATER_L_PER_KWH["absorption_cooling_reject"] * q_abs_cool_annual_mwh * 1000.0
     )
-    return l_total / it_energy_annual_mwh
+
+    # Indirect generation water: charge the full plant output, then the
+    # IT-energy denominator below converts to a per-IT-MWh basis.
+    w_indirect_l = (
+        WATER_L_PER_KWH["nuclear_cooling_tower"] * p_turb_net_annual_mwh  * 1000.0
+        + WATER_L_PER_KWH["ngcc_cooling_tower"]  * p_ngcc_annual_mwh      * 1000.0
+        + WATER_L_PER_KWH["ercot_grid_blend"]    * p_grid_buy_annual_mwh  * 1000.0
+    )
+
+    w_direct_per_mwh = w_direct_l / it_energy_annual_mwh
+    w_indirect_per_mwh = w_indirect_l / it_energy_annual_mwh
+    w_total_per_mwh = w_direct_per_mwh + w_indirect_per_mwh
+    w_scarcity_per_mwh = (w_total_per_mwh / 1000.0) * scarcity_factor
+
+    return WaterFootprint(
+        direct_site_l_per_mwh_e=w_direct_per_mwh,
+        indirect_generation_l_per_mwh_e=w_indirect_per_mwh,
+        total_l_per_mwh_e=w_total_per_mwh,
+        scarcity_weighted_m3_world_eq_per_mwh_e=w_scarcity_per_mwh,
+    )
