@@ -88,7 +88,7 @@ U.S. data centers may consume up to 12\% of national electricity by 2028, intens
 \end{abstract}
 
 \begin{keywords}
-Small modular reactor \sep Absorption cooling \sep Data center \sep Techno-economic analysis \sep Mixed-integer linear programming \sep Waste heat utilization
+Small modular reactor \sep Absorption cooling \sep Data center \sep Techno-economic analysis \sep Linear programming \sep Waste heat utilization
 \end{keywords}
 
 \maketitle
@@ -253,7 +253,7 @@ Q_{cool}^{dem}(t) \;=\; \frac{(\mathrm{PUE} - 1)\, P_{IT}(t)}{\eta_{ch}},
 where $\eta_{ch}=0.90$ accounts for the chilled-water distribution chain. Baseline PUE is 1.30, consistent with the most recent benchmark of operating air-cooled hyperscale data centers in inland Texas; the PUE sensitivity in Section~\ref{sec:results:pue} sweeps PUE over $\{1.10, 1.30, 1.50\}$.
 
 \subsection{Optimization formulation}
-\label{sec:methods:milp}
+\label{sec:methods:opt}
 
 The four cases are solved as separate dispatch problems on the same 8760-hour horizon. Cases~0 and 3 are closed-form linear programs because the absence of storage and recovery makes the hourly decisions independent. Cases~1 and 2 are cast as Pyomo concrete models and solved with Gurobi 13.0.2 as linear programs; binaries are not introduced because round-trip losses in the battery block make simultaneous charge and discharge unprofitable. The same shared accounting routes through all four cases so that cross-case comparisons stay on a common basis.
 
@@ -290,7 +290,7 @@ The 0.5 floor is numerical insurance; Houston wet-bulbs in the National Solar Ra
 \label{eq:abs_avail}
 a(t) \;=\; \begin{cases} 1 & \text{if } T_{wb}(t) + \Delta T_{cw} \le T_{cry}, \\ 0 & \text{otherwise}, \end{cases}
 \end{equation}
-so the absorption chiller is forced offline whenever the cooling-water inlet would exceed the LiBr crystallization line. Delivered absorption cooling is
+so the absorption chiller is forced offline whenever the cooling-water inlet would exceed the LiBr crystallization line. Equivalently, with the $\Delta T_{cw}=5$~K tower approach this is a wet-bulb gate at $T_{cry}-\Delta T_{cw}=32-5=27\,^\circ$C, the value marked in Figure~\ref{fig:inputs}a. Delivered absorption cooling is
 \begin{equation}
 \label{eq:abs_yield}
 Q_{a}(t) \;=\; \mathrm{COP}_a\!\big(T_{wb}(t)\big)\cdot a(t)\cdot Q_{ext}(t),
@@ -468,7 +468,7 @@ Cases~1 and 2 are built with Pyomo 6.7 and solved with Gurobi 13.0.2 on an AMD E
 \subsection{Baseline economics and operational anatomy}
 \label{sec:results:baseline}
 
-Figure~\ref{fig:tac_stack} decomposes the annualized cost of the four configurations at the 2023 ATB-Mid baseline. The grid-supplied data center (Case~0) carries a TAC of \$64.3~M/yr, of which 94\% is the electricity bill at the ERCOT day-ahead price. The two SMR configurations carry a much higher TAC of \$203~M/yr (Case~1) and \$207~M/yr (Case~2), driven almost entirely by reactor capital recovery; the export revenue from selling surplus electricity to ERCOT offsets only about a third of the capital line. The on-site NGCC plant (Case~3) is the only on-site configuration that beats the grid at this baseline, at \$53~M/yr or a heat-recovery premium of $+17\%$, because the 2023 Houston Ship Channel gas price of \$2.63/MMBtu was low enough that on-site fuel cost stayed below ERCOT marginal generation cost throughout the year. Crucially, Case~2 is approximately \$4~M/yr more expensive than Case~1, the equivalent of a 6.5~percentage-point penalty relative to Case~1 against the Case~0 baseline. The intuition that ``adding absorption cooling to a nuclear plant lowers the data-center cost'' is not borne out: at 2023 ATB-Mid prices the absorption capital cost outweighs the cooling-electricity savings that the chiller produces.
+Figure~\ref{fig:tac_stack} decomposes the annualized cost of the four configurations at the 2023 ATB-Mid baseline. The grid-supplied data center (Case~0) carries a TAC of \$64.3~M/yr, of which 94\% is the electricity bill at the ERCOT day-ahead price. The two SMR configurations carry a much higher TAC of \$203~M/yr (Case~1) and \$207~M/yr (Case~2), driven almost entirely by reactor capital recovery; the export revenue from selling surplus electricity to ERCOT offsets only about a third of the capital line. The on-site NGCC plant (Case~3) is the only on-site configuration that beats the grid at this baseline, at \$53~M/yr or a heat-recovery premium of $+17\%$, because the 2023 Houston Ship Channel gas price of \$2.63/MMBtu was low enough that on-site fuel cost stayed below ERCOT marginal generation cost throughout the year. Crucially, Case~2 is approximately \$4.2~M/yr more expensive than Case~1, the equivalent of a 6.5~percentage-point penalty relative to Case~1 against the Case~0 baseline. The intuition that ``adding absorption cooling to a nuclear plant lowers the data-center cost'' is not borne out: at 2023 ATB-Mid prices the absorption capital cost outweighs the cooling-electricity savings that the chiller produces.
 
 \begin{center}
 \begin{minipage}{\linewidth}
@@ -508,7 +508,7 @@ The waterfall in Figure~\ref{fig:value_decomp} decomposes the \$4.2~M/yr gap tha
 \begin{minipage}{\linewidth}
 \centering
 \includegraphics[width=\linewidth]{fig4bis_value_decomp.pdf}
-\captionof{figure}{Waterfall decomposition of the marginal annual value of adding the absorption chiller on top of a nuclear-only plant (Case~2 against Case~1). Positive bars are savings; negative bars are debits. The net result equals the measured \$4~M/yr cost premium of Case~2 over Case~1 within the residual rounding error.}
+\captionof{figure}{Waterfall decomposition of the marginal annual value of adding the absorption chiller on top of a nuclear-only plant (Case~2 against Case~1). Positive bars are savings; negative bars are debits. The net result equals the measured \$4.2~M/yr cost premium of Case~2 over Case~1 within the residual rounding error.}
 \label{fig:value_decomp}
 \end{minipage}
 \end{center}
@@ -561,7 +561,7 @@ The third boundary axis tests whether a 100~MWh / 50~MW lithium-ion BESS changes
 \runinhead{Reactor capital cost trajectory}
 \label{sec:results:capex}
 
-The fourth boundary axis is the SMR overnight capital cost. Figure~\ref{fig:smr_capex} compares the three NREL ATB 2024 trajectories. At FOAK (\$14{,}700/kW$_\mathrm{e}$), the premium is $-490\%$ for both nuclear cases; the reactor capital outweighs all other costs by a factor of five. At ATB-Mid the premium settles at $-216\%$. At NOAK (\$2{,}250/kW$_\mathrm{e}$), the premium climbs to $-8\%$ for Case~1 and $-15\%$ for Case~2, that is, the nuclear cases come within 10--15\% of cost parity with the grid even without thermal integration. NOAK is necessary but not sufficient: even at the lowest published capital trajectory neither nuclear case crosses the premium $=0$ line. Coupling the NOAK reactor with the absorption chiller (Case~2 NOAK) is \emph{less} competitive than Case~1 NOAK, again because the absorption capital still outweighs the cooling-side savings.
+The fourth boundary axis is the SMR overnight capital cost. Figure~\ref{fig:smr_capex} compares the three NREL ATB 2024 trajectories. At FOAK (\$14{,}700/kW$_\mathrm{e}$), the premium is $-490\%$ (Case~1) and $-497\%$ (Case~2); the reactor capital outweighs all other costs by a factor of five. At ATB-Mid the premium settles at $-216\%$ (Case~1) and $-222\%$ (Case~2). At NOAK (\$2{,}250/kW$_\mathrm{e}$), the premium climbs to $-8\%$ for Case~1 and $-15\%$ for Case~2, that is, the nuclear cases come within 10--15\% of cost parity with the grid even without thermal integration. NOAK is necessary but not sufficient: even at the lowest published capital trajectory neither nuclear case crosses the premium $=0$ line. Coupling the NOAK reactor with the absorption chiller (Case~2 NOAK) is \emph{less} competitive than Case~1 NOAK, again because the absorption capital still outweighs the cooling-side savings.
 
 \begin{center}
 \begin{minipage}{\linewidth}
@@ -635,7 +635,7 @@ Three limitations bound the conclusions. First, the IT load is a single hypersca
 \label{sec:conclusion}
 % WRITE-SECTION-TARGET: conclusion
 
-A linear-programming co-optimization of 76 hourly scenarios spanning three ERCOT years, three SMR capital cost trajectories, a $5\times5$ joint reactor/absorption capital cost grid, three carbon prices and three WACC levels reveals that colocated SMR with double-effect absorption cooling for a 200~MW hyperscale data center is a conditional rather than a categorical cost-competitive solution. At 2023 ATB-Mid prices, the cogeneration configuration carries a 222\% premium against grid supply and is approximately \$4~M/yr more expensive than an SMR-only plant; the absorption chiller capital outweighs the cooling-electricity savings it produces. No cell of the published joint reactor / absorption-chiller capital cost rectangle contains a configuration that beats grid supply at zero carbon price; the most favourable corner (NOAK reactor plus a \$450/kW$_\mathrm{c}$ absorption chiller) lands at $-10\%$. A carbon price of approximately \$188/tCO$_2$ closes the gap to grid supply for both SMR configurations, but the cogeneration option does not earn a separable carbon credit above the SMR-only option. Practitioners siting a hyperscale data center in ERCOT should therefore treat colocated SMR with absorption cooling as a strategy that requires the simultaneous arrival of (a) reactor capital cost on the NOAK trajectory, (b) absorption-chiller capital cost at the Bare-Low end of the published range, and (c) either a carbon price near \$188/tCO$_2$ under ATB-Mid capital assumptions or a long-term offtake structure that compresses the effective WACC below 6.7\%. The reproducible co-optimization framework provided here can be re-parameterized for other ISO regions, climates and data-center sizes to test whether the conditional envelope opens in different conditions.
+A linear-programming co-optimization of 76 hourly scenarios spanning three ERCOT years, three SMR capital cost trajectories, a $5\times5$ joint reactor/absorption capital cost grid, three carbon prices and three WACC levels reveals that colocated SMR with double-effect absorption cooling for a 200~MW hyperscale data center is a conditional rather than a categorical cost-competitive solution. At 2023 ATB-Mid prices, the cogeneration configuration is 222\% more expensive than grid supply (a heat-recovery premium of $-222\%$) and is approximately \$4.2~M/yr more expensive than an SMR-only plant; the absorption chiller capital outweighs the cooling-electricity savings it produces. No cell of the published joint reactor / absorption-chiller capital cost rectangle contains a configuration that beats grid supply at zero carbon price; the most favourable corner (NOAK reactor plus a \$450/kW$_\mathrm{c}$ absorption chiller) lands at $-10\%$. A carbon price of approximately \$188/tCO$_2$ closes the gap to grid supply for both SMR configurations, but the cogeneration option does not earn a separable carbon credit above the SMR-only option. Practitioners siting a hyperscale data center in ERCOT should therefore treat colocated SMR with absorption cooling as a strategy that requires the simultaneous arrival of (a) reactor capital cost on the NOAK trajectory, (b) absorption-chiller capital cost at the Bare-Low end of the published range, and (c) either a carbon price near \$188/tCO$_2$ under ATB-Mid capital assumptions or a long-term offtake structure that compresses the effective WACC below 6.7\%. The reproducible co-optimization framework provided here can be re-parameterized for other ISO regions, climates and data-center sizes to test whether the conditional envelope opens in different conditions.
 
 
 \section*{CRediT authorship contribution statement}
