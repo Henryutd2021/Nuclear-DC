@@ -203,6 +203,12 @@ def _result_to_scalars(
         epbt_tech = "ngcc"
     else:  # NuclearCaseResult
         out["co2_annual_tonnes"] = float(r.co2_annual_tonnes)
+        # CO2 breakdown so the net (which is negative whenever the overbuilt
+        # reactor's export credit dominates) is self-documenting in the table:
+        # net = reactor-lifecycle + grid-import debit - grid-export credit.
+        out["co2_rx_lifecycle_tonnes"] = float(r.co2_rx_lifecycle_tonnes)
+        out["co2_grid_import_tonnes"] = float(r.co2_grid_import_tonnes)
+        out["co2_export_credit_tonnes"] = float(r.co2_export_credit_tonnes)
         out["fuel_annual_usd"] = float(r.fuel_annual_usd)
         out["grid_annual_usd"] = float(r.grid_annual_usd)
         out["Q_abs_cool_annual_MWh"] = float(

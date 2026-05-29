@@ -44,6 +44,14 @@ class NuclearCaseResult:
     tac_usd_per_yr: float
     co2_annual_tonnes: float
 
+    # CO2 breakdown (tonnes/yr). co2_annual_tonnes is the NET of these three:
+    # net = reactor-lifecycle + grid-import debit - grid-export credit.
+    # The net goes negative whenever the export credit exceeds on-site +
+    # import emissions (i.e. when the overbuilt reactor exports heavily).
+    co2_rx_lifecycle_tonnes: float = 0.0
+    co2_grid_import_tonnes: float = 0.0
+    co2_export_credit_tonnes: float = 0.0
+
 
 def _to_series(component, T) -> pd.Series:
     """Pull a Pyomo variable or parameter index over T into a pandas Series."""
@@ -101,4 +109,7 @@ def extract_result(
         carbon_annual_usd=float(pyo.value(model.carbon_annual)),
         tac_usd_per_yr=float(pyo.value(model.objective)),
         co2_annual_tonnes=co2_tonnes,
+        co2_rx_lifecycle_tonnes=co2_rx_kg / 1000.0,
+        co2_grid_import_tonnes=co2_grid_kg / 1000.0,
+        co2_export_credit_tonnes=co2_offset_kg / 1000.0,
     )
