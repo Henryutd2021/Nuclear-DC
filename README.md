@@ -130,8 +130,8 @@ Nuclear-DC/
 ├── scripts/                   # Run drivers
 │   └── run_all_analyses.py    # 73-run baseline + S1..S6 sensitivity grid (plan-v2.7)
 ├── tests/                     # Unit & integration tests (pytest, 85 fast + ~8 integration)
-├── notebooks/                 # Figure pipeline (make_v27_figures.py — Fig 2-11 + Graphical Abstract)
-├── AE_SMR_DC/                 # Applied Energy manuscript scaffold (cas-dc.cls)
+├── notebooks/                 # Single Jupyter figure pipeline (paper_figures.ipynb)
+├── AE_SMR_DC/                 # Applied Energy manuscript scaffold (cas-sc.cls)
 ├── docs/                      # Plan, model diagram, gap analysis, changelog
 └── outputs/                   # Solver outputs (git-ignored)
     ├── <group>/<run_id>/summary.json

@@ -9,7 +9,7 @@
   "figs_dir": "../outputs/figures",
   "figs_dir_note": "Shared with Nuclear-DC analysis outputs; not a local figs/ folder. From Original version/main.tex use graphicspath ../../outputs/figures/.",
   "version_dirs": ["Original version", "Final version", "revision", "response letter"],
-  "elsevier_variant": "dc",
+  "elsevier_variant": "sc",
   "git_layout": "nested-as-subfolder",
   "git_layout_note": "No nested .git inside AE_SMR_DC/; tracked by parent Nuclear-DC repo. Build artifacts ignored via Nuclear-DC/.gitignore.",
   "created_at": "2026-05-23T00:00:00Z"

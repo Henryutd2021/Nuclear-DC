@@ -45,6 +45,7 @@ env/
 # Jupyter
 .ipynb_checkpoints
 *.ipynb
+!notebooks/paper_figures.ipynb
 
 # Testing
 .pytest_cache/
@@ -74,7 +75,7 @@ outputs/
 *.out
 figures/**/main.pdf
 
-# Additional LaTeX intermediates (cas-dc / biblatex / beamer / minted etc.)
+# Additional LaTeX intermediates (cas-sc / biblatex / beamer / minted etc.)
 *.abs
 *.bcf
 *.lol
@@ -88,7 +89,7 @@ figures/**/main.pdf
 *.synctex(busy)
 
 # =============================================================================
-# AE_SMR_DC manuscript (Applied Energy, cas-dc.cls)
+# AE_SMR_DC manuscript (Applied Energy, cas-sc.cls)
 # Tracked in this repo as a regular subfolder (no nested .git).
 # Source (.tex / .bib / .cls / .sty / .bst) IS tracked; compiled PDFs and
 # tooling caches are NOT — recompile from source. Globals above cover most

@@ -1,36 +1,36 @@
 %%
-%% This is file `cas-sc.cls'.
+%% This is file `cas-dc.cls'.
 %%
 %% This file is part of the 'CAS Bundle'.
 %% ......................................
 %% 
 %% It may be distributed under the conditions of the LaTeX Project Public
-%% License, either version 1.2 of this license or (at your option) any
+%% License, either version 1.3c of this license or (at your option) any
 %% later version.  The latest version of this license is in
 %%    http://www.latex-project.org/lppl.txt
-%% and version 1.2 or later is part of all distributions of LaTeX
+%% and version 1.3c or later is part of all distributions of LaTeX
 %% version 1999/12/01 or later.
 %% 
 %% The list of all files belonging to the 'CAS Bundle' is
 %% given in the file `manifest.txt'.
 %% 
 
-%% $Id: cas-dc.cls 96 2024-05-04 09:29:44Z rishi $
+%% $Id: cas-sc.cls 96 2024-05-04 09:29:44Z rishi $
 
- \def\RCSfile{cas-dc}%
+ \def\RCSfile{cas-sc}%
  \def\RCSversion{2.4}%
  \def\RCSdate{2024/05/04}%
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
 \ProvidesClass{\RCSfile}[\RCSdate, \RCSversion: Formatting class
-   for CAS double column articles]
+   for CAS single column articles]
 %
 \def\ABD{\AtBeginDocument}
 %
 % switches
 % 
 \newif\iflongmktitle    \longmktitlefalse
-\newif\ifdc             \global\dctrue
-\newif\ifsc             \global\scfalse
+\newif\ifdc             \global\dcfalse
+\newif\ifsc             \global\sctrue
 \newif\ifcasreviewlayout  \global\casreviewlayoutfalse
 \newif\ifcasfinallayout   \global\casfinallayoutfalse
 
@@ -59,7 +59,7 @@
 
 \RequirePackage{expl3,xparse}
 \@ifundefined{regex_match:nnTF}{\RequirePackage{l3regex}}{}
-\RequirePackage{etoolbox,balance}
+\RequirePackage{etoolbox}
 \RequirePackage{booktabs,makecell,multirow,array,colortbl,dcolumn,stfloats}
 \RequirePackage{xspace,xstring,footmisc}
 \RequirePackage[svgnames,dvipsnames]{xcolor}
@@ -70,8 +70,6 @@
 \colorlet{scolor}{black}
 \colorlet{hscolor}{DarkSlateGrey}
 \hypersetup{%
-  pdftitle={\csuse{__short_title:}},
-  pdfauthor={\csuse{__short_authors:}},
   pdfcreator={LaTeX3; cas-sc.cls; hyperref.sty},
   pdfproducer={pdfTeX;},
   linkcolor={hscolor},
@@ -79,8 +77,11 @@
   citecolor={hscolor},
   filecolor={hscolor},
   menucolor={hscolor},
- }
-
+}
+% \AtEndDocument{\hypersetup
+%   {pdftitle={\csuse{__short_title:}},
+%   pdfauthor={\csuse{__short_authors:}}}}
+ 
  \let\comma\@empty
 \let\tnotesep\@empty
 \let\@title\@empty
@@ -95,7 +96,7 @@
 %
 \ExplSyntaxOn
 
-\RenewDocumentCommand \maketitle { }
+\RenewDocumentCommand \maketitle {}
 {
   \ifbool { usecasgrabsbox }
     { 
@@ -110,30 +111,31 @@
       \thispagestyle{empty}
       \unvbox\casauhlbox
     } { }    
-  \pagebreak
-  \thispagestyle{first}    
+  \pagebreak  
+  \thispagestyle{first}
   \ifbool{longmktitle}
   {
     \ifnum\theblind>0\relax
-      \LongMaketitleBox[Blind]
+        \LongMaketitleBox[blind]
     \else
-      \LongMaketitleBox
+		\LongMaketitleBox
     \fi
     \ProcessLongTitleBox
   }
   {
     \ifnum\theblind>0\relax
-      \twocolumn[{\MaketitleBox[blind]}]
+        \MaketitleBox[blind]
     \else
-      \twocolumn[\MaketitleBox]  
+		\MaketitleBox
     \fi
     \printFirstPageNotes
   }
+  \normalcolor \normalfont
   \setcounter{footnote}{\int_use:N \g_stm_fnote_int}
   \renewcommand\thefootnote{\arabic{footnote}}
   \gdef\@pdfauthor{\infoauthors}
   \gdef\@pdfsubject{Complex ~STM ~Content}
-  \ifbool{casreviewlayout}{\doublespacing}{}  
+  \ifbool{casreviewlayout}{\doublespacing}{}
 }
 
 %
@@ -157,31 +159,31 @@
   \iow_term:x {  *********************************************************** }
 }
 
-\file_if_exist:nTF { inconsolata.sty }
+\file_if_exist:nTF { inconsolata }
 { \RequirePackage[scaled=.85]{inconsolata} }
 { \tex_gdef:D \ttdefault { cmtt } }
-
 
 \ExplSyntaxOff
 
 %
 % Page geometry
 %
+
 \usepackage[%
-   paperwidth=210mm,
-   paperheight=280mm,
-   vmargin={19.5mm,18.2mm},
-   hmargin={18.1mm,18.1mm},
-   headsep=12pt,
-   footskip=12pt,
-   columnsep=18pt
+  paperwidth=192mm,
+  paperheight=262mm,
+%  vmargin={12.4mm,11.5mm},
+  vmargin={19mm,19mm},
+  hmargin={13.7mm,13.7mm},
+  headsep=12pt,
+  footskip=12pt,
 ]{geometry}
 
 
 \endinput
   
 %
-% End of class 'cas-dc'
+% End of class 'cas-sc'
 %
 
 
