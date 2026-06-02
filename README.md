@@ -1,6 +1,6 @@
 # Nuclear-Powered Data Center Optimization
 
-A modular Pyomo + Gurobi framework for co-optimizing electricity and chilled-water provision to a data center using nuclear heat. Plan v2.7 covers four operating cases on a single common accounting basis, with a 73-run baseline + 6-dimension sensitivity grid (PUE, ERCOT year, BESS, SMR CAPEX 1D, SMR×absorption CAPEX 2D, and carbon-price policy lever) for techno-economic boundary analysis. All eight KPIs from plan §0.5 D are now populated: TAC, LCOE, LCOC, Heat-Recovery Premium, annual CO₂, carbon abatement cost, EPBT, water footprint.
+A modular Pyomo + Gurobi framework for co-optimizing electricity and chilled-water provision to a data center using nuclear heat. Plan v2.8 covers four operating cases on a single common accounting basis, with a 100-run baseline + sensitivity grid (PUE, ERCOT year, BESS, SMR CAPEX 1D, SMR×absorption CAPEX 2D, carbon-price policy lever, WACC, and data-center size matching) for techno-economic boundary analysis. All eight KPIs from plan §0.5 D are now populated: TAC, LCOE, LCOC, Heat-Recovery Premium, annual CO₂, carbon abatement cost, EPBT, water footprint.
 
 ## Overview
 
@@ -18,7 +18,7 @@ The model minimizes Total Annualized Cost (TAC) while meeting data center IT loa
 
 0. **Case 0 — Grid-only baseline:** Data center buys all electricity from ERCOT and runs a VCC chiller; the TAC denominator for the Heat-Recovery Premium metric.
 1. **Case 1 — Nuclear, no heat recovery:** BWRX-300 + main turbine → electricity for IT and VCC; no cogen. Quantifies the gap between "build the reactor" and "use its waste heat too".
-2. **Case 2 — Nuclear + cascaded extraction + absorption (v2.7 head-line):** HP extraction at ~160 °C drives the absorption chiller. Willans line charges ~0.083 MWe/MWth diverted (Plan §A7 + §F.1).
+2. **Case 2 — Nuclear + cascaded extraction + absorption (v2.8 headline):** HP extraction at ~160 °C drives the absorption chiller. Willans line charges ~0.083 MWe/MWth diverted (Plan §A7 + §F.1).
 3. **Case 3 — On-site NGCC:** Natural-gas combined cycle (net η = 0.55) covers IT and VCC off-grid; benchmark for fossil baseload (was Case 4 in v2.5).
 
 ## Quick Start
@@ -43,7 +43,7 @@ pip install -r requirements.txt
 ### Basic Usage
 
 ```bash
-# Drive the full v2.7 sensitivity grid (baseline + S1..S6, 73 solves total)
+# Drive the full v2.8 sensitivity grid (baseline + S1..S8, 100 solves total)
 PYTHONPATH=. python scripts/run_all_analyses.py
 ```
 
@@ -118,7 +118,7 @@ Nuclear-DC/
 │   ├── config.py              # Pydantic configuration loader + S4 reactor / S5 CAPEX helpers
 │   ├── data.py                # Time-series loader (ERCOT LMP + NSRDB wet bulb + IT load + AEF)
 │   ├── kpi.py                 # Heat-Recovery Premium + LCOE/LCOC helpers
-│   ├── cases/                 # Per-case solve entry points (case0..case3, v2.7)
+│   ├── cases/                 # Per-case solve entry points (case0..case3, v2.8)
 │   │   ├── case0.py           # Grid-only baseline (closed-form LP)
 │   │   ├── case1.py           # Nuclear, no recovery (Pyomo MILP via builder)
 │   │   ├── case2.py           # Nuclear + cascaded extraction + absorption
@@ -128,7 +128,7 @@ Nuclear-DC/
 │       ├── solve.py           # Gurobi solver wrapper
 │       └── result.py          # NuclearCaseResult dataclass + extractor
 ├── scripts/                   # Run drivers
-│   └── run_all_analyses.py    # 73-run baseline + S1..S6 sensitivity grid (plan-v2.7)
+│   └── run_all_analyses.py    # 100-run baseline + S1..S8 sensitivity grid (plan-v2.8)
 ├── tests/                     # Unit & integration tests (pytest, 85 fast + ~8 integration)
 ├── notebooks/                 # Single Jupyter figure pipeline (paper_figures.ipynb)
 ├── AE_SMR_DC/                 # Applied Energy manuscript scaffold (cas-sc.cls)
@@ -255,7 +255,7 @@ Minimize **Total Annualized Cost (TAC)** including:
 
 ## Outputs
 
-For a single-case solve, the model writes hourly dispatch (CSV) and a scalar KPI summary (JSON) under `outputs/`, together with the Gurobi log. The sensitivity-grid driver (`scripts/run_all_analyses.py`) additionally produces a flat `outputs/master_kpi_table.csv` covering every (case × year × PUE × reactor-CAPEX × BESS × equipment-CAPEX) cell, and a `manifest.json` recording the run grid plus per-run wall time.
+For a single-case solve, the model writes hourly dispatch (CSV) and a scalar KPI summary (JSON) under `outputs/`, together with the Gurobi log. The sensitivity-grid driver (`scripts/run_all_analyses.py`) additionally produces a flat `outputs/master_kpi_table.csv` covering every (case × year × PUE × reactor-CAPEX × BESS × equipment-CAPEX × WACC × carbon-price × load-scale) cell, and a `manifest.json` recording the run grid plus per-run wall time.
 
 ## Development
 
@@ -320,7 +320,7 @@ black src/ tests/ && ruff check . && mypy src/
   - 24-hour smoke test: a few seconds
   - 168-hour horizon: 10–60 seconds
   - 8760-hour annual run: 1–10 minutes per case (depends on case and whether capacity co-design is enabled)
-  - Full 73-run sensitivity grid via `scripts/run_all_analyses.py`: ~2.5 min on 12-core workstation (Gurobi LP relaxation; see manifest.json for breakdown)
+  - Full 100-run sensitivity grid via `scripts/run_all_analyses.py`: ~0.5-3 min on a multi-core workstation (Gurobi LP relaxation; see manifest.json for breakdown)
 
 ## Troubleshooting
 

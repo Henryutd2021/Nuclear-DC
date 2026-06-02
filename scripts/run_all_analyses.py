@@ -1,6 +1,6 @@
-"""Drive every plan-v2.6 run (baseline + S1..S5) and stage outputs/.
+"""Drive every plan-v2.8 run (baseline + S1..S8) and stage outputs/.
 
-Run grid (61 solves total, per plan §3 and §5 Phase 2):
+Run grid (100 solves total):
 
   main_baseline       4 runs   Cases 0-3  | year 2023 | PUE 1.30 | reactor ATB-Mid
   s1_pue              6 runs   Cases 1-2  | year 2023 | PUE in {1.10, 1.30, 1.50}
@@ -16,12 +16,16 @@ Run grid (61 solves total, per plan §3 and §5 Phase 2):
   s5_feasibility_2d  25 runs   Case 2     | year 2023 | PUE 1.30
                                                       | (SMR, absorption) CAPEX 5×5 grid
                                                       driven by config/capex_grid_s5.yaml
+  s6_carbon_price    12 runs   Cases 0-3  | carbon price in {0, 50, 100} $/tCO2
+  s7_wacc             3 runs   Case 2     | WACC in {5%, 6.7%, 10%}
+  s8_size_matching   24 runs   Cases 0-3  | IT-load multiplier in
+                                                      {0.5, 1.0, 1.5, 2.0, 2.5, 3.0}
 
 Outputs layout:
 
   outputs/<group>/<run_id>/summary.json     -- scalar KPIs + metadata
   outputs/<group>/<run_id>/dispatch.csv.gz  -- hourly time series (compressed)
-  outputs/master_kpi_table.csv              -- 61-row flat table
+  outputs/master_kpi_table.csv              -- 100-row flat table
   outputs/manifest.json                     -- run grid + execution stats
 """
 
@@ -29,6 +33,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
 import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -40,6 +45,10 @@ import pandas as pd
 import yaml
 
 warnings.filterwarnings("ignore", category=UserWarning)
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.cases.case0 import Case0Result, solve_case0  # noqa: E402
 from src.cases.case1 import solve_case1  # noqa: E402
@@ -62,7 +71,6 @@ from src.kpi import (  # noqa: E402
 )
 from src.milp.result import NuclearCaseResult  # noqa: E402
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUTPUTS = PROJECT_ROOT / "outputs"
 
 CASE_SOLVERS: dict[int, Callable] = {
@@ -309,13 +317,64 @@ def with_capex_pair(
 
 
 # ---------------------------------------------------------------------------
+# v2.8 S8 — data-center size matching against a fixed commercial BWRX-300
+# ---------------------------------------------------------------------------
+
+
+def scale_load_time_series(ts: TimeSeries, load_multiplier: float) -> TimeSeries:
+    """Scale only the IT-load trace while preserving market/weather inputs."""
+    if abs(load_multiplier - 1.0) < 1e-12:
+        return ts
+    return TimeSeries(
+        year=ts.year,
+        num_hours=ts.num_hours,
+        it_load_MW=ts.it_load_MW * load_multiplier,
+        wet_bulb_C=ts.wet_bulb_C,
+        price_import_usd_per_mwh=ts.price_import_usd_per_mwh,
+        carbon_intensity_g_per_kwh=ts.carbon_intensity_g_per_kwh,
+        henry_hub_usd_per_mmbtu=ts.henry_hub_usd_per_mmbtu,
+        henry_hub_usd_per_mmbtu_hourly=ts.henry_hub_usd_per_mmbtu_hourly,
+    )
+
+
+def with_data_center_scale(cfg: RunConfig, load_multiplier: float) -> RunConfig:
+    """Scale data-center-side equipment capacities for the S8 size sweep.
+
+    The commercial BWRX-300 block is deliberately not resized here. S8 asks how
+    a fixed 270 MWe SMR matches campuses of different size, so only chillers
+    and the NGCC comparator scale with the data-center load.
+    """
+    if abs(load_multiplier - 1.0) < 1e-12:
+        return cfg
+
+    cap = cfg.case.capacities
+    updates: dict[str, float] = {}
+    if cap.electric_chiller_capacity_MWth is not None:
+        updates["electric_chiller_capacity_MWth"] = (
+            cap.electric_chiller_capacity_MWth * load_multiplier
+        )
+    if cfg.case.case_id == 2 and cap.absorption_capacity_MWth is not None:
+        updates["absorption_capacity_MWth"] = (
+            cap.absorption_capacity_MWth * load_multiplier
+        )
+    if cfg.case.case_id == 3 and cap.ngcc_capacity_MWe is not None:
+        updates["ngcc_capacity_MWe"] = cap.ngcc_capacity_MWe * load_multiplier
+
+    if not updates:
+        return cfg
+    new_cap = cap.model_copy(update=updates)
+    new_case = cfg.case.model_copy(update={"capacities": new_cap})
+    return cfg.model_copy(update={"case": new_case})
+
+
+# ---------------------------------------------------------------------------
 # Single-run executor
 # ---------------------------------------------------------------------------
 
 
 @dataclass(frozen=True)
 class RunSpec:
-    """One row of the 76-run grid (v2.7: 61 v2.6 + 12 S6 carbon-price + 3 S7 WACC)."""
+    """One row of the 100-run grid (v2.8: v2.7 + S8 size matching)."""
 
     group: str        # 'main_baseline' | 's1_pue' | ... | 's6_carbon_price' | 's7_wacc'
     run_id: str       # filesystem-safe key, unique within group
@@ -330,6 +389,7 @@ class RunSpec:
     absorption_capex_tag: Optional[str] = None            # S5 grid label
     carbon_price_usd_per_tco2: float = 0.0                # S6 sensitivity
     wacc_override: Optional[float] = None                 # S7 sensitivity (v2.7)
+    load_multiplier: float = 1.0                          # S8 sensitivity
 
     @property
     def output_dir(self) -> Path:
@@ -382,8 +442,12 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
     if spec.wacc_override is not None:
         cfg = with_wacc(cfg, spec.wacc_override)
 
+    # --- S8 data-center size sweep (v2.8) ----------------------------------
+    cfg = with_data_center_scale(cfg, spec.load_multiplier)
+
     # --- Time series --------------------------------------------------------
     ts = load_time_series(project_root=PROJECT_ROOT, year=spec.year, num_hours=8760)
+    ts = scale_load_time_series(ts, spec.load_multiplier)
 
     # --- Solve --------------------------------------------------------------
     solver = CASE_SOLVERS[spec.case_id]
@@ -416,6 +480,7 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
             "absorption_capex_tag": spec.absorption_capex_tag,
             "carbon_price_usd_per_tco2": spec.carbon_price_usd_per_tco2,
             "wacc_override": spec.wacc_override,
+            "load_multiplier": spec.load_multiplier,
             "wacc_effective": float(cfg.financial.WACC_nominal),
             "crf_effective": float(cfg.financial.capital_recovery_factor),
             "num_hours": ts.num_hours,
@@ -432,6 +497,7 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
         "case_id": spec.case_id,
         "year": spec.year,
         "pue": spec.pue,
+        "load_multiplier": spec.load_multiplier,
         "reactor_scenario": spec.reactor_scenario,
         "bess_applied": bess_applied,
         "smr_capex_usd_per_kWe": spec.smr_capex_usd_per_kWe,
@@ -596,6 +662,25 @@ def build_run_grid() -> list[RunSpec]:
             )
         )
 
+    # ---- S8 DC-size matching: 4 cases × 6 IT-load multipliers (v2.8) -------
+    # Fixed BWRX-300 nameplate; data-center-side cooling and NGCC comparator
+    # capacities scale with the IT-load trace. This is the deployment-realistic
+    # counterpart to the exploratory load-matched-reactor counterfactual.
+    for mult in (0.50, 1.00, 1.50, 2.00, 2.50, 3.00):
+        mult_tag = f"x{int(round(mult * 100)):03d}"
+        for cid in _ALL_CASES:
+            specs.append(
+                RunSpec(
+                    group="s8_size_matching",
+                    run_id=f"case{cid}_load_{mult_tag}",
+                    case_id=cid,
+                    year=2023,
+                    pue=1.30,
+                    reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
+                    load_multiplier=mult,
+                )
+            )
+
     return specs
 
 
@@ -607,7 +692,7 @@ def build_run_grid() -> list[RunSpec]:
 def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Compute Heat-Recovery Premium + Carbon-Abatement Cost vs Case 0.
 
-    Both metrics use the same (year, pue, bess_applied) matching to Case 0,
+    Both metrics use the same (year, pue, load_multiplier, bess_applied) matching to Case 0,
     falling back to (year, pue, False) and finally to main_baseline Case 0.
 
     Heat-Recovery Premium = (TAC_case0 - TAC_case) / TAC_case0
@@ -618,7 +703,13 @@ def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
     # need a price-matched denominator to be meaningful). S7 WACC scan compares
     # Case 2 against the constant ATB-baseline Case 0 (different WACC's per row
     # would mean Case 0 also needs a WACC scan — out of scope for the mini-scan).
-    key_cols = ["year", "pue", "bess_applied", "carbon_price_usd_per_tco2"]
+    key_cols = [
+        "year",
+        "pue",
+        "load_multiplier",
+        "bess_applied",
+        "carbon_price_usd_per_tco2",
+    ]
     case0_rows = df[df["case_id"] == 0].set_index(key_cols)
     baseline_tac = case0_rows["tac_usd_per_yr"].to_dict()
     baseline_co2 = case0_rows["co2_annual_tonnes"].to_dict()
@@ -628,13 +719,15 @@ def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
 
     def _lookup(row, table: dict, main_fallback: float) -> float:
         key = (
-            row["year"], row["pue"], row["bess_applied"],
+            row["year"], row["pue"], row["load_multiplier"], row["bess_applied"],
             row["carbon_price_usd_per_tco2"],
         )
         # Fallbacks: (1) same year/pue at carbon=0, (2) main baseline value.
         v = table.get(key)
         if v is None:
-            v = table.get((row["year"], row["pue"], False, 0.0))
+            v = table.get((row["year"], row["pue"], row["load_multiplier"], False, 0.0))
+        if v is None:
+            v = table.get((row["year"], row["pue"], 1.0, False, 0.0))
         if v is None:
             v = main_fallback
         return float(v)
@@ -673,6 +766,7 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
         "case_id",
         "year",
         "pue",
+        "load_multiplier",
         "reactor_scenario",
         "bess_applied",
         "carbon_price_usd_per_tco2",
@@ -708,7 +802,7 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
         by_group.setdefault(s.group, []).append(s.run_id)
     total_seconds = float(sum(r.get("solve_seconds", 0.0) for r in rows))
     manifest = {
-        "plan_version": "v2.7",
+        "plan_version": "v2.8",
         "executed_at_utc": pd.Timestamp.utcnow().isoformat(),
         "num_runs": len(specs),
         "total_solve_seconds": round(total_seconds, 1),
@@ -728,6 +822,8 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
                 "(Plan v2.7 Patch 1 — absorption-chiller waterfall)",
                 "outputs/figures/water_3tier.csv "
                 "(Plan v2.7 Patch 2 — direct/indirect/scarcity-weighted)",
+                "outputs/figures/fig12_s8_size_matching.* "
+                "(Plan v2.8 — data-center size matching against fixed BWRX-300)",
             ],
         },
         "notes": [
@@ -742,8 +838,12 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
             "S6 sweeps carbon price {$0, $50, $100}/tCO2 across all four cases.",
             "S7 (v2.7) sweeps WACC {5%, 6.7%, 10%} on Case 2 only; CRF is "
             "recomputed from i*(1+i)^20/((1+i)^20-1) for each row.",
+            "S8 (v2.8) scales the IT-load trace and data-center-side equipment "
+            "capacities by {0.5, 1.0, 1.5, 2.0, 2.5, 3.0} while holding the "
+            "commercial BWRX-300 reactor capacity fixed.",
             "Premium is computed against the Case-0 TAC at matching "
-            "(year, pue, carbon_price), falling back to (year, pue, bess=False) "
+            "(year, pue, load_multiplier, carbon_price), falling back to "
+            "(year, pue, load_multiplier, bess=False) "
             "if needed. S7 rows compare against the ATB-baseline Case 0 (the "
             "WACC scan deliberately holds the baseline fixed so the ΔPremium "
             "isolates the financing lever).",
@@ -759,7 +859,7 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
 
 
 def _resolve_parallelism() -> tuple[int, int]:
-    """Choose (workers, threads_per_solve) for the 73-run grid.
+    """Choose (workers, threads_per_solve) for the 100-run grid.
 
     Defaults are tuned for the Threadripper PRO 5995WX (64 physical
     cores). Both can be overridden via env vars; the product is clamped
@@ -791,7 +891,7 @@ def main() -> None:
         f"sequential" if workers <= 1
         else f"parallel ({workers} workers × {threads_per_solve} threads)"
     )
-    print(f"Running {len(specs)} solves (plan-v2.6) — {mode_tag}\n")
+    print(f"Running {len(specs)} solves (plan-v2.8) — {mode_tag}\n")
 
     rows: list[dict[str, Any]] = []
     t0 = time.time()
