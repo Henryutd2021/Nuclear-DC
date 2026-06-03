@@ -26,6 +26,7 @@ import pandas as pd
 
 from src.config import RunConfig
 from src.data import TimeSeries
+from src.finance import annualized_capex
 
 
 @dataclass(frozen=True)
@@ -106,11 +107,10 @@ def solve_case0(
     # ---- Annualization -----------------------------------------------------
     annual_scale = 8760.0 / ts.num_hours
 
-    capex_annual = (
-        vcc.capex_usd_per_kWth
-        * Q_capacity
-        * 1000.0
-        * cfg.financial.capital_recovery_factor
+    capex_annual = annualized_capex(
+        vcc.capex_usd_per_kWth * Q_capacity * 1000.0,
+        cfg.financial.WACC_nominal,
+        vcc.lifetime_years,
     )
     fom_annual = vcc.fixed_om_usd_per_kWth_year * Q_capacity * 1000.0
     vom_annual = (

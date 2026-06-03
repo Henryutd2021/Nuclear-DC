@@ -77,6 +77,7 @@ absorption:
   crystallization_cw_inlet_C:               32       # LiBr crystallization threshold
   parasitic_kWe_per_kWth:                   0.020
   lifetime_years:                           25
+  availability:                             0.95     # maintenance availability
 
 # VCC backup (same model as Cases 0/1)
 vcc:
@@ -99,3 +100,4 @@ bess:
   soc_max_fraction:            0.95
   initial_soc_fraction:        0.50
   lifetime_years:              15
+  end_of_life_credit_pct:      5        # salvage value of cells/casing

@@ -31,6 +31,7 @@ import pyomo.environ as pyo
 
 from src.config import RunConfig
 from src.data import TimeSeries
+from src.finance import annualized_capex
 
 _MMBTU_PER_MWh: float = 3.412
 
@@ -92,7 +93,7 @@ def build_model(
     pue_used = float(pue if pue is not None else cfg.base.physics.pue_default)
     eta_chain = cfg.base.physics.cooling_chain_efficiency
     dt = cfg.base.time.delta_t
-    crf = cfg.financial.capital_recovery_factor
+    wacc = cfg.financial.WACC_nominal
     annual_scale = 8760.0 / ts.num_hours
 
     m = pyo.ConcreteModel(name=f"NuclearDC_Case{cfg.case.case_id}")
@@ -138,7 +139,7 @@ def build_model(
             for t in m.T
         }
         avail_t = {
-            t: 1.0
+            t: ab.availability
             if _absorption_available(
                 float(ts.wet_bulb_C.iloc[t]),
                 ab.cooling_water_approach_K,
@@ -327,23 +328,37 @@ def build_model(
     # ---- Objective: TAC (v2.6 unified accounting, ORC removed) -------------
     capex_annual_expr = 0.0
     fom_annual_expr = 0.0
-    capex_annual_expr += rx.capex_usd_per_kWe * rx.electric_power_net_MWe * 1000.0 * crf
+    capex_annual_expr += annualized_capex(
+        rx.capex_usd_per_kWe * rx.electric_power_net_MWe * 1000.0, wacc, rx.lifetime_years
+    )
     fom_annual_expr += rx.fixed_om_usd_per_kWe_year * rx.electric_power_net_MWe * 1000.0
     if tb.capex_usd_per_kWe > 0:
-        capex_annual_expr += tb.capex_usd_per_kWe * rx.electric_power_net_MWe * 1000.0 * crf
+        # Turbine is bundled into the reactor island; amortize over reactor life.
+        capex_annual_expr += annualized_capex(
+            tb.capex_usd_per_kWe * rx.electric_power_net_MWe * 1000.0, wacc, rx.lifetime_years
+        )
         fom_annual_expr += tb.fixed_om_usd_per_kWe_year * rx.electric_power_net_MWe * 1000.0
-    capex_annual_expr += vcc.capex_usd_per_kWth * Q_vcc_max * 1000.0 * crf
+    capex_annual_expr += annualized_capex(
+        vcc.capex_usd_per_kWth * Q_vcc_max * 1000.0, wacc, vcc.lifetime_years
+    )
     fom_annual_expr += vcc.fixed_om_usd_per_kWth_year * Q_vcc_max * 1000.0
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
         ab = cfg.case.absorption
         abs_cap_MWth = cap.absorption_capacity_MWth or 100.0
-        capex_annual_expr += ab.capex_usd_per_kWth * abs_cap_MWth * 1000.0 * crf
+        capex_annual_expr += annualized_capex(
+            ab.capex_usd_per_kWth * abs_cap_MWth * 1000.0, wacc, ab.lifetime_years
+        )
         fom_annual_expr += ab.fixed_om_usd_per_kWth_year * abs_cap_MWth * 1000.0
     if eq.bess_enabled and cfg.case.bess is not None:
         bs = cfg.case.bess
         Cap_E = cap.bess_capacity_MWh
         Cap_P = cap.bess_power_MW
-        capex_annual_expr += bs.capex_usd_per_kwh * Cap_E * 1000.0 * crf
+        capex_annual_expr += annualized_capex(
+            bs.capex_usd_per_kwh * Cap_E * 1000.0,
+            wacc,
+            bs.lifetime_years,
+            bs.end_of_life_credit_pct / 100.0,
+        )
         fom_annual_expr += bs.fixed_om_usd_per_kw_year * Cap_P * 1000.0
 
     # Full VOM expression

@@ -28,6 +28,7 @@ import pandas as pd
 
 from src.config import RunConfig
 from src.data import TimeSeries
+from src.finance import annualized_capex
 
 _MMBTU_PER_MWh: float = 3.412  # HHV basis conversion
 
@@ -137,11 +138,12 @@ def solve_case3(
 
     # ---- Annualization ------------------------------------------------------
     annual_scale = 8760.0 / ts.num_hours
-    crf = cfg.financial.capital_recovery_factor
+    wacc = cfg.financial.WACC_nominal
 
-    capex_annual = (
-        ngcc.capex_usd_per_kWe * NGCC_capacity * 1000.0 * crf
-        + vcc.capex_usd_per_kWth * Q_capacity * 1000.0 * crf
+    capex_annual = annualized_capex(
+        ngcc.capex_usd_per_kWe * NGCC_capacity * 1000.0, wacc, ngcc.lifetime_years
+    ) + annualized_capex(
+        vcc.capex_usd_per_kWth * Q_capacity * 1000.0, wacc, vcc.lifetime_years
     )
     fom_annual = (
         ngcc.fixed_om_usd_per_kWe_year * NGCC_capacity * 1000.0

@@ -149,6 +149,7 @@ class AbsorptionConfig(BaseModel):
     crystallization_cw_inlet_C: float = Field(gt=0.0) # 32 °C critical
     parasitic_kWe_per_kWth: float = Field(ge=0.0)
     lifetime_years: int = Field(gt=0)
+    availability: float = Field(1.0, gt=0.0, le=1.0)  # maintenance availability
 
 
 class BessConfig(BaseModel):
@@ -164,6 +165,7 @@ class BessConfig(BaseModel):
     soc_max_fraction: float = Field(gt=0.0, le=1.0)
     initial_soc_fraction: float = Field(ge=0.0, le=1.0)
     lifetime_years: int = Field(gt=0)
+    end_of_life_credit_pct: float = Field(0.0, ge=0.0, lt=100.0)  # salvage at EOL
 
 
 class CaseConfig(BaseModel):

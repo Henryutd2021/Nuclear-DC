@@ -74,3 +74,4 @@ bess:
   soc_max_fraction:            0.95
   initial_soc_fraction:        0.50
   lifetime_years:              15
+  end_of_life_credit_pct:      5        # salvage value of cells/casing

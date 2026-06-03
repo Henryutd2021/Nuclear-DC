@@ -4,11 +4,11 @@ Decomposes the Heat-Recovery Premium of Case 2 vs Case 1 into a waterfall of
 six components so the paper can answer "where does absorption chiller value
 come from / go to?":
 
-    + VCC electricity saved          (positive, absorption displaces VCC kWh)
+    + Gross VCC electricity saved    (positive, absorption displaces Case 1 VCC kWh)
     - Turbine power lost             (negative, extraction reduces P_turb_net)
     - Absorption CAPEX + FOM         (negative, equipment overhead)
     - Extra cooling-tower water cost (negative, Q_reject grows by 1+1/COP)
-    - Crystallization-cutoff VCC backup (negative, hot-day fallback)
+    - Case 2 VCC backup/top-up (negative, steam-limited or hot-day fallback)
     = Net contribution to Premium   (= TAC_Case1 - TAC_Case2)
 
 The "matching pair" semantics: each row pairs a Case 2 run with the Case 1
@@ -31,6 +31,7 @@ from typing import Optional
 import pandas as pd
 
 from src.data import load_time_series
+from src.finance import annualized_capex
 
 # Texas industrial water cost — Macknick 2012 + TWDB 2024 industrial tariff
 # midpoint, used as the externality price for the ΔWater component. Honest
@@ -55,11 +56,12 @@ class ValueDecompositionRow:
     net_value_of_absorption_usd_per_yr: float          # = TAC1 - TAC2
 
     # Waterfall components (positive = adds value, negative = subtracts)
-    vcc_elec_saved_usd_per_yr: float
+    vcc_elec_saved_usd_per_yr: float                     # gross Case 1 VCC electricity cost
+    net_vcc_elec_saved_usd_per_yr: float                 # gross saved less Case 2 VCC backup/top-up
     turbine_gen_lost_usd_per_yr: float
     absorption_capex_fom_usd_per_yr: float
     extra_water_cost_usd_per_yr: float
-    crystal_cutoff_backup_usd_per_yr: float
+    crystal_cutoff_backup_usd_per_yr: float            # legacy name: all Case 2 VCC backup/top-up
     sum_of_components_usd_per_yr: float
     residual_usd_per_yr: float                          # net - sum_components
 
@@ -99,11 +101,12 @@ def _component_value_usd(
 ) -> dict[str, float]:
     """Translate hourly dispatch deltas into annualized $/yr components.
 
-    VCC electricity saved is priced at *import* LMP (counterfactual: Case 1
-    would have bought that kWh from ERCOT). Turbine power lost is priced at
-    *export* LMP (counterfactual: Case 2 would have sold those kWh to ERCOT).
-    The asymmetry is deliberate — it mirrors how Case 1 vs Case 2 actually
-    sees the market.
+    Gross VCC electricity displaced is priced at *import* LMP (counterfactual:
+    Case 1 would have bought that kWh from ERCOT). Case 2 backup/top-up VCC is
+    kept as a separate negative component so the waterfall does not hide it in
+    the savings bar. Turbine power lost is priced at *export* LMP
+    (counterfactual: Case 2 would have sold those kWh to ERCOT). The asymmetry
+    is deliberate — it mirrors how Case 1 vs Case 2 actually sees the market.
     """
     # MW values aligned by integer hour index.
     p_vcc_1 = case1_disp["P_VCC_elec_MW"].to_numpy()
@@ -112,8 +115,8 @@ def _component_value_usd(
     p_import = price_import.to_numpy()
     p_export = price_export.to_numpy()
 
-    delta_vcc_mw = p_vcc_1 - p_vcc_2                   # MW saved by absorption
-    vcc_saved_usd = float((delta_vcc_mw * p_import).sum() * dt * annual_scale)
+    gross_vcc_displaced_mw = p_vcc_1
+    vcc_saved_usd = float((gross_vcc_displaced_mw * p_import).sum() * dt * annual_scale)
 
     p_turb_lost_mw = extraction_slope_MWe_per_MWth * q_to_abs
     turbine_lost_usd = float((p_turb_lost_mw * p_export).sum() * dt * annual_scale)
@@ -149,12 +152,15 @@ def _absorption_capex_annual(s2: dict, project_root: Path) -> tuple[float, float
         abs_capex_usd_per_kWth = case2_yaml["absorption"]["capex_usd_per_kWth"]
     abs_fom_usd_per_kWth_yr = case2_yaml["absorption"]["fixed_om_usd_per_kWth_year"]
     abs_cap_MWth = case2_yaml["capacities"]["absorption_capacity_MWth"]
+    abs_lifetime_years = case2_yaml["absorption"]["lifetime_years"]
 
-    # S7 may have overridden WACC → CRF. Read the effective CRF stored on
-    # the run; fall back to the financial baseline.
-    crf = s2["metadata"].get("crf_effective") or fin["capital_recovery_factor"]
+    # Amortize over the chiller's own life (matches builder per-component CRF).
+    # S7 may have overridden WACC; read the effective WACC, else the baseline.
+    wacc = s2["metadata"].get("wacc_effective") or fin["WACC_nominal"]
 
-    capex_annual = abs_capex_usd_per_kWth * abs_cap_MWth * 1000.0 * crf
+    capex_annual = annualized_capex(
+        abs_capex_usd_per_kWth * abs_cap_MWth * 1000.0, wacc, abs_lifetime_years
+    )
     fom_annual = abs_fom_usd_per_kWth_yr * abs_cap_MWth * 1000.0
     return capex_annual, fom_annual
 
@@ -212,9 +218,10 @@ def compute_value_decomposition(
             abs_capex, abs_fom = _absorption_capex_annual(s2, project_root)
             extra_water = _extra_water_cost(s1, s2)
 
-            # Crystallization-cutoff backup proxy: hours where Case 2's VCC
-            # is firing despite absorption capacity available. Charge those
-            # kWh at the hourly import LMP.
+            # Case 2 VCC backup/top-up proxy: all hours where the VCC is
+            # firing in the absorption case, including steam-limited top-up
+            # and full crystallization-gate fallback. Charge those kWh at the
+            # hourly import LMP.
             crystal_mask = d2["P_VCC_elec_MW"] > 1e-3
             crystal_backup_mw = d2["P_VCC_elec_MW"][crystal_mask]
             crystal_price = price_import.iloc[crystal_backup_mw.index]
@@ -257,6 +264,10 @@ def compute_value_decomposition(
                     tac_case1_usd_per_yr=tac_1,
                     tac_case2_usd_per_yr=tac_2,
                     net_value_of_absorption_usd_per_yr=net,
+                    net_vcc_elec_saved_usd_per_yr=(
+                        comp["vcc_elec_saved_usd_per_yr"]
+                        + comp["crystal_cutoff_backup_usd_per_yr"]
+                    ),
                     sum_of_components_usd_per_yr=sum_components,
                     residual_usd_per_yr=net - sum_components,
                     **comp,
