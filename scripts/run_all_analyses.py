@@ -845,8 +845,6 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
             "post_processed": [
                 "outputs/figures/value_decomp_case2.csv "
                 "(Plan v2.7 Patch 1 — absorption-chiller waterfall)",
-                "outputs/figures/water_3tier.csv "
-                "(Plan v2.7 Patch 2 — direct/indirect/scarcity-weighted)",
                 "outputs/figures/fig12_s8_size_matching.* "
                 "(Plan v2.8 — data-center size matching against fixed BWRX-300)",
             ],
