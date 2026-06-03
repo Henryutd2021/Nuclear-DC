@@ -94,8 +94,10 @@ def solve_case3(
     dt = cfg.base.time.delta_t
 
     # ---- Hourly dispatch (off-grid: NGCC covers everything) ----------------
+    # IT power becomes heat the chiller must reject (eta_chain = distribution
+    # losses); PUE is a reported outcome, not a driver of the heat load.
     P_IT = ts.it_load_MW
-    Q_cool = (pue_used - 1.0) * P_IT / eta_chain
+    Q_cool = P_IT / eta_chain
     P_VCC = Q_cool / vcc.cop_houston
     P_NGCC = P_IT + P_VCC
 
@@ -109,12 +111,12 @@ def solve_case3(
     if Q_cool.max() > Q_capacity + 1e-6:
         raise ValueError(
             f"VCC capacity {Q_capacity} MWth insufficient for max Q_cool "
-            f"{Q_cool.max():.2f} MWth at PUE={pue_used}"
+            f"{Q_cool.max():.2f} MWth (= P_IT_max / eta_chain)"
         )
     if P_NGCC.max() > NGCC_capacity + 1e-6:
         raise ValueError(
             f"NGCC capacity {NGCC_capacity} MWe insufficient for max demand "
-            f"{P_NGCC.max():.2f} MWe at PUE={pue_used}"
+            f"{P_NGCC.max():.2f} MWe"
         )
 
     # ---- Fuel ---------------------------------------------------------------

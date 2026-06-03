@@ -28,8 +28,8 @@ equipment:
   grid_export_enabled:        false
 
 capacities:
-  electric_chiller_capacity_MWth: 120.0   # identical to Case 0 (same DC)
-  ngcc_capacity_MWe:              200.0   # covers max IT (142 MW) + max VCC draw (~22 MW) + buffer
+  electric_chiller_capacity_MWth: 160.0   # identical to Case 0 (>= 158.3 MWth)
+  ngcc_capacity_MWe:              200.0   # covers max IT (142.4) + max VCC draw (49.5) = 191.9 MWe + buffer
 
 # Vapor-compression chiller — identical to Case 0 baseline
 vcc:

@@ -31,7 +31,9 @@ physics:
   pump_power_per_flow: 0.01  # MW per MWth flow
   pump_power_base: 0.1       # MW
 
-  # PUE for cooling derivation (if cooling_load.csv missing)
+  # Cooling chain: heat to reject = P_IT / eta_chain. PUE is a reported outcome
+  # (1 + cooling parasitics / P_IT), not an input to the heat load. pue_default
+  # is retained only as a fallback label for legacy call paths.
   pue_default: 1.5
   cooling_chain_efficiency: 0.9
 

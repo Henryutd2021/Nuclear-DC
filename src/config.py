@@ -415,3 +415,25 @@ def with_reactor_capex(
     new_reactor = cfg.case.reactor.model_copy(update={"capex_usd_per_kWe": occ})
     new_case = cfg.case.model_copy(update={"reactor": new_reactor})
     return cfg.model_copy(update={"case": new_case})
+
+
+def with_cooling_cop(cfg: RunConfig, cop_houston: float) -> RunConfig:
+    """Return a copy of ``cfg`` with the electric-chiller (VCC) COP overridden.
+
+    S1 recasts the old "PUE sweep" as a cooling-efficiency sweep. With the heat
+    load fixed at P_IT / eta_chain, the data-center cooling overhead is set by
+    the chiller COP: reported PUE = 1 + 1 / (eta_chain * COP). Sweeping COP over
+    {11.11, 3.70, 2.22} reproduces effective PUE {1.10, 1.30, 1.50}. The
+    absorption COP is a physical property of the LiBr cycle and is left as-is.
+
+    Raises ValueError if the COP is non-positive or the case has no vcc block.
+    """
+    if cop_houston <= 0.0:
+        raise ValueError(f"cop_houston must be > 0, got {cop_houston!r}")
+    if cfg.case.vcc is None:
+        raise ValueError(
+            f"Case {cfg.case.case_id} has no vcc block; cannot override COP"
+        )
+    new_vcc = cfg.case.vcc.model_copy(update={"cop_houston": cop_houston})
+    new_case = cfg.case.model_copy(update={"vcc": new_vcc})
+    return cfg.model_copy(update={"case": new_case})

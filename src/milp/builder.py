@@ -114,8 +114,12 @@ def build_model(
         initialize={t: float(ts.carbon_intensity_g_per_kwh.iloc[t]) for t in m.T},
         within=pyo.NonNegativeReals,
     )
+    # IT power becomes heat the cooling system must reject each hour
+    # (eta_chain = chilled-water distribution losses). PUE is a reported
+    # outcome, not a driver of the heat load; S1 sweeps the effective cooling
+    # COP (vcc.cop_houston) instead of PUE.
     Q_cool_demand = {
-        t: (pue_used - 1.0) * float(ts.it_load_MW.iloc[t]) / eta_chain for t in m.T
+        t: float(ts.it_load_MW.iloc[t]) / eta_chain for t in m.T
     }
     m.Q_cool_demand = pyo.Param(
         m.T, initialize=Q_cool_demand, within=pyo.NonNegativeReals

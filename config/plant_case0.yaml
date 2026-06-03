@@ -26,10 +26,10 @@ equipment:
   grid_import_enabled:        true
   grid_export_enabled:        false    # DC is a pure load; no surplus to sell
 
-# Equipment capacities (MW or MWth) — sized to cover the worst hour of the
-# Case 2 IT trace (max ≈ 142.4 MW, plus cooling at PUE 1.50 worst-case).
+# Equipment capacities (MW or MWth) — sized to reject the full IT heat load at
+# the worst hour: Q_cool_max = P_IT_max / eta_chain = 142.4 / 0.9 = 158.3 MWth.
 capacities:
-  electric_chiller_capacity_MWth: 120.0   # ≥ (PUE-1)*P_IT_max at PUE=1.50
+  electric_chiller_capacity_MWth: 160.0   # >= P_IT_max / eta_chain (158.3) + margin
 
 # Vapor-compression chiller performance (v2.5 §B reference; no per-equipment
 # YAML exists for VCC yet, so values inlined here from ASHRAE typical centrifugal

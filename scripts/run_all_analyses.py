@@ -3,7 +3,8 @@
 Run grid (100 solves total):
 
   main_baseline       4 runs   Cases 0-3  | year 2023 | PUE 1.30 | reactor ATB-Mid
-  s1_pue              6 runs   Cases 1-2  | year 2023 | PUE in {1.10, 1.30, 1.50}
+  s1_pue              6 runs   Cases 1-2  | year 2023 | effective PUE {1.10,1.30,1.50}
+                                                      | via chiller COP {11.1,3.70,2.22}
                                                       | reactor ATB-Mid
   s2_price           12 runs   Cases 0-3  | year in {2022, 2023, 2024} | PUE 1.30
                                                       | reactor ATB-Mid
@@ -59,6 +60,7 @@ from src.config import (  # noqa: E402
     load_config,
     with_bess,
     with_carbon_price,
+    with_cooling_cop,
     with_reactor_capex,
     with_wacc,
 )
@@ -341,8 +343,13 @@ def with_data_center_scale(cfg: RunConfig, load_multiplier: float) -> RunConfig:
     """Scale data-center-side equipment capacities for the S8 size sweep.
 
     The commercial BWRX-300 block is deliberately not resized here. S8 asks how
-    a fixed 270 MWe SMR matches campuses of different size, so only chillers
-    and the NGCC comparator scale with the data-center load.
+    a fixed 270 MWe SMR matches campuses of different size, so only chillers,
+    the NGCC comparator, and the grid interconnect scale with the load. The
+    PCC interconnect is data-center-side infrastructure: a larger campus
+    contracts a proportionally larger connection, and at the bigger sizes the
+    fixed reactor covers a shrinking fraction so the campus relies more on the
+    grid. We only scale the interconnect up (multiplier > 1) so the oversized
+    export headroom of the small-campus cases is left untouched.
     """
     if abs(load_multiplier - 1.0) < 1e-12:
         return cfg
@@ -359,6 +366,11 @@ def with_data_center_scale(cfg: RunConfig, load_multiplier: float) -> RunConfig:
         )
     if cfg.case.case_id == 3 and cap.ngcc_capacity_MWe is not None:
         updates["ngcc_capacity_MWe"] = cap.ngcc_capacity_MWe * load_multiplier
+    if load_multiplier > 1.0:
+        base_pcc = (
+            cap.pcc_capacity_MW if cap.pcc_capacity_MW is not None else 300.0
+        )
+        updates["pcc_capacity_MW"] = base_pcc * load_multiplier
 
     if not updates:
         return cfg
@@ -390,6 +402,7 @@ class RunSpec:
     carbon_price_usd_per_tco2: float = 0.0                # S6 sensitivity
     wacc_override: Optional[float] = None                 # S7 sensitivity (v2.7)
     load_multiplier: float = 1.0                          # S8 sensitivity
+    cooling_cop_override: Optional[float] = None          # S1 effective-COP sweep
 
     @property
     def output_dir(self) -> Path:
@@ -444,6 +457,10 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
 
     # --- S8 data-center size sweep (v2.8) ----------------------------------
     cfg = with_data_center_scale(cfg, spec.load_multiplier)
+
+    # --- S1 cooling-efficiency (effective-COP) override --------------------
+    if spec.cooling_cop_override is not None:
+        cfg = with_cooling_cop(cfg, spec.cooling_cop_override)
 
     # --- Time series --------------------------------------------------------
     ts = load_time_series(project_root=PROJECT_ROOT, year=spec.year, num_hours=8760)
@@ -544,7 +561,12 @@ def build_run_grid() -> list[RunSpec]:
             )
         )
 
-    # ---- S1 PUE: Cases 1-2 × {1.10, 1.30, 1.50}, 2023, ATB-Mid ------------
+    # ---- S1 cooling efficiency: Cases 1-2 × effective PUE {1.10,1.30,1.50} ----
+    # The heat load is fixed (P_IT / eta_chain); cooling efficiency is the lever.
+    # Each target PUE maps to an electric-chiller COP via
+    #   PUE = 1 + 1 / (eta_chain * COP)  =>  COP = 1 / ((PUE - 1) * eta_chain),
+    # with eta_chain = 0.9 (config/base.yaml), giving COP {11.11, 3.70, 2.22}.
+    _ETA_CHAIN = 0.9
     for cid in _NUCLEAR_CASES:
         for pue in (1.10, 1.30, 1.50):
             pue_tag = f"{int(round(pue * 100)):03d}"
@@ -556,6 +578,7 @@ def build_run_grid() -> list[RunSpec]:
                     year=2023,
                     pue=pue,
                     reactor_scenario="ATB_Mid",
+                    cooling_cop_override=1.0 / ((pue - 1.0) * _ETA_CHAIN),
                 )
             )
 
