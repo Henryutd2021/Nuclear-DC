@@ -46,12 +46,13 @@ def test_case0_energy_balance_closes(cfg, ts_2023_168h):
     assert residual < 1e-9
 
 
-def test_case0_cooling_load_matches_pue_definition(cfg, ts_2023_168h):
-    """Q_cool(t) = (PUE - 1) * P_IT(t) / eta_chain (v2.5 §F definition)."""
-    pue = 1.30
-    result = solve_case0(cfg, ts_2023_168h, pue=pue)
+def test_case0_cooling_load_matches_eta_chain_definition(cfg, ts_2023_168h):
+    """Q_cool(t) = P_IT(t) / eta_chain (Option A: the heat the chiller rejects is
+    the full IT draw scaled by distribution losses; PUE is a reported outcome,
+    not a driver of the cooling load)."""
+    result = solve_case0(cfg, ts_2023_168h, pue=1.30)
     eta = cfg.base.physics.cooling_chain_efficiency
-    expected = (pue - 1.0) * result.P_IT_MW / eta
+    expected = result.P_IT_MW / eta
     diff = (result.Q_cool_MWth - expected).abs().max()
     assert diff < 1e-9
 
@@ -82,12 +83,15 @@ def test_case0_tac_decomposition_sums_to_total(cfg, ts_2023_168h):
     assert parts == pytest.approx(result.tac_usd_per_yr, rel=1e-9)
 
 
-def test_case0_higher_pue_increases_grid_consumption(cfg, ts_2023_168h):
+def test_case0_pue_setpoint_does_not_change_dispatch(cfg, ts_2023_168h):
+    """Option A regression guard: PUE is decoupled from the cooling load, so the
+    pue argument must not alter dispatch. Grid consumption, cost, and emissions
+    are identical regardless of the PUE setpoint (S1 now sweeps cooling COP)."""
     r110 = solve_case0(cfg, ts_2023_168h, pue=1.10)
     r150 = solve_case0(cfg, ts_2023_168h, pue=1.50)
-    assert r150.P_grid_buy_MW.sum() > r110.P_grid_buy_MW.sum()
-    assert r150.grid_annual_usd > r110.grid_annual_usd
-    assert r150.co2_annual_tonnes > r110.co2_annual_tonnes
+    assert r150.P_grid_buy_MW.sum() == pytest.approx(r110.P_grid_buy_MW.sum())
+    assert r150.grid_annual_usd == pytest.approx(r110.grid_annual_usd)
+    assert r150.co2_annual_tonnes == pytest.approx(r110.co2_annual_tonnes)
 
 
 def test_case0_grid_cost_per_buy_equals_lmp(cfg, ts_2023_168h):

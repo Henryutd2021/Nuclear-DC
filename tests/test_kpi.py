@@ -81,17 +81,13 @@ def test_heat_recovery_premium_rejects_nonpositive_baseline():
         heat_recovery_premium(-1.0e7, 1.0e7)
 
 
-def test_lcoc_drops_as_pue_rises_capex_dominated(cfg, ts_2023):
-    """At higher PUE, the fixed chiller CAPEX amortizes over MORE cooling.
-
-    For Case 0 with a fixed VCC capacity, going from PUE 1.10 → 1.50
-    roughly triples cooling delivered (denominator) while the LMP×P_VCC
-    cooling-electricity term only doubles, so LCOC must strictly decrease.
-    """
+def test_lcoc_is_independent_of_pue_setpoint(cfg, ts_2023):
+    """Option A: cooling delivered (Q_cool = P_IT / eta_chain) no longer depends
+    on PUE, so the fixed chiller CAPEX amortizes over the same cooling regardless
+    of the PUE setpoint and LCOC is unchanged across PUE values."""
     r110 = solve_case0(cfg, ts_2023, pue=1.10)
     r150 = solve_case0(cfg, ts_2023, pue=1.50)
     k110 = compute_kpis_case0(r110, ts_2023, cfg)
     k150 = compute_kpis_case0(r150, ts_2023, cfg)
     assert k110.lcoc_usd_per_mwh_c > 0
-    assert k150.lcoc_usd_per_mwh_c > 0
-    assert k150.lcoc_usd_per_mwh_c < k110.lcoc_usd_per_mwh_c
+    assert k150.lcoc_usd_per_mwh_c == pytest.approx(k110.lcoc_usd_per_mwh_c)

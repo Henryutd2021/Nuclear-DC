@@ -74,12 +74,22 @@ def test_case2_absorption_active_in_normal_hours(cfg, ts_2023_168h):
 
 
 def test_case2_capex_includes_absorption(cfg, ts_2023_168h):
-    """v2.6: absorption CAPEX is the only cogen-side capital line over Case 1."""
+    """v2.6 + L1: Case 2 capex exceeds Case 1 by exactly the absorption chiller's
+    own-lifetime annualized CAPEX. The VCC capacity is identical in both cases
+    (160 MWth) and the reactor/turbine are shared, so every other capital line
+    cancels in the difference."""
     from src.cases.case1 import solve_case1
+    from src.finance import annualized_capex
+
     cfg1 = load_config(case_id=1, project_root=PROJECT_ROOT)
     r1 = solve_case1(cfg1, ts_2023_168h)
     r2 = solve_case2(cfg, ts_2023_168h)
-    # Case 2 capex minus Case 1 capex ≈ absorption annualized CAPEX.
-    # $750/kWth × 100,000 kWth × CRF (0.0922) ≈ $6.9 M/yr
+    ab = cfg.case.absorption
+    abs_cap = cfg.case.capacities.absorption_capacity_MWth
+    expected = annualized_capex(
+        ab.capex_usd_per_kWth * abs_cap * 1000.0,
+        cfg.financial.WACC_nominal,
+        ab.lifetime_years,
+    )
     delta = r2.capex_annual_usd - r1.capex_annual_usd
-    assert 5.5e6 < delta < 8.5e6
+    assert delta == pytest.approx(expected, rel=1e-9)

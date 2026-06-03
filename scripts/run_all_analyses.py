@@ -221,6 +221,8 @@ def _result_to_scalars(
         out["co2_export_credit_tonnes"] = float(r.co2_export_credit_tonnes)
         out["fuel_annual_usd"] = float(r.fuel_annual_usd)
         out["grid_annual_usd"] = float(r.grid_annual_usd)
+        # Section 45U nuclear PTC (negative = a credit, already in tac_usd_per_yr).
+        out["ptc_annual_usd"] = float(r.ptc_annual_usd)
         out["Q_abs_cool_annual_MWh"] = float(
             r.Q_abs_cool_MWth.sum() * dt * annual_scale
         )

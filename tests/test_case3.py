@@ -133,8 +133,11 @@ def test_case3_tac_components_sum_correctly(cfg, ts_2023_168h):
     assert parts == pytest.approx(result.tac_usd_per_yr, rel=1e-9)
 
 
-def test_case3_higher_pue_increases_fuel_and_tac(cfg, ts_2023_168h):
+def test_case3_pue_setpoint_does_not_change_fuel_or_tac(cfg, ts_2023_168h):
+    """Option A: PUE is decoupled from the cooling load, so the pue argument must
+    not change Case 3 fuel burn or TAC (the heat the chiller rejects is fixed by
+    P_IT / eta_chain regardless of the reported PUE)."""
     r110 = solve_case3(cfg, ts_2023_168h, pue=1.10)
     r150 = solve_case3(cfg, ts_2023_168h, pue=1.50)
-    assert r150.fuel_annual_usd > r110.fuel_annual_usd
-    assert r150.tac_usd_per_yr > r110.tac_usd_per_yr
+    assert r150.fuel_annual_usd == pytest.approx(r110.fuel_annual_usd)
+    assert r150.tac_usd_per_yr == pytest.approx(r110.tac_usd_per_yr)

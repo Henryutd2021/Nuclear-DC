@@ -31,7 +31,7 @@ import pyomo.environ as pyo
 
 from src.config import RunConfig
 from src.data import TimeSeries
-from src.finance import annualized_capex
+from src.finance import annualized_capex, section_45u_credit_usd_per_mwh
 from src.performance import vcc_pwl_points
 
 _MMBTU_PER_MWh: float = 3.412
@@ -424,12 +424,38 @@ def build_model(
     ) * dt * annual_scale
     carbon_annual_expr = carbon_price * co2_net_kg_expr / 1000.0  # → $/yr
 
+    # Section 45U nuclear production tax credit (IRA 2022 Sec. 13105;
+    # 26 U.S.C. 45U(b)). A per-MWh credit on net nuclear generation whose rate
+    # falls with the hourly market price per the statutory gross-receipts
+    # phaseout (full $15/MWh below $25/MWh, zero at $43.75/MWh). LMP is a known
+    # parameter, so the per-hour rate is a constant and the credit stays linear
+    # in P_turb_net. Default-on for Cases 1-2; entered as a negative cost.
+    fin = cfg.financial
+    if fin.nuclear_ptc_enabled:
+        ptc_rate_t = {
+            t: float(
+                section_45u_credit_usd_per_mwh(
+                    float(ts.price_import_usd_per_mwh.iloc[t]),
+                    fin.ptc_usd_per_mwh_assumed,
+                    fin.ptc_45u_phaseout_start_usd_per_mwh,
+                    fin.ptc_45u_phaseout_end_usd_per_mwh,
+                )
+            )
+            for t in m.T
+        }
+        ptc_annual_expr = (
+            -sum(ptc_rate_t[t] * m.P_turb_net[t] for t in m.T) * dt * annual_scale
+        )
+    else:
+        ptc_annual_expr = 0.0
+
     m.capex_annual = pyo.Expression(expr=capex_annual_expr)
     m.fom_annual = pyo.Expression(expr=fom_annual_expr)
     m.vom_annual = pyo.Expression(expr=vom_annual_expr)
     m.fuel_annual = pyo.Expression(expr=fuel_annual_expr)
     m.grid_annual = pyo.Expression(expr=grid_annual_expr)
     m.carbon_annual = pyo.Expression(expr=carbon_annual_expr)
+    m.ptc_annual = pyo.Expression(expr=ptc_annual_expr)
 
     m.objective = pyo.Objective(
         expr=(
@@ -439,6 +465,7 @@ def build_model(
             + m.fuel_annual
             + m.grid_annual
             + m.carbon_annual
+            + m.ptc_annual
         ),
         sense=pyo.minimize,
     )

@@ -14,10 +14,18 @@ financial:
   reactor_lcoe_amortization_years: 40    # NREL ATB 2024 SMR convention
   reactor_crf_40yr_at_67: 0.0724         # CRF(i=6.7%, n=40); corrected from 0.0734 on 2026-05-19
 
-  # Tax / subsidy environment (used in MIT ANP-201 reconciliation)
-  itc_rate_assumed: 0.30                 # IRA Section 48 nuclear tax credit (2024)
-  ptc_usd_per_mwh_assumed: 30            # IRA Section 45U nuclear production tax credit
-  ptc_phaseout_year: 2032
+  # Tax / subsidy environment
+  itc_rate_assumed: 0.30                 # IRA Section 48E investment credit (alternative to 45U, not stacked)
+  # Section 45U zero-emission nuclear PTC at the prevailing-wage rate. Full credit
+  # 1.5 cents/kWh = $15/MWh while gross receipts stay at/below 2.5 cents/kWh
+  # ($25/MWh); reduced by 16% x5 of the excess (0.8 $/$ slope) and reaching $0 at
+  # 4.375 cents/kWh ($43.75/MWh). Nominal 2024 amounts; statute inflation-adjusts
+  # after 2024. Refs: 26 U.S.C. 45U(b); IRA 2022 Sec. 13105; IRS Form 7213.
+  ptc_usd_per_mwh_assumed: 15            # full prevailing-wage 45U credit ($/MWh)
+  ptc_45u_phaseout_start_usd_per_mwh: 25.0
+  ptc_45u_phaseout_end_usd_per_mwh: 43.75
+  nuclear_ptc_enabled: true              # default-on in the Cases 1-2 baseline
+  ptc_phaseout_year: 2032                # statutory sunset (tax years before 2033)
 
 # ==============================================================================
 # SOURCES
@@ -37,3 +45,18 @@ sources:
     year: 2022
     url: "https://www.congress.gov/bill/117th-congress/house-bill/5376"
     used_for: ["itc_rate_assumed", "ptc_usd_per_mwh_assumed", "ptc_phaseout_year"]
+
+  - id: "USC-26-45U"
+    title: "26 U.S.C. 45U — Zero-emission nuclear power production credit (credit amount and gross-receipts phaseout)"
+    publisher: "Office of the Law Revision Counsel, U.S. Code"
+    year: 2022
+    url: "https://uscode.house.gov/view.xhtml?req=(title:26+section:45U+edition:prelim)"
+    used_for: ["ptc_usd_per_mwh_assumed", "ptc_45u_phaseout_start_usd_per_mwh",
+               "ptc_45u_phaseout_end_usd_per_mwh"]
+
+  - id: "IRS-45U-ZENPPC"
+    title: "Zero-Emission Nuclear Power Production Credit (Section 45U), claimed on Form 7213"
+    publisher: "Internal Revenue Service"
+    year: 2024
+    url: "https://www.irs.gov/credits-deductions/zero-emission-nuclear-power-production-credit"
+    used_for: ["ptc_usd_per_mwh_assumed", "nuclear_ptc_enabled"]

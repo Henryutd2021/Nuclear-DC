@@ -41,6 +41,9 @@ class NuclearCaseResult:
     fuel_annual_usd: float
     grid_annual_usd: float
     carbon_annual_usd: float
+    # Section 45U nuclear PTC, negative (a credit). Zero when the credit is
+    # disabled. Already included in tac_usd_per_yr via the objective.
+    ptc_annual_usd: float
     tac_usd_per_yr: float
     co2_annual_tonnes: float
 
@@ -107,6 +110,7 @@ def extract_result(
         fuel_annual_usd=float(pyo.value(model.fuel_annual)),
         grid_annual_usd=float(pyo.value(model.grid_annual)),
         carbon_annual_usd=float(pyo.value(model.carbon_annual)),
+        ptc_annual_usd=float(pyo.value(model.ptc_annual)),
         tac_usd_per_yr=float(pyo.value(model.objective)),
         co2_annual_tonnes=co2_tonnes,
         co2_rx_lifecycle_tonnes=co2_rx_kg / 1000.0,

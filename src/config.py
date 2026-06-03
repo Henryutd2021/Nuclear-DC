@@ -249,8 +249,15 @@ class FinancialParams(BaseModel):
     reactor_lcoe_amortization_years: int = Field(gt=0)
     reactor_crf_40yr_at_67: float
     itc_rate_assumed: float
+    # Section 45U nuclear PTC. ptc_usd_per_mwh_assumed is the full prevailing-wage
+    # credit (1.5 cents/kWh = $15/MWh); it phases out linearly between the two
+    # breakpoints below per 26 U.S.C. 45U(b) (full below $25/MWh = 2.5 cents/kWh,
+    # zero at $43.75/MWh = 4.375 cents/kWh). Default-on for Cases 1-2.
     ptc_usd_per_mwh_assumed: float
     ptc_phaseout_year: int
+    nuclear_ptc_enabled: bool = True
+    ptc_45u_phaseout_start_usd_per_mwh: float = Field(25.0, ge=0.0)
+    ptc_45u_phaseout_end_usd_per_mwh: float = Field(43.75, gt=0.0)
 
 
 class RunConfig(BaseModel):
@@ -346,6 +353,20 @@ def with_carbon_price(cfg: RunConfig, price_usd_per_tco2: float) -> RunConfig:
     )
     new_base = cfg.base.model_copy(update={"physics": new_physics})
     return cfg.model_copy(update={"base": new_base})
+
+
+def with_nuclear_ptc(cfg: RunConfig, enabled: bool) -> RunConfig:
+    """Return a copy of ``cfg`` with the Section 45U nuclear PTC turned on/off.
+
+    The credit is default-on in the baseline (Cases 1-2). This toggle lets a
+    sensitivity run the policy-off counterfactual without editing yamls; the
+    credit enters the TAC objective in builder.py as a price-dependent per-MWh
+    reduction on net nuclear generation (see ``section_45u_credit_usd_per_mwh``).
+    """
+    new_financial = cfg.financial.model_copy(
+        update={"nuclear_ptc_enabled": bool(enabled)}
+    )
+    return cfg.model_copy(update={"financial": new_financial})
 
 
 def with_wacc(cfg: RunConfig, wacc: float) -> RunConfig:

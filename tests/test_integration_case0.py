@@ -42,8 +42,10 @@ def test_case0_168h_2023_smoke(cfg):
     assert 30 < kpis.lcoe_usd_per_mwh_e < 200
 
 
-def test_case0_three_pue_sensitivity_2023(cfg):
-    """v2.5 S1: sweep PUE ∈ {1.10, 1.30, 1.50}. Higher PUE → higher TAC."""
+def test_case0_pue_setpoint_decoupled_from_tac_2023(cfg):
+    """Option A: PUE is a reported outcome, not a driver, so sweeping the PUE
+    setpoint ∈ {1.10, 1.30, 1.50} leaves TAC and CO2 unchanged. S1 now sweeps the
+    cooling COP instead of PUE."""
     ts = load_time_series(project_root=PROJECT_ROOT, year=2023, num_hours=168)
     tacs = []
     co2s = []
@@ -52,9 +54,10 @@ def test_case0_three_pue_sensitivity_2023(cfg):
         kpis = compute_kpis_case0(r, ts, cfg)
         tacs.append(kpis.tac_usd_per_yr)
         co2s.append(kpis.co2_annual_tonnes)
-    # Monotone: PUE up → TAC up + CO2 up
-    assert tacs[0] < tacs[1] < tacs[2]
-    assert co2s[0] < co2s[1] < co2s[2]
+    assert tacs[1] == pytest.approx(tacs[0])
+    assert tacs[2] == pytest.approx(tacs[0])
+    assert co2s[1] == pytest.approx(co2s[0])
+    assert co2s[2] == pytest.approx(co2s[0])
 
 
 def test_case0_three_year_regime_full_8760(cfg):
