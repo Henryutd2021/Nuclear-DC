@@ -27,6 +27,7 @@ import pandas as pd
 from src.config import RunConfig
 from src.data import TimeSeries
 from src.finance import annualized_capex
+from src.performance import vcc_cop_at_load
 
 
 @dataclass(frozen=True)
@@ -88,8 +89,6 @@ def solve_case0(
     # (1 + P_VCC/P_IT), not an input to the heat load.
     P_IT = ts.it_load_MW
     Q_cool = P_IT / eta_chain
-    P_VCC = Q_cool / vcc.cop_houston
-    P_grid_buy = P_IT + P_VCC
 
     Q_capacity = cfg.case.capacities.electric_chiller_capacity_MWth
     if Q_capacity is None:
@@ -99,6 +98,13 @@ def solve_case0(
             f"VCC capacity {Q_capacity} MWth insufficient for Q_cool max "
             f"{Q_cool.max():.2f} MWth (= P_IT_max / eta_chain)"
         )
+
+    # Part-load: the chiller COP varies with the cooling-load fraction (the IPLV
+    # hump peaks near 40-50% load), so electricity follows the load-dependent COP
+    # rather than a single full-load value.
+    cop_load = vcc_cop_at_load(Q_cool / Q_capacity, vcc.cop_houston)
+    P_VCC = Q_cool / pd.Series(cop_load, index=Q_cool.index)
+    P_grid_buy = P_IT + P_VCC
 
     # ---- Hourly cost & emissions -------------------------------------------
     grid_cost_h = ts.price_import_usd_per_mwh * P_grid_buy * dt          # $/h

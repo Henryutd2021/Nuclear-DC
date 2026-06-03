@@ -32,6 +32,7 @@ import pyomo.environ as pyo
 from src.config import RunConfig
 from src.data import TimeSeries
 from src.finance import annualized_capex
+from src.performance import vcc_pwl_points
 
 _MMBTU_PER_MWh: float = 3.412
 
@@ -232,16 +233,29 @@ def build_model(
     if vcc is None:
         raise ValueError("Cases 1-2 require a vcc block (backup chiller)")
     Q_vcc_max = cap.electric_chiller_capacity_MWth or 0.0
+    # Part-load: VCC electricity follows the non-convex IPLV COP curve, so the
+    # chiller is an SOS2 piecewise map P_vcc = f(Q_vcc_cool) rather than a single
+    # constant-COP line. This makes the model a MILP.
+    vcc_q_pts, vcc_p_pts = vcc_pwl_points(vcc.cop_houston, Q_vcc_max)
     m.P_vcc = pyo.Var(
-        m.T, domain=pyo.NonNegativeReals, bounds=(0, Q_vcc_max / vcc.cop_houston)
+        m.T, domain=pyo.NonNegativeReals, bounds=(0, max(vcc_p_pts))
     )
     m.Q_vcc_cool = pyo.Var(
         m.T, domain=pyo.NonNegativeReals, bounds=(0, Q_vcc_max)
     )
-    m.vcc_eq = pyo.Constraint(
-        m.T,
-        rule=lambda mdl, t: mdl.Q_vcc_cool[t] == vcc.cop_houston * mdl.P_vcc[t],
-    )
+    if Q_vcc_max > 0:
+        _vcc_p_of_q = dict(zip(vcc_q_pts, vcc_p_pts))
+        m.vcc_pwl = pyo.Piecewise(
+            m.T,
+            m.P_vcc,
+            m.Q_vcc_cool,
+            pw_pts=vcc_q_pts,
+            pw_constr_type="EQ",
+            f_rule=lambda mdl, t, x: _vcc_p_of_q[x],
+            pw_repn="SOS2",
+        )
+    else:
+        m.vcc_eq = pyo.Constraint(m.T, rule=lambda mdl, t: mdl.P_vcc[t] == 0.0)
 
     # ---- Grid (v2.6 §A: PCC interconnect limit) ----------------------------
     pcc_cap = cap.pcc_capacity_MW or 300.0

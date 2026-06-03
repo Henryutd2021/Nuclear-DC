@@ -1,10 +1,11 @@
 """Solver invocation for the Nuclear-DC Pyomo models.
 
-The builder produces a pure continuous LP (no integer or binary
-variables — see `src/milp/builder.py`). Gurobi's barrier method is
-fastest on this workstation for problems of this size; per-solve and
-parallel-orchestration tuning lives in the workstation memory file
-`reference_workstation-specs`.
+The builder is mostly a continuous LP, but the vapor-compression chiller
+is an SOS2 piecewise map of its non-convex part-load COP curve (see
+`src/milp/builder.py`), which makes the model a MILP. Gurobi handles both
+the LP relaxation and the SOS2 branching efficiently at this size;
+per-solve and parallel-orchestration tuning lives in the workstation
+memory file `reference_workstation-specs`.
 """
 
 from __future__ import annotations

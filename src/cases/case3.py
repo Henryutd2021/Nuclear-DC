@@ -29,6 +29,11 @@ import pandas as pd
 from src.config import RunConfig
 from src.data import TimeSeries
 from src.finance import annualized_capex
+from src.performance import (
+    ngcc_efficiency_at_load,
+    ngcc_hr_multiplier,
+    vcc_cop_at_load,
+)
 
 _MMBTU_PER_MWh: float = 3.412  # HHV basis conversion
 
@@ -99,8 +104,6 @@ def solve_case3(
     # losses); PUE is a reported outcome, not a driver of the heat load.
     P_IT = ts.it_load_MW
     Q_cool = P_IT / eta_chain
-    P_VCC = Q_cool / vcc.cop_houston
-    P_NGCC = P_IT + P_VCC
 
     Q_capacity = cfg.case.capacities.electric_chiller_capacity_MWth
     NGCC_capacity = cfg.case.capacities.ngcc_capacity_MWe
@@ -114,6 +117,12 @@ def solve_case3(
             f"VCC capacity {Q_capacity} MWth insufficient for max Q_cool "
             f"{Q_cool.max():.2f} MWth (= P_IT_max / eta_chain)"
         )
+
+    # Part-load: the chiller COP varies with the cooling-load fraction (the IPLV
+    # hump), so VCC electricity uses the load-dependent COP, not a flat value.
+    cop_load = vcc_cop_at_load(Q_cool / Q_capacity, vcc.cop_houston)
+    P_VCC = Q_cool / pd.Series(cop_load, index=Q_cool.index)
+    P_NGCC = P_IT + P_VCC
     if P_NGCC.max() > NGCC_capacity + 1e-6:
         raise ValueError(
             f"NGCC capacity {NGCC_capacity} MWe insufficient for max demand "
@@ -125,7 +134,16 @@ def solve_case3(
     # ffilled to 24-h blocks) rather than the annual mean. Captures the
     # Jan 2024 cold-snap spike to $13/MMBtu, which the year-mean $2.19
     # silently averaged into Case 3 in v2.6.
-    fuel_MMBtu_h = P_NGCC * _MMBTU_PER_MWh / ngcc.net_efficiency_hhv
+    # Part-load heat rate: efficiency falls as the NGCC runs below its design
+    # point, so both fuel burn and the resulting emissions rise by the same
+    # heat-rate multiplier (>=1) relative to the full-load figures.
+    load_fraction = P_NGCC / NGCC_capacity
+    eta_load = pd.Series(
+        ngcc_efficiency_at_load(load_fraction, ngcc.net_efficiency_hhv),
+        index=P_NGCC.index,
+    )
+    hr_mult = pd.Series(ngcc_hr_multiplier(load_fraction), index=P_NGCC.index)
+    fuel_MMBtu_h = P_NGCC * _MMBTU_PER_MWh / eta_load
     delivered_fuel_h = (
         ts.henry_hub_usd_per_mmbtu_hourly + ngcc.henry_hub_basis_usd_per_mmbtu
     )
@@ -133,8 +151,10 @@ def solve_case3(
     delivered_fuel_mean = float(delivered_fuel_h.mean())
 
     # ---- Emissions ----------------------------------------------------------
-    direct_kg_h = P_NGCC * dt * ngcc.co2_direct_g_per_kwh_e
-    upstream_kg_h = P_NGCC * dt * ngcc.co2_upstream_ch4_g_per_kwh_e
+    # CO2 scales with fuel burned, so the full-load g/kWh_e factors are raised by
+    # the same part-load heat-rate multiplier (carbon-per-MMBtu stays constant).
+    direct_kg_h = P_NGCC * dt * ngcc.co2_direct_g_per_kwh_e * hr_mult
+    upstream_kg_h = P_NGCC * dt * ngcc.co2_upstream_ch4_g_per_kwh_e * hr_mult
 
     # ---- Annualization ------------------------------------------------------
     annual_scale = 8760.0 / ts.num_hours

@@ -43,11 +43,17 @@ def test_case3_off_grid_balance(cfg, ts_2023_168h):
     assert residual < 1e-9
 
 
-def test_case3_fuel_consumption_matches_efficiency(cfg, ts_2023_168h):
-    """Fuel [MMBtu/h] = P_NGCC [MW] * 3.412 / η_hhv."""
+def test_case3_fuel_consumption_matches_partload_efficiency(cfg, ts_2023_168h):
+    """Fuel [MMBtu/h] = P_NGCC [MW] * 3.412 / η(load), where η falls below the
+    design point per the part-load heat-rate curve."""
+    from src.performance import ngcc_efficiency_at_load
+
     result = solve_case3(cfg, ts_2023_168h)
-    eta = cfg.case.ngcc.net_efficiency_hhv
-    expected = result.P_NGCC_elec_MW * 3.412 / eta
+    ngcc_cap = cfg.case.capacities.ngcc_capacity_MWe
+    eta_load = ngcc_efficiency_at_load(
+        result.P_NGCC_elec_MW / ngcc_cap, cfg.case.ngcc.net_efficiency_hhv
+    )
+    expected = result.P_NGCC_elec_MW * 3.412 / eta_load
     diff = (result.fuel_consumption_MMBtu_per_h - expected).abs().max()
     assert diff < 1e-6
 
@@ -87,13 +93,20 @@ def test_case3_2022_fuel_more_expensive_than_2024(cfg):
     assert 2.0 < ratio < 4.0
 
 
-def test_case3_direct_emissions_match_emission_factor(cfg, ts_2023_168h):
-    """Direct CO2 [kg/h] = P_NGCC [MW] × 1h × CO2_direct [g/kWh] (g/kWh × MW × h = kg)."""
+def test_case3_direct_emissions_match_partload_emission_factor(cfg, ts_2023_168h):
+    """Direct CO2 [kg/h] = P_NGCC × 1h × CO2_direct[g/kWh] × heat-rate multiplier.
+    CO2 tracks fuel burned, so the full-load emission factor is scaled by the
+    same part-load heat-rate penalty applied to fuel."""
+    from src.performance import ngcc_hr_multiplier
+
     result = solve_case3(cfg, ts_2023_168h)
+    ngcc_cap = cfg.case.capacities.ngcc_capacity_MWe
+    hr_mult = ngcc_hr_multiplier(result.P_NGCC_elec_MW / ngcc_cap)
     expected = (
         result.P_NGCC_elec_MW
         * cfg.base.time.delta_t
         * cfg.case.ngcc.co2_direct_g_per_kwh_e
+        * hr_mult
     )
     diff = (result.direct_emissions_kg_co2_per_h - expected).abs().max()
     assert diff < 1e-6

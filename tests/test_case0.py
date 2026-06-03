@@ -56,10 +56,16 @@ def test_case0_cooling_load_matches_pue_definition(cfg, ts_2023_168h):
     assert diff < 1e-9
 
 
-def test_case0_vcc_power_uses_houston_derated_cop(cfg, ts_2023_168h):
-    """P_VCC = Q_cool / COP_houston (the derated COP, not the nameplate)."""
+def test_case0_vcc_power_uses_houston_derated_partload_cop(cfg, ts_2023_168h):
+    """P_VCC = Q_cool / COP(load), the Houston-derated COP evaluated at the
+    realized cooling-load fraction (the IPLV part-load curve), not a flat
+    full-load value."""
+    from src.performance import vcc_cop_at_load
+
     result = solve_case0(cfg, ts_2023_168h)
-    expected = result.Q_cool_MWth / cfg.case.vcc.cop_houston
+    q_max = cfg.case.capacities.electric_chiller_capacity_MWth
+    cop_load = vcc_cop_at_load(result.Q_cool_MWth / q_max, cfg.case.vcc.cop_houston)
+    expected = result.Q_cool_MWth / cop_load
     diff = (result.P_VCC_elec_MW - expected).abs().max()
     assert diff < 1e-9
 
