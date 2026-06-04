@@ -33,15 +33,15 @@ scenarios:
     secondary_source: "WNN-2024-09"
 
   ATB_Mid:
-    label: "NREL ATB 2024 Moderate — generic SMR mid-range"
+    label: "NLR ATB 2024 Moderate — generic SMR mid-range"
     overnight_capital_cost_usd_per_kWe: 7615
     lcoe_usd_per_mwh: 130              # interpolated from ATB Moderate Nuclear-SMR 2030 cohort
     description: |
-      NREL Annual Technology Baseline 2024 'Nuclear — SMR — Moderate' financial
+      NLR Annual Technology Baseline 2024 'Nuclear — SMR — Moderate' financial
       assumption for a generic light-water SMR. Treated as the intermediate point
       between FOAK realities and NOAK targets. Conservative-case = $8,017/kWe
       (not used as primary scenario; documented for completeness).
-    primary_source: "NREL-ATB-2024-Nuclear"
+    primary_source: "NLR-ATB-2024-Nuclear"
     conservative_alternative_usd_per_kWe: 8017
 
   NOAK:
@@ -73,8 +73,8 @@ sanity_check:
 # ------------------------------------------------------------------------------
 # Fixed operating cost (FOM) — common across all 3 scenarios
 # ------------------------------------------------------------------------------
-fixed_om_usd_per_kWe_year: 121          # NREL ATB 2024 SMR Moderate
-variable_om_usd_per_mwh: 3.50           # NREL ATB 2024 SMR Moderate (incl. minor consumables)
+fixed_om_usd_per_kWe_year: 121          # NLR ATB 2024 SMR Moderate
+variable_om_usd_per_mwh: 3.50           # NLR ATB 2024 SMR Moderate (incl. minor consumables)
 fuel_cost_usd_per_mwh_thermal: 6.0      # baseline (EIA 2024 nuclear fleet avg); paper sensitivity range [5, 7]
 fuel_cost_range_usd_per_mwh_thermal: [5.0, 7.0]
 
@@ -82,10 +82,10 @@ fuel_cost_range_usd_per_mwh_thermal: [5.0, 7.0]
 # Financial parameters (apply across all 3 scenarios)
 # ------------------------------------------------------------------------------
 financial:
-  WACC_nominal: 0.067                   # 6.7% — NREL ATB 2024 default (private financing, US, nuclear)
+  WACC_nominal: 0.067                   # 6.7% — NLR ATB 2024 default (private financing, US, nuclear)
   project_lifetime_years: 20            # for amortization in TAC; reactor physical life is 60 years
   capital_recovery_factor: 0.0907       # CRF = i(1+i)^n / [(1+i)^n - 1] @ i=6.7%, n=20
-  source: "NREL-ATB-2024"
+  source: "NLR-ATB-2024"
 
 # ==============================================================================
 # SOURCES
@@ -104,9 +104,9 @@ sources:
     year: 2024
     url: "https://www.world-nuclear-news.org/articles/what-is-the-budget-for-canadas-first-smr-project"
 
-  - id: "NREL-ATB-2024-Nuclear"
-    title: "NREL Annual Technology Baseline 2024 — Nuclear (SMR)"
-    publisher: "National Renewable Energy Laboratory, US DOE"
+  - id: "NLR-ATB-2024-Nuclear"
+    title: "NLR Annual Technology Baseline 2024 — Nuclear (SMR)"
+    publisher: "National Laboratory of the Rockies"
     year: 2024
     url: "https://atb.nrel.gov/electricity/2024/nuclear"
     notes: "CSV downloads available; cost categories: SMR Moderate/Conservative/Advanced"

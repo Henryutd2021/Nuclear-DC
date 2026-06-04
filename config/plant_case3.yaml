@@ -40,9 +40,9 @@ vcc:
   capex_usd_per_kWth: 250
   lifetime_years: 25
 
-# NGCC parameters from data/equipment/ngcc_onsite.yaml (NREL ATB 2024 + EIA + Alvarez 2018)
+# NGCC parameters from data/equipment/ngcc_onsite.yaml (NLR ATB 2024 + EIA + Alvarez 2018)
 ngcc:
-  capex_usd_per_kWe:                1330      # NREL ATB 2024 NGCC F-class Moderate
+  capex_usd_per_kWe:                1330      # NLR ATB 2024 NGCC F-class Moderate
   fixed_om_usd_per_kWe_year:        29.3
   variable_om_usd_per_mwh_e:        2.65
   net_efficiency_lhv:               0.55      # for fuel-energy → electricity
@@ -50,4 +50,4 @@ ngcc:
   co2_direct_g_per_kwh_e:           360       # paper value, commonly cited NGCC direct emissions
   co2_upstream_ch4_g_per_kwh_e:     60        # Alvarez 2018 methane leakage (CO2-equivalent)
   henry_hub_basis_usd_per_mmbtu:    0.10      # Houston Ship Channel basis to Henry Hub
-  lifetime_years:                   30        # NREL ATB convention (NGCC life > nuclear 20-yr window)
+  lifetime_years:                   30        # NLR ATB convention (NGCC life > nuclear 20-yr window)

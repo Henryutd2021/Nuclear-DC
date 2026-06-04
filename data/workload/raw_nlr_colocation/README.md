@@ -36,8 +36,10 @@ Script: [data/_raw/build_real_ai_workload.py](../../_raw/build_real_ai_workload.
 3. Aggregated 1-minute → 1-hour via mean (525,600 rows → 8760 hourly rows).
 
 Outputs at `data/workload/dc_200mw_real_{u}u_2018.csv` for all 4 utilization
-variants; `data/workload/cooling_load_pue{110,130,150}.csv` for PUE-derived
-cooling load; and `data/it_load.csv` (paper primary, copy of 60u variant).
+variants; legacy `data/workload/cooling_load_pue{110,130,150}.csv` files for
+the old PUE-derived cooling-load audit trail; and `data/it_load.csv` (paper
+primary, copy of 60u variant). The Nature Energy model computes cooling demand
+as `P_IT / eta_chain` in code and sweeps VCC COP for effective PUE.
 
 ## License
 

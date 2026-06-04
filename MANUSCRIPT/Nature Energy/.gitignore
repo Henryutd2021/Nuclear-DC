@@ -1,0 +1,38 @@
+# LaTeX build artefacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.lol
+*.lof
+*.lot
+*.toc
+*.out
+*.synctex.gz
+*.run.xml
+*.nav
+*.snm
+*.vrb
+*.xdv
+*.dvi
+
+# Editor temporary
+.DS_Store
+*~
+.*.swp
+.idea/
+.vscode/
+*.tex.bak
+
+# Output PDFs (un-comment to ignore — many authors prefer to track final PDF)
+# *.pdf
+
+# Python/Jupyter (if used for figs)
+__pycache__/
+*.ipynb_checkpoints/
+
+# Confidential / personal
+private/

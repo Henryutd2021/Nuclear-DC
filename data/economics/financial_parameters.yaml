@@ -2,7 +2,7 @@
 # Used by paper: amortization of CAPEX in TAC, LCOE, LCOC calculations.
 
 financial:
-  WACC_nominal: 0.067                    # 6.7% — NREL ATB 2024 default for nuclear, US, private financing
+  WACC_nominal: 0.067                    # 6.7% — NLR ATB 2024 default for nuclear, US, private financing
   WACC_real: 0.044                       # ~ (1 + WACC_nominal) / (1 + inflation) - 1, with inflation ~2.2%
   inflation_rate: 0.022                  # US long-run CPI assumption
   project_lifetime_years: 20             # paper convention (NB: physical asset life much longer)
@@ -11,7 +11,7 @@ financial:
 
   # Reactor-specific physical life (for LCOE only; TAC uses 20-year window)
   reactor_physical_life_years: 60
-  reactor_lcoe_amortization_years: 40    # NREL ATB 2024 SMR convention
+  reactor_lcoe_amortization_years: 40    # NLR ATB 2024 SMR convention
   reactor_crf_40yr_at_67: 0.0724         # CRF(i=6.7%, n=40); corrected from 0.0734 on 2026-05-19
 
   # Tax / subsidy environment
@@ -31,9 +31,9 @@ financial:
 # SOURCES
 # ==============================================================================
 sources:
-  - id: "NREL-ATB-2024-Financial"
-    title: "NREL ATB 2024 — Financial Assumptions"
-    publisher: "NREL"
+  - id: "NLR-ATB-2024-Financial"
+    title: "NLR ATB 2024 — Financial Assumptions"
+    publisher: "NLR"
     year: 2024
     url: "https://atb.nrel.gov/electricity/2024/financial_cases_&_methods"
     used_for: ["WACC_nominal", "WACC_real", "inflation_rate", "project_lifetime_years",

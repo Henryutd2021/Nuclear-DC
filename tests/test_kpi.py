@@ -48,8 +48,9 @@ def test_lcoc_positive(kpis):
 
 
 def test_co2_per_mwh_realistic(kpis):
-    """Case 0 sources all electricity from ERCOT → kg/MWh ≈ ERCOT AEF × PUE factor."""
-    # AEF 2023 ≈ 333 g/kWh = 333 kg/MWh; with PUE ~1.5, total / IT-MWh ≈ AEF × 1.5
+    """Case 0 sources all electricity from ERCOT, including electric cooling."""
+    # AEF 2023 ≈ 333 g/kWh = 333 kg/MWh; electric cooling raises the
+    # IT-normalized footprint above the raw grid factor.
     # Loose bounds: 300 < kg/MWh < 700
     assert 300 < kpis.co2_per_mwh_kg < 700
 

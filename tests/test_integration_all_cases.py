@@ -1,7 +1,7 @@
 """v2.6 integration: 4-case Premium matrix and P1-A wet-bulb gate.
 
-Locks in cross-case behavior at the v2.6 baseline grid (3 ERCOT years
-× PUE 1.30 × ATB-Mid reactor CAPEX). Premium(Case 0, Case N) signs
+Locks in cross-case behavior at the baseline grid (3 ERCOT years
+× full-load PUE 1.35 × ATB-Mid reactor CAPEX). Premium(Case 0, Case N) signs
 become regression checks: if a future code change accidentally flips
 one of them, this test catches it.
 """
@@ -27,7 +27,7 @@ if not gurobi.available(exception_flag=False):
     pytest.skip("Gurobi unavailable", allow_module_level=True)
 
 
-def _solve_all(year: int, pue: float = 1.30, hours: int = 168):
+def _solve_all(year: int, pue: float = 1.35, hours: int = 168):
     """Solve all 4 cases for one (year, PUE) and return TAC dict."""
     ts = load_time_series(project_root=PROJECT_ROOT, year=year, num_hours=hours)
     tacs = {}
@@ -50,7 +50,7 @@ def test_all_cases_solve_and_return_positive_tac():
 
 
 def test_nuclear_cases_lose_to_case0_at_atb_mid_capex():
-    """At NREL ATB Moderate ($7,615/kWe), BWRX CAPEX dominates → Cases 1-2 lose to Case 0."""
+    """At NLR ATB Moderate ($7,615/kWe), BWRX CAPEX dominates → Cases 1-2 lose to Case 0."""
     tacs = _solve_all(2023)
     for cid in (1, 2):
         prem = heat_recovery_premium(tacs[0], tacs[cid])
@@ -60,17 +60,17 @@ def test_nuclear_cases_lose_to_case0_at_atb_mid_capex():
 def test_case2_drives_absorption_at_realistic_pue():
     """v2.6 cascade extraction must actually utilize absorption.
 
-    At PUE 1.30 the cooling load is ~60 MWth and Case 2 should serve
-    nearly all of it via absorption (VCC engages only during P1-A
+    At the baseline heat-rejection load, Case 2 should serve nearly all
+    cooling via absorption (VCC engages only during P1-A
     crystallization windows). This is a regression check that the
     Willans-penalty model doesn't accidentally shut the chiller off.
     """
     ts = load_time_series(project_root=PROJECT_ROOT, year=2023, num_hours=168)
     cfg2 = load_config(case_id=2, project_root=PROJECT_ROOT)
-    r2 = solve_case2(cfg2, ts, pue=1.30)
+    r2 = solve_case2(cfg2, ts, pue=1.35)
     abs_share = float(r2.Q_abs_cool_MWth.sum() / r2.Q_cool_demand_MWth.sum())
     assert abs_share > 0.85, (
-        f"Expected absorption to serve > 85% of cooling at PUE 1.30; "
+        f"Expected absorption to serve > 85% of cooling at baseline PUE label; "
         f"got {abs_share:.0%}"
     )
 
@@ -98,7 +98,7 @@ def test_p1a_absorption_gate_triggers_in_hot_hour_summer_slice():
     ts = load_time_series(
         project_root=PROJECT_ROOT, year=2023, num_hours=168, start_hour=4344
     )
-    r = solve_case2(cfg, ts, pue=1.30)
+    r = solve_case2(cfg, ts, pue=1.35)
     # At least some VCC dispatch must happen — proves the gate engaged
     assert r.Q_VCC_cool_MWth.sum() > 0, (
         "Expected VCC backup to engage during July hot hours when absorption "

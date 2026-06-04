@@ -314,7 +314,9 @@ def build_model(
         m.B_discharge = pyo.Param(m.T, initialize=0.0)
 
     # ---- Energy balances ---------------------------------------------------
-    # Absorption-chiller parasitic electric load (v2.6 §F.1: ~0.02 kWe/kWth)
+    # Absorption-chiller parasitic electric load. The legacy config key says
+    # kWth, but the value is applied per kWc of delivered absorption cooling,
+    # matching beta_a Q_a in the manuscript.
     absorption_parasitic = (
         cfg.case.absorption.parasitic_kWe_per_kWth
         if (eq.absorption_chiller_enabled and cfg.case.absorption is not None)
@@ -392,7 +394,7 @@ def build_model(
             for t in m.T
         ) * dt * annual_scale
     if eq.bess_enabled and cfg.case.bess is not None:
-        # VOM scales with throughput (charge + discharge), per NREL ATB convention.
+        # VOM scales with throughput (charge + discharge), per NLR ATB convention.
         vom_annual_expr = vom_annual_expr + sum(
             cfg.case.bess.variable_om_usd_per_mwh
             * (m.B_charge[t] + m.B_discharge[t])

@@ -102,7 +102,7 @@ def test_bess_no_simultaneous_charge_and_discharge(cfg2_bess, ts_168h):
 
 
 def test_bess_raises_tac_by_capex(cfg2_no_bess, cfg2_bess, ts_168h):
-    """Adding BESS adds ~$3.7M/yr CAPEX (NREL ATB 405 $/kWh × 100 MWh × CRF 0.0922)."""
+    """Adding BESS adds ~$3.7M/yr CAPEX (NLR ATB 405 $/kWh × 100 MWh × CRF 0.0922)."""
     r_no = solve_case2(cfg2_no_bess, ts_168h, pue=1.30)
     r_yes = solve_case2(cfg2_bess, ts_168h, pue=1.30)
     delta_capex = r_yes.capex_annual_usd - r_no.capex_annual_usd

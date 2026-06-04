@@ -214,7 +214,7 @@ class SolverConfig(BaseModel):
 class PhysicsConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
 
-    pue_default: float = Field(1.5, ge=1.0)
+    pue_default: float = Field(1.35, ge=1.0)
     cooling_chain_efficiency: float = Field(0.9, gt=0.0, le=1.0)
     # v2.7 §S6: optional carbon price applied to net annual CO2 in the TAC
     # objective. Default 0 keeps every pre-v2.7 result unchanged; S6 sensitivity

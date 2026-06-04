@@ -1,7 +1,7 @@
 # v2.6 S5 — SMR × absorption CAPEX 2D feasibility grid
 #
 # Plan §C / §3 S5 (head-line figure): hold all other knobs at the v2.6
-# baseline (Case 2, ERCOT 2023, PUE 1.30, no BESS) and sweep two CAPEX
+# baseline (Case 2, ERCOT 2023, full-load PUE 1.35, no BESS) and sweep two CAPEX
 # axes jointly to draw the Premium=0 economic feasibility contour.
 #
 # SMR axis adds two interior points to S4's three (FOAK / ATB-Mid / NOAK)
@@ -20,7 +20,7 @@ axes:
     - tag: "Low_Mid"
       value: 5000            # interior point bridging NOAK and ATB-Mid
     - tag: "ATB_Mid"
-      value: 7615            # NREL ATB 2024 Moderate — matches S4
+      value: 7615            # NLR ATB 2024 Moderate — matches S4
     - tag: "High_Mid"
       value: 11000           # interior point bridging ATB-Mid and FOAK
     - tag: "FOAK"
@@ -49,7 +49,7 @@ anchors:
     smr_tag: "NOAK"
     absorption_tag: "Baseline"
     marker: "green_circle"
-  - label: "NREL ATB-Mid + Shahzad baseline"
+  - label: "NLR ATB-Mid + Shahzad baseline"
     smr_tag: "ATB_Mid"
     absorption_tag: "Baseline"
     marker: "yellow_circle"

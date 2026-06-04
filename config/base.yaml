@@ -34,11 +34,10 @@ physics:
   # Cooling chain: heat to reject = P_IT / eta_chain. PUE is a reported outcome
   # (1 + cooling parasitics / P_IT), not an input to the heat load. pue_default
   # is retained only as a fallback label for legacy call paths.
-  pue_default: 1.5
+  pue_default: 1.35
   cooling_chain_efficiency: 0.9
 
 optimization:
   capacity_optimization: false  # false = dispatch only; true = co-design
   enable_ramping: true          # Turbine ramping constraints
   enable_unit_commitment: false # Binary on/off variables
-

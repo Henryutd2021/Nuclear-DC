@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941">
+  <defs>
+    <style>
+      .label { font-family: Arial, Helvetica, sans-serif; font-size: 24px; fill: #061A57; }
+      .small { font-family: Arial, Helvetica, sans-serif; font-size: 20px; fill: #061A57; }
+      .tiny { font-family: Arial, Helvetica, sans-serif; font-size: 16px; fill: #1F1F1F; }
+      .title { font-family: Arial, Helvetica, sans-serif; font-size: 31px; font-weight: 700; fill: #061A57; }
+      .steam-text { fill: #B24A13; }
+      .cool-text { fill: #006D73; }
+      .muted { fill: #555555; }
+      .plant { fill: none; stroke: #777777; stroke-width: 2; stroke-dasharray: 8 8; }
+      .power-fill { fill: #E7F5FF; stroke: #061A57; stroke-width: 2.2; }
+      .thermal-fill { fill: #FFF0BC; stroke: #6B5200; stroke-width: 2.2; }
+      .cool-fill { fill: #EAF9F8; stroke: #006D73; stroke-width: 2.2; }
+      .external-fill { fill: #EFEFEF; stroke: #404040; stroke-width: 2.0; }
+      .storage-fill { fill: #E8EEF3; stroke: #404A57; stroke-width: 2.0; }
+      .data-fill { fill: #EAF6FF; stroke: #061A57; stroke-width: 2.2; }
+      .steam-line { fill: none; stroke: #B24A13; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .elec-line { fill: none; stroke: #061A8A; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .cool-line { fill: none; stroke: #006D73; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .backup-line { fill: none; stroke: #E95A57; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 12 11; }
+      .return-line { fill: none; stroke: #006D73; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 11 10; }
+      .shaft-line { fill: none; stroke: #333333; stroke-width: 4; stroke-linecap: round; }
+      .thin { stroke-width: 2; }
+    </style>
+    <marker id="arrow-steam" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#B24A13"/>
+    </marker>
+    <marker id="arrow-elec" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#061A8A"/>
+    </marker>
+    <marker id="arrow-cool" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#006D73"/>
+    </marker>
+    <marker id="arrow-backup" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#E95A57"/>
+    </marker>
+    <marker id="arrow-return" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#006D73"/>
+    </marker>
+  </defs>
+
+  <rect width="1672" height="941" fill="#FFFFFF"/>
+
+  <!-- SMR plant boundary -->
+  <rect class="plant" x="34" y="35" width="980" height="630" rx="24"/>
+  <text class="title" x="507" y="82" text-anchor="middle">SMR Cogeneration Plant</text>
+
+  <!-- BWRX-300 reactor -->
+  <rect class="power-fill" x="82" y="112" width="138" height="272" rx="68"/>
+  <rect x="76" y="166" width="150" height="18" rx="6" fill="#CBEAFF" stroke="#061A57" stroke-width="2.2"/>
+  <line x1="112" y1="214" x2="112" y2="344" stroke="#061A57" stroke-width="3"/>
+  <line x1="130" y1="214" x2="130" y2="344" stroke="#061A57" stroke-width="3"/>
+  <line x1="148" y1="214" x2="148" y2="344" stroke="#061A57" stroke-width="3"/>
+  <line x1="166" y1="214" x2="166" y2="344" stroke="#061A57" stroke-width="3"/>
+  <line x1="184" y1="214" x2="184" y2="344" stroke="#061A57" stroke-width="3"/>
+  <line x1="104" y1="344" x2="194" y2="344" stroke="#061A57" stroke-width="3"/>
+  <text class="label" x="151" y="417" text-anchor="middle">BWRX-300</text>
+  <text class="label" x="151" y="447" text-anchor="middle">Reactor</text>
+
+  <!-- Turbines and generator -->
+  <polygon class="power-fill" points="365,150 478,180 478,260 365,290"/>
+  <text class="label" x="421" y="309" text-anchor="middle">High Pressure</text>
+  <text class="label" x="421" y="338" text-anchor="middle">Turbine</text>
+
+  <polygon class="power-fill" points="645,150 765,180 765,260 645,290"/>
+  <text class="label" x="705" y="309" text-anchor="middle">Low Pressure</text>
+  <text class="label" x="705" y="338" text-anchor="middle">Turbine</text>
+
+  <circle class="power-fill" cx="912" cy="220" r="54"/>
+  <path d="M875 222 C895 175, 925 175, 945 222" fill="none" stroke="#061A57" stroke-width="4"/>
+  <text class="label" x="912" y="306" text-anchor="middle">Generator</text>
+  <line class="shaft-line" x1="765" y1="220" x2="858" y2="220"/>
+
+  <rect class="power-fill" x="788" y="354" width="122" height="104" rx="8"/>
+  <path d="M806 430 L894 430" stroke="#061A57" stroke-width="4"/>
+  <path d="M819 410 L881 410" stroke="#061A57" stroke-width="4"/>
+  <path d="M829 390 L850 368 L872 390" fill="none" stroke="#061A57" stroke-width="4"/>
+  <text class="label" x="849" y="494" text-anchor="middle">Condenser</text>
+
+  <!-- Steam cycle -->
+  <path class="steam-line" marker-end="url(#arrow-steam)" d="M220 220 L360 220"/>
+  <text class="small steam-text" x="265" y="184">Steam</text>
+  <path class="steam-line" marker-end="url(#arrow-steam)" d="M478 220 L635 220"/>
+  <path class="steam-line" marker-end="url(#arrow-steam)" d="M535 220 L535 395"/>
+  <text class="small steam-text" x="548" y="294">Mid-pressure</text>
+  <text class="small steam-text" x="548" y="322">extraction</text>
+  <text class="tiny steam-text" x="548" y="356">cascaded heat use</text>
+  <path class="steam-line" marker-end="url(#arrow-steam)" d="M705 290 L705 348 L788 388"/>
+
+  <!-- Absorption chiller -->
+  <rect class="thermal-fill" x="390" y="402" width="280" height="126" rx="12"/>
+  <circle cx="452" cy="465" r="36" fill="none" stroke="#061A57" stroke-width="3"/>
+  <path d="M414 465 C430 430, 445 430, 459 465 S490 500, 506 465" fill="none" stroke="#061A57" stroke-width="4"/>
+  <line x1="410" y1="465" x2="506" y2="465" stroke="#061A57" stroke-width="3"/>
+  <text class="small" x="575" y="449" text-anchor="middle">Double-Effect</text>
+  <text class="small" x="575" y="478" text-anchor="middle">LiBr-H2O</text>
+  <text class="small" x="575" y="507" text-anchor="middle">Absorption Chiller</text>
+
+  <!-- Vapor-compression chiller, cooling equipment fill not backup fill -->
+  <rect class="cool-fill" x="770" y="560" width="285" height="86" rx="12"/>
+  <circle cx="820" cy="603" r="29" fill="none" stroke="#061A57" stroke-width="3"/>
+  <circle cx="820" cy="603" r="7" fill="#061A57"/>
+  <path d="M820 573 C846 585, 843 606, 826 603" fill="#061A57" opacity="0.75"/>
+  <path d="M849 610 C828 627, 809 618, 820 603" fill="#061A57" opacity="0.75"/>
+  <path d="M803 624 C800 598, 812 584, 820 603" fill="#061A57" opacity="0.75"/>
+  <text class="small" x="940" y="594" text-anchor="middle">Vapor-Compression</text>
+  <text class="small" x="940" y="624" text-anchor="middle">Chiller (Backup)</text>
+
+  <!-- Data center -->
+  <rect class="data-fill" x="1148" y="388" width="210" height="242" rx="12"/>
+  <rect x="1184" y="438" width="46" height="90" rx="5" fill="#12345B"/>
+  <rect x="1238" y="438" width="46" height="90" rx="5" fill="#12345B"/>
+  <rect x="1292" y="438" width="46" height="90" rx="5" fill="#12345B"/>
+  <g stroke="#EAF6FF" stroke-width="5">
+    <line x1="1195" y1="464" x2="1219" y2="464"/>
+    <line x1="1195" y1="482" x2="1219" y2="482"/>
+    <line x1="1250" y1="464" x2="1273" y2="464"/>
+    <line x1="1250" y1="482" x2="1273" y2="482"/>
+    <line x1="1304" y1="464" x2="1326" y2="464"/>
+    <line x1="1304" y1="482" x2="1326" y2="482"/>
+  </g>
+  <text class="label" x="1253" y="565" text-anchor="middle">Data Center</text>
+  <text class="label" x="1253" y="594" text-anchor="middle">200 MWe</text>
+  <text class="label" x="1253" y="623" text-anchor="middle">(IT Load)</text>
+
+  <!-- External grid and storage -->
+  <rect class="external-fill" x="1432" y="205" width="215" height="105" rx="12"/>
+  <path d="M1483 230 L1462 285 L1503 285 Z" fill="none" stroke="#1F1F1F" stroke-width="3"/>
+  <line x1="1469" y1="255" x2="1496" y2="255" stroke="#1F1F1F" stroke-width="3"/>
+  <line x1="1453" y1="270" x2="1511" y2="270" stroke="#1F1F1F" stroke-width="3"/>
+  <text class="label" x="1571" y="258" text-anchor="middle">ERCOT Grid</text>
+  <text class="label" x="1571" y="288" text-anchor="middle">(PCC)</text>
+
+  <rect class="storage-fill" x="1432" y="350" width="215" height="105" rx="12"/>
+  <rect x="1465" y="377" width="44" height="58" rx="4" fill="#FFFFFF" stroke="#1F1F1F" stroke-width="3"/>
+  <rect x="1476" y="368" width="22" height="9" fill="#FFFFFF" stroke="#1F1F1F" stroke-width="3"/>
+  <line x1="1474" y1="404" x2="1500" y2="404" stroke="#1F1F1F" stroke-width="3"/>
+  <line x1="1487" y1="391" x2="1487" y2="417" stroke="#1F1F1F" stroke-width="3"/>
+  <text class="label" x="1572" y="386" text-anchor="middle">BESS</text>
+  <text class="small" x="1572" y="416" text-anchor="middle">100 MWh</text>
+  <text class="small" x="1572" y="445" text-anchor="middle">50 MW</text>
+
+  <!-- Electricity bus and links -->
+  <path class="elec-line" d="M966 220 L1045 220 L1045 155 L1545 155"/>
+  <circle cx="1125" cy="155" r="9" fill="#061A8A"/>
+  <circle cx="1235" cy="155" r="9" fill="#061A8A"/>
+  <circle cx="1392" cy="155" r="9" fill="#061A8A"/>
+  <text class="label" x="1215" y="128" text-anchor="middle">Electricity</text>
+  <path class="elec-line" marker-end="url(#arrow-elec)" d="M1235 155 L1235 385"/>
+  <path class="elec-line" marker-end="url(#arrow-elec)" d="M1045 155 L1045 560"/>
+  <path class="elec-line" marker-start="url(#arrow-elec)" marker-end="url(#arrow-elec)" d="M1392 155 L1392 255 L1432 255"/>
+  <path class="elec-line" marker-start="url(#arrow-elec)" marker-end="url(#arrow-elec)" d="M1392 155 L1392 402 L1432 402"/>
+
+  <!-- Cooling and return flows -->
+  <path class="cool-line" marker-end="url(#arrow-cool)" d="M670 465 L1148 465"/>
+  <text class="small cool-text" x="925" y="438">Chilled Water</text>
+  <text class="small cool-text" x="940" y="466">(Primary)</text>
+  <path class="backup-line" marker-end="url(#arrow-backup)" d="M1055 603 L1148 603"/>
+  <text class="tiny" x="1080" y="585" fill="#E95A57">backup</text>
+  <path class="return-line" marker-end="url(#arrow-return)" d="M835 458 L835 610 L533 610 L533 528"/>
+  <path class="return-line" d="M533 610 L148 610 L148 462"/>
+  <text class="small cool-text" x="290" y="601">Condensate /</text>
+  <text class="small cool-text" x="290" y="630">Water Return</text>
+
+  <!-- Flow and component keys -->
+  <rect x="52" y="700" width="835" height="165" rx="12" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="1.5"/>
+  <text class="small" x="75" y="735" font-weight="700">Flow key</text>
+  <path class="elec-line thin" marker-end="url(#arrow-elec)" d="M75 775 L150 775"/>
+  <text class="tiny" x="175" y="782">Electricity</text>
+  <path class="steam-line thin" marker-end="url(#arrow-steam)" d="M75 815 L150 815"/>
+  <text class="tiny" x="175" y="822">Steam / heat</text>
+  <path class="cool-line thin" marker-end="url(#arrow-cool)" d="M75 855 L150 855"/>
+  <text class="tiny" x="175" y="862">Chilled water</text>
+  <path class="backup-line thin" marker-end="url(#arrow-backup)" d="M380 775 L455 775"/>
+  <text class="tiny" x="480" y="782">Backup cooling</text>
+  <path class="return-line thin" marker-end="url(#arrow-return)" d="M380 815 L455 815"/>
+  <text class="tiny" x="480" y="822">Condensate / water return</text>
+  <line x1="620" y1="725" x2="620" y2="848" stroke="#DDDDDD" stroke-width="1.5"/>
+  <text class="small" x="642" y="735" font-weight="700">Component fill</text>
+  <rect x="642" y="752" width="24" height="24" class="power-fill"/>
+  <text class="tiny" x="680" y="770">Power conversion</text>
+  <rect x="642" y="785" width="24" height="24" class="thermal-fill"/>
+  <text class="tiny" x="680" y="803">Thermal utilization</text>
+  <rect x="642" y="818" width="24" height="24" class="cool-fill"/>
+  <text class="tiny" x="680" y="836">Cooling equipment</text>
+  <rect x="812" y="752" width="24" height="24" class="external-fill"/>
+  <text class="tiny" x="848" y="770">External</text>
+  <rect x="812" y="785" width="24" height="24" class="storage-fill"/>
+  <text class="tiny" x="848" y="803">Storage</text>
+
+  <!-- Boundary inputs -->
+  <rect class="plant" x="900" y="710" width="510" height="155" rx="18"/>
+  <text class="label" x="1155" y="746" text-anchor="middle" font-weight="700">Boundary inputs</text>
+  <g transform="translate(950 770)" stroke="#061A57" fill="none" stroke-width="2.5">
+    <polyline points="0,70 0,5"/>
+    <polyline points="0,70 75,70"/>
+    <rect x="10" y="48" width="12" height="22" fill="#EAF6FF"/>
+    <rect x="31" y="36" width="12" height="34" fill="#EAF6FF"/>
+    <rect x="52" y="22" width="12" height="48" fill="#EAF6FF"/>
+    <polyline points="10,45 30,30 45,35 70,12"/>
+    <polyline points="61,12 70,12 70,21"/>
+  </g>
+  <text class="tiny" x="987" y="850" text-anchor="middle">ERCOT LMP</text>
+  <g transform="translate(1085 770)" stroke="#061A57" fill="none" stroke-width="2.5">
+    <line x1="16" y1="10" x2="16" y2="58"/>
+    <circle cx="16" cy="58" r="15" fill="#EAF6FF"/>
+    <path d="M58 12 C45 36 37 53 37 63 C37 75 47 82 58 82 C69 82 79 75 79 63 C79 53 71 36 58 12 Z" fill="#EAF9F8"/>
+  </g>
+  <text class="tiny" x="1130" y="850" text-anchor="middle">Wet-bulb</text>
+  <g transform="translate(1210 770)" stroke="#061A57" fill="none" stroke-width="2.5">
+    <path d="M0 0 L52 0 L72 20 L72 82 L0 82 Z" fill="#FFFFFF"/>
+    <path d="M52 0 L52 20 L72 20"/>
+    <text x="36" y="55" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#061A57" stroke="none">45U</text>
+  </g>
+  <text class="tiny" x="1246" y="850" text-anchor="middle">45U PTC</text>
+  <g transform="translate(1320 770)" stroke="#061A57" fill="none" stroke-width="2.5">
+    <circle cx="45" cy="42" r="39" fill="#FFFFFF"/>
+    <text x="45" y="56" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="55" fill="#061A57" stroke="none">$</text>
+  </g>
+  <text class="tiny" x="1365" y="850" text-anchor="middle">CAPEX / O&amp;M</text>
+</svg>

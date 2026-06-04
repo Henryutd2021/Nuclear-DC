@@ -1,11 +1,11 @@
 """Case 0 — grid-only baseline (v2.5 §B).
 
 Per v2.5 §2.1, Case 0 runs as an "independent LP estimation" rather than as
-part of the unified MILP. With a fixed PUE and no on-site generation or
+part of the unified MILP. With fixed cooling equipment and no on-site generation or
 storage, dispatch is deterministic per hour:
 
-    Q_cool(t) = (PUE - 1) * P_IT(t) / eta_chain      [v2.5 §F definition]
-    P_VCC(t) = Q_cool(t) / COP_VCC_Houston           [v2.5 §B + Houston derating]
+    Q_cool(t) = P_IT(t) / eta_chain                  [IT heat-rejection load]
+    P_VCC(t) = Q_cool(t) / COP_VCC(load)             [Houston derating + part load]
     P_grid_buy(t) = P_IT(t) + P_VCC(t)               [grid covers everything]
 
 TAC then follows the §2.0.3 unified formula:
@@ -64,8 +64,9 @@ def solve_case0(
     Args:
         cfg: ``RunConfig`` loaded for ``case_id=0``.
         ts: Aligned hourly time series (one ERCOT year).
-        pue: Override the PUE setpoint (defaults to ``cfg.base.physics.pue_default``).
-            v2.5 S1 sensitivity values: {1.10, 1.30, 1.50}.
+        pue: Metadata label for reported full-load PUE (defaults to
+            ``cfg.base.physics.pue_default``). It does not change dispatch;
+            the cooling-efficiency sensitivity changes VCC COP instead.
 
     Returns:
         ``Case0Result`` bundling per-hour dispatch and annualized accounting.

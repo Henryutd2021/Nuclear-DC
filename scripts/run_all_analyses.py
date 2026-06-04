@@ -2,19 +2,19 @@
 
 Run grid (100 solves total):
 
-  main_baseline       4 runs   Cases 0-3  | year 2023 | PUE 1.30 | reactor ATB-Mid
+  main_baseline       4 runs   Cases 0-3  | year 2023 | full-load PUE 1.35 | reactor ATB-Mid
   s1_pue              6 runs   Cases 1-2  | year 2023 | effective PUE {1.10,1.30,1.50}
                                                       | via chiller COP {11.1,3.70,2.22}
                                                       | reactor ATB-Mid
-  s2_price           12 runs   Cases 0-3  | year in {2022, 2023, 2024} | PUE 1.30
+  s2_price           12 runs   Cases 0-3  | year in {2022, 2023, 2024} | full-load PUE 1.35
                                                       | reactor ATB-Mid
-  s3_battery          8 runs   Cases 0-3  | year 2023 | PUE 1.30
+  s3_battery          8 runs   Cases 0-3  | year 2023 | full-load PUE 1.35
                                                       | bess in {off, on}
                                                       | (Cases 0/3 have no BESS block;
                                                       rows duplicated for table shape)
-  s4_capex            6 runs   Cases 1-2  | year 2023 | PUE 1.30
+  s4_capex            6 runs   Cases 1-2  | year 2023 | full-load PUE 1.35
                                                       | reactor in {FOAK, ATB_Mid, NOAK}
-  s5_feasibility_2d  25 runs   Case 2     | year 2023 | PUE 1.30
+  s5_feasibility_2d  25 runs   Case 2     | year 2023 | full-load PUE 1.35
                                                       | (SMR, absorption) CAPEX 5×5 grid
                                                       driven by config/capex_grid_s5.yaml
   s6_carbon_price    12 runs   Cases 0-3  | carbon price in {0, 50, 100} $/tCO2
@@ -74,6 +74,7 @@ from src.kpi import (  # noqa: E402
 from src.milp.result import NuclearCaseResult  # noqa: E402
 
 OUTPUTS = PROJECT_ROOT / "outputs"
+BASELINE_FULL_LOAD_PUE = 1.35
 
 CASE_SOLVERS: dict[int, Callable] = {
     0: solve_case0,
@@ -550,7 +551,7 @@ _NUCLEAR_CASES = (1, 2)
 def build_run_grid() -> list[RunSpec]:
     specs: list[RunSpec] = []
 
-    # ---- main_baseline: 4 cases, 2023, PUE 1.30, ATB-Mid ------------------
+    # ---- main_baseline: 4 cases, 2023, full-load PUE 1.35, ATB-Mid --------
     for cid in _ALL_CASES:
         specs.append(
             RunSpec(
@@ -558,7 +559,7 @@ def build_run_grid() -> list[RunSpec]:
                 run_id=f"case{cid}",
                 case_id=cid,
                 year=2023,
-                pue=1.30,
+                pue=BASELINE_FULL_LOAD_PUE,
                 reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
             )
         )
@@ -593,7 +594,7 @@ def build_run_grid() -> list[RunSpec]:
                     run_id=f"case{cid}_year{year}",
                     case_id=cid,
                     year=year,
-                    pue=1.30,
+                    pue=BASELINE_FULL_LOAD_PUE,
                     reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
                 )
             )
@@ -608,7 +609,7 @@ def build_run_grid() -> list[RunSpec]:
                     run_id=f"case{cid}_bess_{tag}",
                     case_id=cid,
                     year=2023,
-                    pue=1.30,
+                    pue=BASELINE_FULL_LOAD_PUE,
                     reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
                     bess_on=bess_on,
                 )
@@ -623,7 +624,7 @@ def build_run_grid() -> list[RunSpec]:
                     run_id=f"case{cid}_{scen}",
                     case_id=cid,
                     year=2023,
-                    pue=1.30,
+                    pue=BASELINE_FULL_LOAD_PUE,
                     reactor_scenario=scen,
                 )
             )
@@ -640,7 +641,7 @@ def build_run_grid() -> list[RunSpec]:
                     run_id=f"case2_smr_{smr['tag']}_abs_{ab['tag']}",
                     case_id=2,
                     year=2023,
-                    pue=1.30,
+                    pue=BASELINE_FULL_LOAD_PUE,
                     # S5 sets SMR CAPEX directly (overrides the S4 scenario path)
                     smr_capex_usd_per_kWe=float(smr["value"]),
                     absorption_capex_usd_per_kWth=float(ab["value"]),
@@ -661,7 +662,7 @@ def build_run_grid() -> list[RunSpec]:
                     run_id=f"case{cid}_{price_tag}",
                     case_id=cid,
                     year=2023,
-                    pue=1.30,
+                    pue=BASELINE_FULL_LOAD_PUE,
                     reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
                     carbon_price_usd_per_tco2=price,
                 )
@@ -671,7 +672,7 @@ def build_run_grid() -> list[RunSpec]:
     # Tests the policy-leverage claim: is the ΔPremium from a 5%→10% WACC
     # spread larger or smaller than the ΔPremium from FOAK→NOAK CAPEX?
     # 5%   → DOE LPO Section 1703 loan guarantee / regulated asset base
-    # 6.7% → NREL ATB 2024 baseline (matches main_baseline)
+    # 6.7% -> NLR ATB 2024 baseline (matches main_baseline)
     # 10%  → merchant project risk premium (no LPO, private financing)
     for wacc in (0.05, 0.067, 0.10):
         wacc_tag = f"wacc_{int(round(wacc * 1000))}"  # e.g. wacc_50, wacc_67, wacc_100
@@ -681,7 +682,7 @@ def build_run_grid() -> list[RunSpec]:
                 run_id=f"case2_{wacc_tag}",
                 case_id=2,
                 year=2023,
-                pue=1.30,
+                pue=BASELINE_FULL_LOAD_PUE,
                 reactor_scenario="ATB_Mid",
                 wacc_override=wacc,
             )
@@ -700,7 +701,7 @@ def build_run_grid() -> list[RunSpec]:
                     run_id=f"case{cid}_load_{mult_tag}",
                     case_id=cid,
                     year=2023,
-                    pue=1.30,
+                    pue=BASELINE_FULL_LOAD_PUE,
                     reactor_scenario="ATB_Mid" if cid in _NUCLEAR_CASES else None,
                     load_multiplier=mult,
                 )
@@ -855,7 +856,7 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
             "binaries are introduced by S3 BESS).",
             "S3 BESS rows for Cases 0/3 carry bess_applied=False because "
             "those cases have no BESS block; rows preserved for table shape.",
-            "S5 fixes year=2023 / PUE=1.30 / ATB-Mid-equivalent baseline; "
+            "S5 fixes year=2023 / full-load PUE=1.35 / ATB-Mid-equivalent baseline; "
             "the 25 cells span SMR ∈ {2250..14700} $/kWe × absorption ∈ "
             "{450..1200} $/kWth driven by config/capex_grid_s5.yaml.",
             "S6 sweeps carbon price {$0, $50, $100}/tCO2 across all four cases.",

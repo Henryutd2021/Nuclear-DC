@@ -20,7 +20,7 @@ Transformation:
 Outputs:
   data/workload/dc_200mw_real_60u_2018.csv             — baseline IT load profile
   data/workload/dc_200mw_real_{u}u_2018.csv            — for each utilization (20/40/60/80)
-  data/workload/cooling_load_pue{110,130,150}.csv     — derived for 3 PUE levels
+  data/workload/cooling_load_pue{110,130,150}.csv     — legacy derived PUE-load files
   data/it_load.csv                                      — primary, copied from 60u
 
 This REPLACES the previous synthetic archetype with REAL measurement-derived data.
@@ -97,7 +97,7 @@ stats = {
         "alternative_utilizations_available": ["20u", "40u", "60u", "80u"],
     },
     "statistics_per_utilization": results,
-    "pue_variants": {
+        "pue_variants_legacy": {
         "pue_110": {
             "description": "Hyperscale direct-liquid-cooling (Google fleet 2024, Meta tier-1)",
             "cooling_load_mean_MWth": round((0.10 / 0.9) * results["60u"]["mean_MW"], 1),

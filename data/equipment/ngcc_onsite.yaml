@@ -5,10 +5,10 @@
 # recovery (Microsoft on-site gas pilot, Crusoe stranded-gas).
 
 economics:
-  overnight_capital_cost_usd_per_kWe: 1330    # NREL ATB 2024 NGCC F-class, Moderate
+  overnight_capital_cost_usd_per_kWe: 1330    # NLR ATB 2024 NGCC F-class, Moderate
   overnight_capital_cost_range_usd_per_kWe: [1077, 1583]  # ATB Advanced → Conservative
-  fixed_om_usd_per_kWe_year: 29.3              # NREL ATB 2024 NGCC
-  variable_om_usd_per_mwh: 2.65                # NREL ATB 2024 NGCC
+  fixed_om_usd_per_kWe_year: 29.3              # NLR ATB 2024 NGCC
+  variable_om_usd_per_mwh: 2.65                # NLR ATB 2024 NGCC
   lifetime_years: 30
   capacity_factor_realistic: 0.85              # high CF when sized for DC firm power
 
@@ -28,7 +28,7 @@ technical:
   min_load_fraction: 0.40
 
 emissions:
-  co2_direct_g_per_kwh_e_lhv: 333              # 0.181 kg/MJ × 3.6 MJ/kWh / 0.55 (NREL ATB)
+  co2_direct_g_per_kwh_e_lhv: 333              # 0.181 kg/MJ × 3.6 MJ/kWh / 0.55 (NLR ATB)
   co2_direct_g_per_kwh_e_paper: 360            # paper uses 360 to match commonly cited NGCC value
   ch4_upstream_g_co2eq_per_kwh: 60             # methane leakage (Alvarez 2018 + recent EDF tracking)
   total_lifecycle_g_co2eq_per_kwh: 420
@@ -37,9 +37,9 @@ emissions:
 # SOURCES
 # ==============================================================================
 sources:
-  - id: "NREL-ATB-2024-NaturalGas"
-    title: "NREL ATB 2024 — Natural Gas (NGCC)"
-    publisher: "NREL"
+  - id: "NLR-ATB-2024-NaturalGas"
+    title: "NLR ATB 2024 — Natural Gas (NGCC)"
+    publisher: "NLR"
     year: 2024
     url: "https://atb.nrel.gov/electricity/2024/natural_gas"
     used_for: ["economics.overnight_capital_cost_usd_per_kWe", "economics.fixed_om_usd_per_kWe_year",

@@ -9,11 +9,11 @@ Standalone computation (matches Case 0 style; not part of the Cases 1-2
 nuclear MILP):
 
     P_NGCC(t) = P_IT(t) + P_VCC(t)              [off-grid balance]
-    Q_cool(t) = (PUE - 1) * P_IT(t) / eta_chain [v2.6 §F definition]
-    P_VCC(t)  = Q_cool(t) / COP_VCC_Houston     [Houston wet-bulb derating]
+    Q_cool(t) = P_IT(t) / eta_chain             [IT heat-rejection load]
+    P_VCC(t)  = Q_cool(t) / COP_VCC(load)       [Houston derating + part load]
 
     Fuel(t) [MMBtu] = P_NGCC(t) * 3.412 / eta_HHV
-    Fuel cost(t) = Fuel(t) * (HenryHub_annual_mean + Houston_basis)
+    Fuel cost(t) = Fuel(t) * (HenryHub_hourly + Houston_basis)
 
 CO2 is tracked as both direct combustion (~360 g/kWh_e) and lifecycle
 including upstream methane leakage (Alvarez 2018, +60 g/kWh_e equivalent).
@@ -79,7 +79,9 @@ def solve_case3(
     Args:
         cfg: ``RunConfig`` loaded for ``case_id=3``.
         ts: Aligned hourly time series (one ERCOT year).
-        pue: Override the PUE setpoint (defaults to ``cfg.base.physics.pue_default``).
+        pue: Metadata label for reported full-load PUE (defaults to
+            ``cfg.base.physics.pue_default``). It does not change dispatch;
+            the cooling-efficiency sensitivity changes VCC COP instead.
 
     Returns:
         ``Case3NgccResult`` with per-hour dispatch + annualized accounting.

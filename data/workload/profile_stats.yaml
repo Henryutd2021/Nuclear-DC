@@ -40,7 +40,7 @@ statistics_per_utilization:
     std_MW: 35.3388443670177
     rows: 8760
     csv: dc_200mw_real_80u_2018.csv
-pue_variants:
+pue_variants_legacy:
   pue_110:
     description: Hyperscale direct-liquid-cooling (Google fleet 2024, Meta tier-1)
     cooling_load_mean_MWth: 10.5

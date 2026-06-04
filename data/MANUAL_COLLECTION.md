@@ -38,16 +38,16 @@ component of TAC; will not change the qualitative finding.
 
 ---
 
-## 2. NREL ATB 2024 Raw CSV Files — Optional
+## 2. NLR ATB 2024 Raw CSV Files — Optional
 
-**What it adds:** The complete cost and performance CSV tables that NREL ATB
+**What it adds:** The complete cost and performance CSV tables that NLR ATB
 publishes for the manuscript SI appendix's "input data audit trail". The
 specific values used in the paper are already in our YAMLs (`reactor/`,
 `equipment/`), so this is purely for the SI completeness section.
 
 **Steps to obtain:**
 
-1. Visit NREL ATB 2024 download page: https://atb.nrel.gov/electricity/2024/data
+1. Visit NLR ATB 2024 download page: https://atb.nlr.gov/electricity/2024/data
 2. Download CSV files for:
    - **Nuclear (SMR):** https://atb.nrel.gov/electricity/2024/nuclear
    - **Natural Gas:** https://atb.nrel.gov/electricity/2024/natural_gas
@@ -128,7 +128,7 @@ optimization. Reference URL in Discussion is sufficient.
 | Item | Replaces | Priority | Time required |
 |---|---|---|---|
 | 1. WattTime MOER | EIA-930 AEF hour-of-day shape | Low | 1-2 days application + 1 hour processing |
-| 2. NREL ATB raw CSVs | (nothing — adds SI completeness) | Low | 30 min |
+| 2. NLR ATB raw CSVs | (nothing — adds SI completeness) | Low | 30 min |
 | 3. Alt AI workloads | (already have NLR real) | Optional | 1 day each |
 | 4. NSRDB observations | Open-Meteo ERA5 | Optional | 30 min + API key |
 | 5. ERCOT load forecast | (Discussion narrative only) | Optional | 1 hour |

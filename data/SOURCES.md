@@ -147,14 +147,14 @@ schema and aggregates back to canonical fuel buckets.
 | Scenario | OCC ($/kWe) | LCOE ($/MWh) | Source |
 |---|---|---|---|
 | FOAK | 14,700 | 194 | OPG Darlington 2024 budget + MIT ANP-201 |
-| ATB-Mid | 7,615 | 130 | NREL ATB 2024 SMR Moderate |
+| ATB-Mid | 7,615 | 130 | NLR ATB 2024 SMR Moderate |
 | NOAK | 2,250 | 95 | GE-Hitachi target + MIT ANP-201 |
 
 - **OPG Darlington 2024:** CAD 6.1B + CAD 1.6B = CAD 7.7B total for one
   300 MWe-net unit. At 2024-Q3 FX 0.73 USD/CAD → **$14,700/kWe**.
   URL: https://www.world-nuclear-news.org/articles/what-is-the-budget-for-canadas-first-smr-project
 
-- **NREL ATB 2024 Nuclear-SMR:** Moderate 7,615 $/kWe.
+- **NLR ATB 2024 Nuclear-SMR:** Moderate 7,615 $/kWe.
   URL: https://atb.nrel.gov/electricity/2024/nuclear
 
 - **MIT ANP-201 (Shirvan 2024):** FOAK $194 (with IRA ITC + LPO); NOAK $95.
@@ -187,14 +187,14 @@ All equipment YAMLs compile values from peer-reviewed/standard references.
 > Oak Ridge National Laboratory. (2009). CHP in Data Centers (Pub-14546). https://info.ornl.gov/sites/publications/files/Pub14546.pdf
 
 ### 3.3 NGCC On-Site (Case 4) — `ngcc_onsite.yaml`
-- OCC 1,330 $/kWe: NREL ATB 2024 NGCC F-class Moderate
+- OCC 1,330 $/kWe: NLR ATB 2024 NGCC F-class Moderate
 - Upstream CH4: Alvarez 2018, Science
 
 **Citation:**
 > Alvarez, R.A., et al. (2018). Science, 361(6398), 186–188. https://doi.org/10.1126/science.aar7204
 
 ### 3.4 BESS Li-ion — `bess_liion.yaml`
-- CAPEX 405 $/kWh, 4-hour: NREL ATB 2024 + Cole & Karmakar 2024
+- CAPEX 405 $/kWh, 4-hour: NLR ATB 2024 + Cole & Karmakar 2024
 
 **Citation:**
 > Cole, W., & Karmakar, A. (2024). NREL TP-6A40-89625. https://www.nrel.gov/docs/fy24osti/89625.pdf
@@ -229,7 +229,7 @@ tabulation at 10-11 rows per file required deterministic interpolation
 |---|---|---|
 | `dc_200mw_real_60u_2018.csv` | **REAL** (scaled) | Paper baseline — 60u utilization × 20 scale |
 | `dc_200mw_real_{20,40,80}u_2018.csv` | **REAL** (scaled) | Alternative utilization levels |
-| `cooling_load_pue{110,130,150}.csv` | **DERIVED** from above | (PUE-1)·IT/η_chain |
+| `cooling_load_pue{110,130,150}.csv` | **LEGACY DERIVED** from above | Old PUE-derived cooling-load variants; not used by the Nature Energy model, which computes $Q_\mathrm{cool}=P_\mathrm{IT}/\eta_\mathrm{chain}$ in code and sweeps VCC COP for effective PUE |
 | `raw_nlr_colocation/colocation_10MW_2840nodes_{20,40,60,80}u_power.csv` | **REAL** | Original NLR 1-minute profiles |
 | `raw_nlr_colocation/inference_1MW_283nodes_{20,40,60,80}u_power.csv` | **REAL** | NLR 1 MW inference variant |
 | `raw_nlr_colocation/README.md` | — | NLR dataset provenance |
@@ -351,8 +351,8 @@ from WattTime would be slightly different. Replace if needed
 ### 8.1 Financial — `REAL` — `financial_parameters.yaml`
 | Field | Value | Source |
 |---|---|---|
-| WACC nominal | 6.7 % | NREL ATB 2024 |
-| Project life | 20 yr | NREL ATB 2024 |
+| WACC nominal | 6.7 % | NLR ATB 2024 |
+| Project life | 20 yr | NLR ATB 2024 |
 | CRF | 0.0907 | **DERIVED** from i, n |
 | IRA ITC 30%, PTC $30/MWh | IRA 2022 |
 
@@ -438,7 +438,7 @@ All entries below have stable URLs/DOIs and are properly formatted for BibTeX.
 - EIA-930 Hourly Electric Grid Monitor — ERCO
 - EIA Form 923 (nuclear fuel)
 - EIA Henry Hub Spot Prices (NG.RNGWHHD.D)
-- NREL ATB 2024 (Nuclear, NG, Storage, Geothermal-Binary, Financial)
+- NLR ATB 2024 (Nuclear, NG, Storage, Geothermal-Binary, Financial)
 - EPA AVERT 2024 (2023 emission factors)
 - UNECE 2022 LCA Report
 - IAEA ARIS SMR Catalogue 2024
@@ -510,7 +510,7 @@ See `data/MANUAL_COLLECTION.md` for details. As of 2026-05-19 sprint completion:
 
 - **Optional:** Replace EIA-930-derived AEF with WattTime MOER (MARGINAL emission
   rate, 1-2 day academic application).
-- **Optional:** Download raw NREL ATB 2024 CSV files for the manuscript SI
+- **Optional:** Download raw NLR ATB 2024 CSV files for the manuscript SI
   appendix (the YAMLs we wrote already capture the key parameters).
 
 **No mandatory gaps remain.** The dataset is complete and paper-ready.

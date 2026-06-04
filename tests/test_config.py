@@ -31,12 +31,12 @@ def test_case0_equipment_flags_match_v25_locked_spec():
     assert eq.grid_export_enabled is False
 
 
-def test_case0_capacities_cover_pue150_worst_hour():
-    """Case 0 chiller must cover (PUE-1)*P_IT_max at the most cooling-heavy PUE."""
+def test_case0_capacities_cover_peak_it_heat_rejection():
+    """Case 0 chiller must cover P_IT_max / eta_chain at the peak IT hour."""
     cfg = load_config(case_id=0, project_root=PROJECT_ROOT)
-    # P_IT_max ≈ 142.4 MW (NLR Vercellino dataset), PUE=1.50 → Q_cool ≈ 71 MWth
-    # Allow margin → capacity ≥ 120 MWth
-    assert cfg.case.capacities.electric_chiller_capacity_MWth >= 120.0
+    # P_IT_max ≈ 142.4 MW (NLR Vercellino dataset), eta_chain=0.9
+    # gives Q_cool_max ≈ 158.3 MWc.
+    assert cfg.case.capacities.electric_chiller_capacity_MWth >= 158.3
 
 
 def test_case0_vcc_houston_derated_cop_is_below_nameplate():

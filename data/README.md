@@ -103,7 +103,7 @@ specified year's Tier-2 data.
 
 | Dim | Variable | Data files / config |
 |---|---|---|
-| **S1** | PUE {1.10, 1.30, 1.50} | `workload/cooling_load_pue{110,130,150}.csv` (Tier 2) or pass `pue=` to `load_time_series()` |
+| **S1** | Effective full-load PUE {1.10, 1.30, 1.50} | VCC COP override via `with_cooling_cop()`; legacy `workload/cooling_load_pue{110,130,150}.csv` files are retained only for audit history |
 | **S2** | ERCOT regime {2022/2023/2024} | `ercot/{year}_dam_lmp_houston.csv` (Tier 2) + `build_ambient_and_price_bridge.py --year` |
 | **S3** | BESS on/off | `equipment/bess_liion.yaml` + flag in `config/plant_case*.yaml` |
 | **S4** | CAPEX {FOAK/Mid/NOAK} | `reactor/bwrx300_economic.yaml.scenarios.*` |

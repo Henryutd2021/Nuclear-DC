@@ -7,7 +7,7 @@ bess_liion:
   configuration_paper: "100 MWh / 25 MW (4-hour duration)"
 
   economics:
-    capex_total_2024_usd_per_kwh: 405          # NREL ATB 2024 Battery Storage, Moderate
+    capex_total_2024_usd_per_kwh: 405          # NLR ATB 2024 Battery Storage, Moderate
     capex_total_2024_usd_per_kw: 1620          # 4-hour total ($/kW)
     capex_battery_pack_usd_per_kwh: 156        # cell + module + pack
     capex_balance_of_system_usd_per_kwh: 249   # PCS, EPC, interconnect
@@ -37,9 +37,9 @@ bess_liion:
 # SOURCES
 # ==============================================================================
 sources:
-  - id: "NREL-ATB-2024-Storage"
-    title: "NREL ATB 2024 — Battery Storage (4-hour duration, Utility-Scale)"
-    publisher: "NREL"
+  - id: "NLR-ATB-2024-Storage"
+    title: "NLR ATB 2024 — Battery Storage (4-hour duration, Utility-Scale)"
+    publisher: "NLR"
     year: 2024
     url: "https://atb.nrel.gov/electricity/2024/utility-scale_battery_storage"
     used_for: ["economics.capex_*", "economics.fixed_om_usd_per_kw_year",

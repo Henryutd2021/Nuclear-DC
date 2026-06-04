@@ -1,0 +1,690 @@
+% !TeX program = pdflatex
+% Engine: sn-jnl + pdflatex packages + sn-vancouver.bst. Nature Energy working draft.
+% Structure: Introduction -> Results -> Discussion -> Conclusion -> Methods -> Supplementary.
+% Nature Energy working manuscript; data and figure paths are local to this directory.
+
+\documentclass[sn-vancouver,Numbered]{sn-jnl}% Springer Nature / Vancouver Reference Style
+
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+\usepackage[title]{appendix}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage{manyfoot}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{hyperref}
+\hypersetup{hypertexnames=false}
+\usepackage{xurl}
+% Defensive no-op stub for sn-jnl first-page shipout hook under non-pdftex drivers.
+\makeatletter
+\providecommand{\headerps@out}[1]{}
+\makeatother
+\usepackage{lineno}
+
+\setcitestyle{super,sort&compress}
+\makeatletter
+\renewcommand\NAT@open{}
+\renewcommand\NAT@close{}
+\makeatother
+
+% Figures live in this manuscript's own figures/ folder (per-version, Nature set).
+\graphicspath{{figures/}}
+
+% Run-in subheading used in the migrated body.
+\newcommand{\runinhead}[1]{\par\smallskip\noindent\textbf{#1.}\quad}
+% Safety: define \checkmark if the loaded fonts do not provide it.
+\usepackage{pifont}
+\providecommand{\checkmark}{\ding{51}}
+
+\raggedbottom
+
+\begin{document}
+
+\title[Reactor capital cost governs data-center cogeneration]{Reactor capital cost governs small modular reactor cogeneration for data-center power and cooling}
+
+\author[1,3]{\fnm{Honglin} \sur{Li}}
+\author[3]{\fnm{Buxin} \sur{She}}
+\author*[1,2]{\fnm{Jie} \sur{Zhang}}\email{jiezhang@utdallas.edu}
+
+\affil[1]{\orgdiv{Department of Mechanical Engineering}, \orgname{The University of Texas at Dallas}, \orgaddress{\city{Richardson}, \postcode{75080}, \state{TX}, \country{USA}}}
+\affil[2]{\orgdiv{Department of Electrical and Computer Engineering}, \orgname{The University of Texas at Dallas}, \orgaddress{\city{Richardson}, \postcode{75080}, \state{TX}, \country{USA}}}
+\affil[3]{\orgdiv{Department of Electrical and Computer Engineering}, \orgname{Kansas State University}, \orgaddress{\city{Manhattan}, \postcode{66506}, \state{KS}, \country{USA}}}
+
+\abstract{%
+Data centers are becoming large, continuous electricity loads, but the value of colocating them with small modular reactors that also recover heat for cooling remains uncertain under current market and policy conditions. Here we co-optimize electricity supply, steam extraction, absorption cooling, grid exchange and storage for a 200~MW$_\mathrm{e}$ data center in the Texas power market over 100 hourly scenarios spanning 2022--2024 prices, reactor capital costs, financing, carbon prices, cooling efficiency and scale. At 2023 mid-range reactor capital, the nuclear configurations cost 146--149\% more than grid supply even with the nuclear production tax credit, whereas nth-of-a-kind reactor capital makes them 22--25\% cheaper without a carbon price. Absorption cooling supplies 94\% of annual cooling but changes cost by only \$2.4~M~yr$^{-1}$, showing that reactor capital, not heat recovery, sets the viability boundary.
+}
+
+\keywords{Small modular reactor, Absorption cooling, Data center, Techno-economic analysis, Mixed-integer linear programming, Thermal integration}
+
+\maketitle
+
+% Line numbers on for the initial submission / review copy.
+\linenumbers
+
+\section{Introduction}
+\label{sec:introduction}
+
+Data centers are emerging as a major driver of electricity-demand growth after a decade in which efficiency gains moderated their global energy use \citep{masanet2020datacenter}. U.S. data-center electricity consumption nearly doubled between 2019 and 2023 and is projected to reach 6.7--12\% of total U.S. electricity by 2028 \citep{shehabi2024}; globally, electricity use from data centers is projected to roughly double to 945~TWh by 2030 \citep{iea2024electricity,iea2025energyAi}. In the Electric Reliability Council of Texas (ERCOT), large-load interconnection requests already exceed the scale of conventional planning margins \citep{ercot2025longterm,eia2026aeo}. This growth creates a supply problem that is not only about annual energy: hyperscale campuses are continuous loads, require high availability, and carry cooling demands that rise sharply during hot and humid hours \citep{greenGrid2012pue,ashrae2021thermal}.
+
+Small modular reactors (SMRs) have therefore re-entered data-center procurement discussions as firm, low-carbon generators whose unit sizes are closer to a hyperscale campus than conventional gigawatt-scale nuclear plants \citep{mignacca2020smrFinance,doe2024liftoff,atb2024nuclear,asuega2023}. Yet the economic boundary remains unsettled. Prior techno-economic assessments show that SMRs can be lower-risk to build than large reactors but often remain above grid supply without a carbon constraint \citep{asuega2023}. Capital-cost estimates also span a wide first-of-a-kind (FOAK) to nth-of-a-kind (NOAK) range, with learning, standardization, financing and project delivery determining whether reactors approach published low-cost trajectories \citep{inl2024metaanalysis,nea2020constructionCost,atb2024nuclear}. Current U.S. policy adds a second uncertainty: the Section~45U nuclear production tax credit (PTC) can materially change the cost of operating a qualifying nuclear plant, but only if the pre-credit gap is small enough for the credit to close.
+
+Cooling-side thermal integration offers a different route to value. Data-center cooling can account for 20--40\% of facility energy use, and absorption chillers can convert heat into chilled water when the heat source is sufficiently hot and available \citep{ebrahimi2014review,yuan2023wasteHeatReview,amiri2021}. Reactor steam cycles can provide the driving temperatures required by double-effect lithium-bromide absorption chillers more readily than server exhaust, but the value of this integration depends on chiller capital cost, extracted-steam opportunity cost, wet-bulb-driven de-rating and backup electric cooling during crystallization-risk hours \citep{srikhirin2001absorption,herold2016absorption,cui2025switchable}. Treating heat recovery as an automatic benefit therefore risks overstating the value of nuclear cogeneration for an efficiently cooled campus.
+
+The remaining gap is a boundary problem. Existing studies rarely combine hourly cooling physics, multi-year electricity and gas prices, reactor capital-cost trajectories, production-tax-credit policy and carbon accounting in one co-optimization. One-dimensional sensitivities also make it difficult to tell whether a proposed site or contracting structure lies in a competitive region. The needed result is not a single levelized cost but a multi-axis map: when does a colocated reactor beat grid procurement, when does absorption cooling actually add value, and which assumptions move the boundary?
+
+Here we present a techno-economic boundary analysis of a 200~MW$_\mathrm{e}$ data center colocated with a BWRX-300 SMR and a double-effect absorption chiller driven by cascaded high-pressure to low-pressure turbine extraction. A mixed-integer linear program co-optimizes power supply, cooling, grid exchange and storage at hourly resolution across 2022--2024 ERCOT prices, Henry Hub gas prices and Houston wet-bulb temperatures, with the Section~45U PTC applied to the nuclear cases. We compare grid supply, reactor supply without heat recovery, reactor supply with absorption cooling, and an on-site natural gas combined cycle (NGCC) across 100 scenarios spanning data-center scale, cooling efficiency, market year, battery deployment, reactor and absorption capital cost, carbon price and weighted-average cost of capital (WACC); the case definitions, optimization formulation and scenario ledger are specified in Methods and the Supplementary Information. We find that nuclear cogeneration is a conditional strategy: at mid-range reactor capital it remains far above grid cost, but at NOAK reactor capital the PTC opens a viable region with no carbon price, while absorption cooling supplies most cooling yet does not set the economic boundary.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{A boundary analysis separates supply, heat recovery and policy effects}
+\label{sec:results:design}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig1_system_schematic.pdf}
+\caption{Cascaded steam-extraction mechanism for SMR-powered data-center cooling. Steam from the BWRX-300 power block expands through the high-pressure turbine, a mid-pressure extraction stream drives a double-effect LiBr--H$_2$O absorption chiller, and the remaining steam expands through the low-pressure turbine to produce electricity. Chilled water supplies the data center, vapor-compression cooling provides backup during absorption limits, and the grid and battery interfaces balance electricity. Complete case definitions, optimization equations and scenario groups are provided in Methods and the Supplementary Information. SMR, small modular reactor; LiBr, lithium bromide; ERCOT, Electric Reliability Council of Texas; PCC, point of common coupling; BESS, battery energy storage system; CAPEX, overnight capital expenditure; O\&M, operations and maintenance.}
+\label{fig:schematic}
+\end{figure}
+
+The analysis is organized around a single competitiveness metric, the grid-cost margin, defined as one minus the ratio of each configuration's total annualized cost (TAC) to the matching grid-only data-center cost. Positive values mean that an on-site option beats grid procurement; negative values mean that it does not. This framing matters because the reactor, cooling system and policy support can move the margin in different directions. Reactor capital and financing determine the annualized fixed-cost burden, absorption cooling changes both chiller electricity and turbine output, grid exchange determines merchant-export value, and the Section~45U PTC offsets eligible nuclear generation.
+
+Figure~\ref{fig:schematic} presents the fully integrated Case~2 configuration as the organizing system schematic, with reactor power conversion, cascaded steam extraction, absorption cooling, vapor-compression backup, grid exchange and optional storage shown in one architecture. The four model configurations are then defined as supply and cooling variants of this architecture in Methods and Table~\ref{tab:cases}, the hourly optimization workflow is specified by the formulation in Methods, and the scenario envelope is given in the scenario-design subsection and Supplementary Table~\ref{tab:scenarios}. The Results first establish the baseline economic gap, then ask whether operations, cooling-side value, reactor capital, financing, market year or carbon policy can close it.
+
+\subsection{Mid-range reactor capital keeps nuclear options above grid supply}
+\label{sec:results:baseline}
+
+At the 2023 National Laboratory of the Rockies (NLR) Annual Technology Baseline mid-range (ATB-Mid) reactor-capital baseline, the nuclear configurations are not close to grid parity. The grid-supplied data center (Case~0) has a TAC of \$78.1~M~yr$^{-1}$, of which 93\% is the electricity bill. The two reactor configurations cost \$192.2 and \$194.6~M~yr$^{-1}$ without heat recovery (Case~1) and with absorption cooling (Case~2), respectively, even after the Section~45U PTC returns \$26.4 and \$25.8~M~yr$^{-1}$ (Figure~\ref{fig:baseline_economics}a). Reactor capital recovery dominates both totals. Grid-export revenue and the PTC offset part of the fixed-cost burden, but not enough to prevent grid-cost margins of $-146\%$ and $-149\%$.
+
+The only baseline configuration that beats grid procurement is the on-site NGCC plant (Case~3), at \$55.7~M~yr$^{-1}$ and a $+29\%$ grid-cost margin. This result is tied to the 2023 fuel-price regime: delivered natural gas averaged \$2.63~MMBtu$^{-1}$, while ERCOT day-ahead prices remained high enough for the grid-only bill to exceed on-site fuel cost. Because Case~3 is islanded, it cannot import during the roughly 42\% of hours when the day-ahead price falls below its running cost, so the comparison is an annual cost result rather than an hour-by-hour arbitrage result. Adding absorption cooling to the nuclear plant changes cost by only \$2.4~M~yr$^{-1}$ relative to the reactor-only case, showing already at the baseline that heat recovery is not the primary economic lever.
+
+The BWRX-300 unit-size constraint explains part, but not most, of the baseline nuclear penalty. The smallest commercial unit is 270~MW$_\mathrm{e}$ net at the assumed capacity factor, about 2.9 times the data center's 94.7~MW$_\mathrm{e}$ average information-technology (IT) load, so Case~2 exports about 1.43~TWh~yr$^{-1}$ to ERCOT. Scaling the campus to 2.5$\times$ the baseline load brings the nuclear site close to import-export balance, but the matched Case~2 margin is still $-62\%$; at 3.0$\times$ the site becomes a net importer and the margin improves only to $-52\%$ (Supplementary Figure~\ref{fig:size_matching}). Unit-size matching therefore improves utilization intensity, reducing the Case~2 excess cost from \$140 to \$49~MWh$_\mathrm{IT}^{-1}$ across the sweep, but it does not remove the ATB-Mid reactor-capital gap.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_baseline_economics.pdf}
+\caption{Baseline economics of the four configurations at the 2023 ATB-Mid baseline. ATB-Mid denotes the mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; SMR, small modular reactor; NGCC, natural gas combined cycle; PUE, power usage effectiveness; WACC, weighted-average cost of capital; O\&M, operations and maintenance; PTC, production tax credit; TAC, total annualized cost; ERCOT, Electric Reliability Council of Texas. Baseline assumptions are full-load PUE 1.35 and WACC 6.7\%. (a)~TAC decomposition: each bar stacks capital recovery, fixed and variable O\&M, fuel and grid imports; bars below zero are grid-export revenues and, for the nuclear cases, the Section~45U PTC; the horizontal mark is the net TAC and $M$ is the grid-cost margin against Case~0. (b)~Cost--carbon trade-off across ERCOT years 2022, 2023 and 2024: marker shape denotes case, marker color denotes year, and the arrow indicates the Pareto-preferred direction. (c)~Carbon-accounting components for the two nuclear configurations: grid-import and reactor-lifecycle emissions are offset by grid-export credits, and the horizontal mark reports net annual CO$_2$.}
+\label{fig:baseline_economics}
+\end{figure}
+
+The baseline cost ranking is mirrored in the cost--carbon plane (Figure~\ref{fig:baseline_economics}b,c). The nuclear cases occupy the low-carbon region after reactor-lifecycle emissions and grid-export credits are accounted for using the ERCOT hourly average carbon intensity, while the grid-only case anchors the low-cost region in 2023 and 2024. Case~3 trades higher emissions for lower cost under 2023 gas prices. Figure~\ref{fig:baseline_economics}c shows that export credits more than offset grid-import and reactor-lifecycle emissions in Cases~1 and 2, but low carbon intensity alone does not make either reactor configuration cost-competitive at zero carbon price and mid-range reactor capital.
+
+\subsection{Absorption cooling supplies most cooling but adds little value}
+\label{sec:results:cooling}
+
+The hourly dispatch of Case~2 shows how the absorption chiller integrates with the reactor under winter and summer operating conditions (Figure~\ref{fig:operation_value}a,b). In the winter week, the BWRX-300 runs near nameplate thermal output, consistent with its 92\% annual capacity-factor constraint. The high-pressure to low-pressure turbine train produces close to its full $\sim 270$~MW$_\mathrm{e}$ net output through most of the window, turning down to about 125~MW$_\mathrm{e}$ during the low-price hours. Chilled-water demand tracks the 25--142~MW$_\mathrm{e}$ winter IT load through $Q_{\mathrm{cool}}^{\mathrm{dem}}=P_{\mathrm{IT}}/\eta_{\mathrm{ch}}$, and the extraction tap supplies most of it as steam, with the VCC backup contributing only on the highest-demand hours. In the July week, wet-bulb temperature climbs toward the 26~$^\circ$C design anchor on the warm afternoons, derating the absorption coefficient of performance (COP) toward its 1.10 design value. The week stays below the 27~$^\circ$C crystallization gate (32~$^\circ$C cooling-water inlet). The higher summer cooling load nonetheless exceeds what the derated absorber can supply from steam, so the VCC backup tops up to about 30~MW$_\mathrm{c}$ on the warmest afternoons. Across the full year the absorption chiller delivers 862~GWh$_\mathrm{c}$ and the VCC backup 60~GWh$_\mathrm{c}$, the latter spread over roughly 2{,}870~hours of partial top-up that also cover the 5\% maintenance derating of the absorber (Supplementary Information). The crystallization gate itself is rare: the availability indicator in Equation~\ref{eq:abs_avail} forces the absorber fully offline for about 115~hours, concentrated in late June through August (annual peak wet-bulb 28~$^\circ$C), during which the backup carries the entire cooling load of those hours (13.6~GWh$_\mathrm{c}$).
+
+The waterfall in Figure~\ref{fig:operation_value}c decomposes the \$2.4~M~yr$^{-1}$ gap between Case~2 and Case~1 into the marginal components of adding absorption cooling to the nuclear-only plant. The chiller displaces \$18.2~M~yr$^{-1}$ of gross vapor-compression electricity at the ERCOT 2023 hourly import price. Against this credit stand, in annual terms, \$13.2~M for absorption capital plus fixed operations and maintenance, \$4.1~M for the Willans-line electricity opportunity cost of extracted steam, \$2.3~M for VCC backup and top-up, and \$0.6~M for the reduction in the production tax credit, since diverting steam to the absorber lowers the creditable turbine output; the monetized direct-site-water increment is only \$0.04~M~yr$^{-1}$. A small $-\$0.3$~M~yr$^{-1}$ residual reconciles the component sum with the measured TAC difference. Credit and cost nearly cancel, so the chiller is close to break-even, and the residual penalty is a capital-cost problem rather than one of operating physics or water.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_operation_value.pdf}
+\caption{Cogeneration operation and the marginal value of absorption cooling for Case~2. VCC denotes vapor-compression chiller; TAC, total annualized cost; PTC, production tax credit. (a)~Hourly dispatch over a winter week (15--22 January) and (b)~a summer week (15--22 July): reactor thermal output $P_{\mathrm{rx}}$ and turbine net electric output $P_{\mathrm{tn}}$ are read on the left axis; mid-pressure extraction $Q_{\mathrm{ext}}$, absorption cooling $Q_{\mathrm{a}}$, and VCC backup cooling $Q_{\mathrm{v}}$ on the right axis. In both plotted weeks the wet-bulb stays below the 27~$^\circ$C crystallization gate, so the absorption chiller carries most of the cooling load; the VCC backup tops up on the warmest summer afternoons, when the derated absorber cannot meet demand from steam, and takes over entirely during the roughly 115~crystallization-gate hours~yr$^{-1}$ elsewhere in the record. (c)~Waterfall decomposition of the marginal annual value of adding the absorption chiller to a nuclear-only plant (Case~2 against Case~1): positive bars reduce Case~2 TAC, negative bars increase it, VCC backup covers steam-limited top-up and crystallization-gate fallback, PTC forgone is the production tax credit lost as steam diverts from the turbine, and the residual bar reconciles the component sum with the measured \$2.4~M~yr$^{-1}$ difference.}
+\label{fig:operation_value}
+\end{figure}
+
+With the heat load fixed at $P_{\mathrm{IT}}/\eta_{\mathrm{ch}}$, the cooling-side lever is the efficiency of the electric chiller rather than the size of the duty. The cooling-efficiency sweep (Supplementary Figure~\ref{fig:cooling_response}) varies the chiller coefficient of performance so that the reported power usage effectiveness (PUE) spans $\{1.10, 1.30, 1.50\}$ for Cases~1 and 2, with all other parameters at the 2023 ATB-Mid baseline. The absorption chiller delivers a near-constant 862~GWh$_\mathrm{c}$~yr$^{-1}$ across the sweep; what changes is the value of the electric cooling it displaces. Net cooling-electricity saving after VCC backup and top-up rises from \$1.9 to \$13.8 and \$23.0~M~yr$^{-1}$ as PUE increases from 1.10 to 1.30 and 1.50. As a result, Case~2 costs \$13.0~M~yr$^{-1}$ more than Case~1 when the electric chiller is highly efficient, narrows to a \$4.6~M~yr$^{-1}$ penalty at PUE\,1.30, and becomes a \$4.6~M~yr$^{-1}$ saving at PUE\,1.50. The main-results baseline uses a COP-3.2 electric chiller at a full-load PUE of 1.35, so its \$2.4~M~yr$^{-1}$ Case~2-minus-Case~1 gap sits just below the break-even point near PUE 1.40.
+
+\subsection{Viability opens only along the low reactor-capital frontier}
+\label{sec:results:frontier}
+
+The ERCOT price regime during the year of operation is the largest single market sensitivity (Figure~\ref{fig:boundary_atlas}a). The 2022 cluster captures the high natural-gas price regime: delivered natural gas (Henry Hub plus Houston Ship Channel basis) averaged \$6.53~MMBtu$^{-1}$, and the NGCC margin falls to $-1\%$, essentially parity with the grid, because the grid clearing price and the on-site fuel cost moved together. In 2023, low gas prices (\$2.63~MMBtu$^{-1}$) combined with high ERCOT prices made Case~3 the only on-site option that beat grid supply (a $+29\%$ margin). The 2024 cluster shows the deepest negative margin for every on-site option because ERCOT LMPs settled at a multi-year low, an annual mean of about \$28~MWh$_\mathrm{e}^{-1}$, making grid procurement comparatively inexpensive. Across the three years, no on-site option beats grid supply in 2024 or 2022, and only NGCC beats it in 2023. The year regime therefore sets the market boundary for the on-site gas option: a $\pm 50\%$ swing in Henry Hub gas price or ERCOT LMP can overturn the ranking between grid and NGCC supply. Nuclear, by contrast, stays far above grid cost in all three years, so its ranking is governed by the capital-cost rather than the market axis.
+
+The battery energy storage system (BESS) axis tests whether a 100~MWh, 50~MW lithium-ion battery changes the competitiveness frontier. It lowers TAC by \$0.63~M~yr$^{-1}$ in each nuclear case, improving the margin by only 0.8 percentage point and never altering the configuration ranking (see Supplementary Information). Because this effect is much smaller than the market, capital-cost and financing axes, it is retained as a secondary boundary rather than as a main result.
+
+SMR overnight capital cost is the dominant technology-cost axis (Figure~\ref{fig:boundary_atlas}b). At FOAK (\$14{,}700~kW$_\mathrm{e}^{-1}$) the margin is $-372\%$ (Case~1) and $-375\%$ (Case~2): reactor capital outweighs all other costs by roughly a factor of five, and the production tax credit is far too small to matter. At ATB-Mid the margin settles at $-146\%$ (Case~1) and $-149\%$ (Case~2), so even with the credit, mid-range capital leaves the nuclear cases about 2.5 times more expensive than grid supply. At NOAK (\$2{,}250~kW$_\mathrm{e}^{-1}$) the picture inverts: the margin rises to $+25\%$ for Case~1 and $+22\%$ for Case~2, so both nuclear configurations are cheaper than grid procurement with no carbon price applied. The credit is decisive precisely here, because the pre-credit gap to grid at NOAK capital is small, on the order of 10\%, and the \$26.4~M~yr$^{-1}$ Case~1 credit more than covers it, whereas the same credit barely dents the far larger FOAK and ATB-Mid gaps. Coupling the NOAK reactor with the absorption chiller (Case~2 NOAK) is marginally less competitive than Case~1 NOAK, because the absorption capital still slightly outweighs the cooling-side savings, but both stay comfortably below grid cost.
+
+\label{sec:results:wacc}
+
+The financing assumption changes the same capital-dominated boundary rather than creating a separate operating mechanism (Figure~\ref{fig:boundary_atlas}c). Sweeping the weighted-average cost of capital between 5\% and 10\% for Case~2 while holding absorption capital, reactor capital and operating parameters fixed moves TAC from \$168 to \$251~M~yr$^{-1}$, an \$83~M~yr$^{-1}$ range. The implied grid-cost margin ranges from $-115\%$ at 5\% WACC to $-221\%$ at 10\% WACC. By comparison, the full range of group G4 (reactor capital, FOAK to NOAK) moves the Case~2 margin between $-375\%$ and $+22\%$, crossing the parity line. Financing materially affects the high-cost FOAK--ATB region but matters less than the reactor capital-cost axis once the trajectory reaches NOAK. Policy or contracting mechanisms that lower the effective cost of capital for SMR projects, such as long-term offtake agreements, sovereign loan guarantees, or accelerated depreciation, can compress but not eliminate the gap to grid supply.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_sensitivity_boundary_atlas.pdf}
+\caption{Market, reactor-capital, financing and joint capital-cost boundary atlas. ERCOT denotes Electric Reliability Council of Texas; NLR ATB, National Laboratory of the Rockies Annual Technology Baseline; WACC, weighted-average cost of capital; SMR, small modular reactor; FOAK, first-of-a-kind; NOAK, nth-of-a-kind. (a) Grid-cost margin for the four configurations across ERCOT years 2022, 2023 and 2024. (b) Grid-cost margin for Cases~1 and 2 across the NLR ATB 2024 BWRX-300 capital-cost trajectories. (c) Case~2 grid-cost margin across the WACC sweep. (d) Joint SMR and absorption-chiller capital-cost viability frontier for Case~2; cell values are grid-cost margin against the 2023 grid-only baseline. Bars or cells below zero indicate configurations that are more expensive than the grid-only baseline.}
+\label{fig:boundary_atlas}
+\end{figure}
+
+The joint capital-cost frontier in Figure~\ref{fig:boundary_atlas}d turns the preceding one-axis sensitivities into the procurement-relevant capital-cost test. Both axes sweep simultaneously: SMR capital cost runs from NOAK to FOAK on the vertical axis (\$2{,}250--14{,}700~kW$_\mathrm{e}^{-1}$), and absorption-chiller capital cost runs from Bare-Low to Turnkey-High on the horizontal axis (\$450--1{,}200~kW$_\mathrm{c}^{-1}$). Every cell in the $5 \times 5$ grid is solved at 2023 ATB-Mid market conditions, full-load PUE 1.35, WACC 6.7\%, and zero carbon price, with the production tax credit applied. A viable region now opens along the NOAK edge: every cell in the NOAK row reaches a positive grid-cost margin, from $+27\%$ with Bare-Low absorption to $+14\%$ with Turnkey-High, so the margin $=0$ contour enters the published rectangle. The most favorable corner (NOAK reactor with a Bare-Low absorption chiller at \$450~kW$_\mathrm{c}^{-1}$) lands at $+27\%$, and the least favorable (FOAK reactor with Turnkey-High absorption) at $-383\%$. The frontier is governed almost entirely by the reactor axis: absorption capital shifts the margin by at most 13 percentage points across its full published range, whereas raising reactor capital one trajectory above NOAK drops the margin below $-60\%$. Reaching roughly nth-of-a-kind reactor capital is therefore the binding condition. With the production tax credit it makes colocated SMR with absorption cooling cheaper than grid supply at 2023 ERCOT prices and zero carbon cost, and no tested capital trajectory above the NOAK row is competitive.
+
+\subsection{Carbon pricing is a contingent second route}
+\label{sec:results:policy}
+
+A carbon price provides a weaker, second route to nuclear competitiveness, distinct from the NOAK capital route just described. Holding capital at the ATB-Mid baseline, the policy axis is the carbon price (Figure~\ref{fig:policy_sensitivity_summary}a). All four cases have net annual CO$_2$ footprints that are nearly fixed by dispatch (Case~0 $+369$, Case~3 $+486$, Case~1 $-388$ and Case~2 $-448$~kt~CO$_2$~yr$^{-1}$), so each TAC--carbon relationship is essentially linear over the plotted range. The nuclear footprints barely deepen as carbon is valued, because the production tax credit already drives the reactor to export close to its full surplus, leaving little additional export to unlock.
+
+The grid-only Case~0 increases by \$0.37~M~yr$^{-1}$ for each \(\$1~\mathrm{tCO}_2^{-1}\) rise in carbon price because the ERCOT grid mix is carbon-intensive. The two nuclear cases decrease by about \$0.39--0.45~M~yr$^{-1}$ under the same price increment, because their grid exports displace carbon-intensive generation and receive a corresponding credit. Case~3 NGCC increases by \$0.49~M~yr$^{-1}$ for each \(\$1~\mathrm{tCO}_2^{-1}\) rise, carrying the full direct emissions on the buyer side. As the carbon price rises, the two on-site options cross the grid-only baseline in opposite directions. At ATB-Mid capital the nuclear cases start well above the baseline and fall below it between \(\$142\) and \(\$151~\mathrm{tCO}_2^{-1}\), while NGCC starts below grid and rises above it near \(\$191~\mathrm{tCO}_2^{-1}\); both crossings are extrapolations beyond the \(\$0\)--\(\$100~\mathrm{tCO}_2^{-1}\) range solved in group G6. Above about \(\$151~\mathrm{tCO}_2^{-1}\) both nuclear cases are cheaper than grid supply at mid-range capital, and by the NGCC--grid crossover near \(\$191~\mathrm{tCO}_2^{-1}\) they are below both grid procurement and the on-site gas alternative. This carbon route is independent of the NOAK capital route: at NOAK capital the nuclear cases already sit below grid cost at zero carbon price.
+
+The cogeneration cooling earns only a small, indirect carbon benefit: meeting cooling from steam rather than electricity lets Case~2 both export more and import less than Case~1, giving it a marginally deeper net footprint ($-448$ versus $-388$~kt~CO$_2$~yr$^{-1}$) and a slightly earlier crossover, but it does not create a separate credit mechanism. Both crossings depend on crediting the reactor's merchant exports at the ERCOT hourly average carbon intensity: the nuclear cases reach a net-negative footprint only because the $\sim$1.43~TWh~yr$^{-1}$ of exported electricity displaces grid generation. The carbon route is correspondingly sensitive to this accounting choice. Halving the export credit roughly doubles the crossover price, and removing it entirely pushes the crossover far above any carbon price modeled here, leaving NOAK reactor capital with the production tax credit as the route that actually makes the nuclear cases competitive.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_policy_sensitivity_summary.pdf}
+\caption{Policy crossover and global sensitivity ranking. TAC denotes total annualized cost; NGCC, natural gas combined cycle; ATB-Mid, mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; SMR, small modular reactor; BESS, battery energy storage system; PUE, power usage effectiveness; WACC, weighted-average cost of capital; CAPEX, overnight capital expenditure. (a) TAC extrapolated against carbon price for the four configurations. Vertical dotted lines mark the nuclear and NGCC crossovers against Case~0; the blue region marks where the nuclear cases begin to beat grid supply, and the pink region marks the higher-carbon-price range where they are below both grid and NGCC. (b) Ranked sensitivity of the Case~2 grid-cost margin to each boundary axis, anchored at the 2023 ATB-Mid baseline ($-149\%$).}
+\label{fig:policy_sensitivity_summary}
+\end{figure}
+
+\section{Discussion and conclusions}
+\label{sec:discussion}
+
+Colocated small modular reactors with absorption cooling are a conditional, not categorical, low-carbon strategy for hyperscale data centers. The condition is narrower than the usual heat-recovery argument suggests: across the four configurations and 100 scenarios, competitiveness is governed mainly by reactor capital cost interacting with the Section~45U production tax credit. At 2023 mid-range capital, the reactor-with-absorption configuration costs 149\% more than grid supply even after the credit. At nth-of-a-kind capital, the same policy support makes it 22\% cheaper than grid supply with no carbon price. The central conclusion is therefore that nuclear data-center cogeneration becomes viable only when reactor capital reaches the low-cost learning trajectory; heat recovery does not set the boundary.
+
+The mechanism is a fixed-cost threshold rather than an operating-efficiency threshold. Sweeping reactor and absorption-chiller capital together, the entire nth-of-a-kind reactor row is competitive, from $+27\%$ with a bare-low absorption chiller to $+14\%$ with a turnkey-high one, whereas one reactor-capital trajectory above nth-of-a-kind pushes the margin below $-60\%$. Absorption capital changes the margin by at most 13 percentage points over its published range. By contrast, the reactor-capital trajectory moves the margin by hundreds of percentage points, so the production tax credit is decisive only once the pre-credit capital gap is already small enough to close.
+
+This finding changes how the data-center nuclear question should be framed. Unit-size matching removes an important distortion but does not create parity: scaling the load to 2.5$\times$ brings the reactor close to import-export balance, yet the cogeneration plant remains 62\% more expensive than the matched grid baseline. Market year mainly determines whether the on-site gas comparator is temporarily attractive; it does not rescue mid-range nuclear capital. Financing helps by lowering annualized fixed cost, but the 5--10\% WACC sweep still leaves Case~2 far above grid supply at ATB-Mid capital. These results suggest that procurement discussions should treat load matching, market regime and financing as necessary supporting conditions rather than substitutes for reactor cost learning.
+
+A carbon price is a second route but a less robust one. Holding reactor capital at the mid-range baseline, the nuclear cases cross the grid baseline only near \(\$150~\mathrm{tCO}_2^{-1}\), and this crossing depends on crediting merchant nuclear exports at the ERCOT hourly average carbon intensity. Halving the export credit roughly doubles the crossover price, and removing it pushes the crossover beyond the modelled policy range. The low-capital route is therefore more decision-relevant than the carbon-price route because it does not depend on a particular avoided-emissions accounting convention.
+
+Against this capital-dominated boundary, cooling integration should be interpreted as a reliability and energy-management design choice rather than the main economic source of value. The absorption chiller supplies 862~GWh$_\mathrm{c}$~yr$^{-1}$, about 94\% of annual cooling, but it raises cost by \$2.4~M~yr$^{-1}$ at the baseline because its capital cost, the lost turbine output and a smaller production tax credit slightly exceed the avoided electric cooling cost (Section~\ref{sec:results:cooling}). The sign reverses when full-load PUE exceeds about 1.40 or when carbon is priced, so absorption can matter for inefficient campuses or carbon-constrained settings. For an efficient COP-3.2 electric chiller, however, thermal integration is near cost-neutral. This refines waste-heat studies that treat absorption as categorically beneficial and reactor techno-economic studies that omit cooling-side physics.
+
+Several limitations bound the quantitative margins without overturning the central ordering. The load-scaling sweep uses one hyperscale profile, so campuses dominated by different artificial-intelligence workloads or located in different climates could shift the cooling value. The carbon-policy route uses hourly average rather than marginal emission factors, so a merit-order marginal series would better estimate displaced emissions from nuclear exports. Demand charges and ancillary-service revenues are not modelled; adding delivered retail tariffs or market-service revenues would change the grid and export economics. The gas comparator omits forced outages, redundant generation and an outage-covering grid tie, so five-nines availability requirements would erode its baseline advantage. The production tax credit is applied at full prevailing-wage value to net nuclear generation under an assumed power-purchase-agreement structure and held at nominal in-window values, so eligibility limits, credit expiry or inflation-indexing details would alter the low-capital result. The reactor is also treated as the smallest deployable commercial unit rather than an optimized multi-module buildout.
+
+For procurement, the result is a short list of conditions that must coincide: reactor capital on the nth-of-a-kind trajectory, production-tax-credit eligibility, a load large enough to use the smallest commercial reactor and a market regime in which grid procurement is not unusually cheap. Where those conditions hold, small modular reactor cogeneration can undercut grid supply without a carbon price, and absorption cooling can be chosen for operational reasons rather than as the source of the saving. Where reactor capital remains at first-of-a-kind or mid-range levels, neither thermal integration nor a plausible carbon price is enough. The broader contribution of the study is the boundary map itself: it provides a way to test nuclear data-center proposals against region-specific tariffs, financing, cooling climates and carbon-accounting rules before treating firm low-carbon supply as an economic proposition.
+
+\section{Methods}
+\label{sec:methods}
+
+\subsection{System configurations}
+\label{sec:methods:system}
+
+The analysis compares four configurations that supply electricity and chilled water to a single 200~MW$_\mathrm{e}$ rated hyperscale data center in Houston, Texas. Each configuration uses the same data-center load profile, vapor-compression chiller technology when required, and financial parameters; the configurations differ only in the electricity supply pathway and in whether the cooling chain uses recovered reactor heat. Figure~\ref{fig:schematic} illustrates the cogeneration mechanism and the grid and storage interfaces for the thermal-integration case. Cases~0, 1 and 3 are reduced versions of this layout in which selected blocks are disabled. Table~\ref{tab:cases} summarizes the four configurations.
+
+Case~0 represents the conventional grid-supplied data center. All electricity is purchased from ERCOT at the day-ahead locational marginal price, and all cooling is produced by a water-cooled centrifugal vapor-compression chiller with a Houston-derated coefficient of performance of 3.2. This case serves as the benchmark for the grid-cost margin reported throughout the paper. Case~1 replaces grid imports with on-site BWRX-300 generation while retaining the same VCC. Heat at the turbine condenser is rejected to the cooling tower and is not recovered. Bidirectional grid exchange is retained so that excess electricity can be sold to ERCOT during low-load hours and grid imports can cover residual demand during planned outages. Case~2 adds a double-effect LiBr--H$_2$O absorption chiller fed by a mid-pressure extraction tap on the high-pressure (HP) turbine. The cascade keeps the low-pressure (LP) turbine in service, so diverted steam incurs a Willans penalty rather than the full turbine efficiency penalty. A 160~MW$_\mathrm{c}$ vapor-compression backup chiller remains installed, the same capacity as the primary chiller in the VCC-only cases, because it must carry the full cooling load whenever the absorption unit shuts down at the LiBr crystallization threshold. Case~3 replaces the SMR with a 200~MW$_\mathrm{e}$ on-site F-class natural gas combined cycle, retains the VCC, and disconnects from the grid to isolate the value of replacing grid procurement with a fossil-fueled on-site alternative.
+
+\begin{table}[t]
+\centering
+\caption{System configurations modeled in this study. \checkmark denotes that the block is enabled; -- that it is disabled. SMR denotes small modular reactor; NGCC, natural gas combined cycle; ERCOT, Electric Reliability Council of Texas; PCC, point of common coupling; VCC, vapor-compression chiller; LiBr, lithium bromide; BESS, battery energy storage system.}
+\label{tab:cases}
+{\small\setlength{\tabcolsep}{4.5pt}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{3.4cm}cccc@{}}
+\toprule
+ &  & Case~0 & Case~1 & Case~2 & Case~3 \\
+\midrule
+Generation & BWRX-300 SMR + steam turbine & --        & \checkmark & \checkmark & --        \\
+           & NGCC on-site, F-class        & --        & --         & --         & \checkmark \\
+           & ERCOT grid (PCC, 300 MW)     & \checkmark\,(import) & \checkmark\,(bi-dir.) & \checkmark\,(bi-dir.) & --        \\
+Cooling    & VCC, water-cooled            & \checkmark\,(primary) & \checkmark\,(primary) & \checkmark\,(backup)  & \checkmark\,(primary) \\
+           & Double-effect LiBr absorber  & --        & --         & \checkmark            & --        \\
+Storage    & Li-ion BESS, 100 MWh, 50 MW & -- & sensitivity & sensitivity & -- \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The data-center IT load follows an annual hourly trace synthesized from a 200~MW$_\mathrm{e}$ hyperscale reference profile with a peak hour of 142.4~MW$_\mathrm{e}$, an annual average of 94.7~MW$_\mathrm{e}$, and an annual utilization of 0.67. The same trace is used in every case and every scenario; the IT load is not a decision variable. We treat the full IT electrical draw as heat that the cooling system must reject, so the hourly cooling demand is
+\begin{equation}
+\label{eq:cool_demand}
+Q_{\mathrm{cool}}^{\mathrm{dem}}(t) \;=\; \frac{P_{\mathrm{IT}}(t)}{\eta_{\mathrm{ch}}},
+\end{equation}
+where $\eta_{\mathrm{ch}}=0.90$ accounts for the chilled-water distribution chain. Each scenario is labeled by its full-load vapor-compression PUE, $1+1/(\eta_{\mathrm{ch}}\,\mathrm{COP}_{\mathrm{v}})$, which is 1.35 at the baseline COP of 3.2. The dispatch-realized annual PUE, $1+P_{\mathrm{cool}}/P_{\mathrm{IT}}$, is slightly lower for the vapor-compression cases, near 1.33, because the part-load COP curve runs more efficiently than its full-load point. It falls to about 1.05 in Case~2, where steam-driven absorption supplies most of the cooling and leaves little electric cooling load. The cooling-efficiency sensitivity in Section~\ref{sec:results:cooling} sweeps the chiller COP so that this full-load PUE label spans $\{1.10, 1.30, 1.50\}$, the range between high-efficiency and legacy hyperscale practice \citep{greenGrid2012pue,ashrae2021thermal}.
+
+\subsection{Optimization formulation}
+\label{sec:methods:opt}
+
+The four cases are formulated as separate dispatch problems on the same 8760-hour horizon. Cases~0 and 3 reduce to closed-form annual cost evaluations because the absence of storage and heat recovery makes the hourly decisions independent. Cases~1 and 2 are mixed-integer linear programs: the only integer structure is the special-ordered-set (SOS2) representation of the vapor-compression chiller part-load curve described below, which is non-convex and cannot be relaxed; no binary commitment variables are introduced, because round-trip losses in the battery block already make simultaneous charge and discharge unprofitable. The same accounting structure is applied to all four cases so that cross-case comparisons remain on a common basis.
+
+\runinhead{Reactor and turbine block (Cases~1 and 2)}
+The BWRX-300 reactor is modeled as a continuous thermal source with bounded ramping and an annual capacity-factor constraint. The reactor block enforces
+\begin{align}
+\underline{P}_{\mathrm{rx}} \;\le\; & P_{\mathrm{rx}}(t) \;\le\; \overline{P}_{\mathrm{rx}}, &\forall\, t \in \mathcal{T}, \label{eq:rx_bounds}\\
+\big|P_{\mathrm{rx}}(t) - P_{\mathrm{rx}}(t-1)\big| \;\le\; & \Delta P_{\mathrm{rx}}^{\max}, &\forall\, t \ge 1, \label{eq:rx_ramp}\\
+\sum_{t \in \mathcal{T}} P_{\mathrm{rx}}(t) \;\ge\; & \overline{\mathrm{CF}} \cdot \overline{P}_{\mathrm{rx}} \cdot |\mathcal{T}|, & \label{eq:rx_cf}
+\end{align}
+with $\overline{P}_{\mathrm{rx}}=870~\mathrm{MW}_{\mathrm{th}}$, $\underline{P}_{\mathrm{rx}}=435~\mathrm{MW}_{\mathrm{th}}$ (50\% minimum-load fraction from the BWRX-300 design basis \citep{gehitachi2024bwrx300}), $\Delta P_{\mathrm{rx}}^{\max}=522~\mathrm{MW}_{\mathrm{th}}~\mathrm{h}^{-1}$ corresponding to a 1\,\%~min$^{-1}$ ramp, and $\overline{\mathrm{CF}}=0.92$ from the mature U.S.\ light-water-reactor fleet average \citep{eia2025capacityfactors}. The annual capacity-factor constraint sets an annual energy floor equivalent to roughly one month of downtime, without modeling the timing of individual outages or introducing unit-commitment binaries.
+
+The Rankine steam cycle is represented by a cascaded high-pressure to low-pressure turbine with a Willans-line extraction penalty. Letting $\eta_{\mathrm{r}}=0.345$ be the rated electric efficiency at zero extraction and $\alpha_{\mathrm{w}}=0.083~\mathrm{MW}_{\mathrm{e}}~\mathrm{MW}_{\mathrm{th}}^{-1}$ the marginal electricity loss intensity for mid-pressure steam diverted to the absorber:
+\begin{align}
+P_{\mathrm{tg}}(t) \;=\; & \eta_{\mathrm{r}}\, P_{\mathrm{rx}}(t) \;-\; \alpha_{\mathrm{w}}\, Q_{\mathrm{ext}}(t), \label{eq:turb_willans}\\
+P_{\mathrm{tn}}(t) \;=\; & (1 - \xi_{\mathrm{aux}})\, P_{\mathrm{tg}}(t), \label{eq:turb_aux}
+\end{align}
+with $\xi_{\mathrm{aux}}=0.10$. Because diverted steam still expands through the high-pressure turbine before extraction, the Willans coefficient is roughly one order of magnitude smaller than charging the full turbine efficiency against extracted heat, as would be appropriate for a parallel main-steam tap.
+
+\runinhead{Absorption-chiller submodel (Case~2)}
+The double-effect LiBr--H$_2$O absorption chiller is described by a time-varying coefficient of performance and a binary availability indicator that captures LiBr crystallization risk \citep{srikhirin2001absorption,herold2016absorption}. With $T_{\mathrm{wb},0}=26\,^\circ$C as the Houston design wet-bulb, $\mathrm{COP}_{\mathrm{a}}^{\,0}=1.10$ as the COP at the design wet-bulb, $\delta=0.015\,^\circ$C$^{-1}$ as the linear de-rating slope, and $\overline{\mathrm{COP}}_{\mathrm{a}}=1.30$ as the nameplate cap, the chiller COP at wet-bulb $T_{\mathrm{wb}}(t)$ is
+\begin{equation}
+\label{eq:cop_abs}
+\begin{aligned}
+\mathrm{COP}_{\mathrm{a}}\!\big(T_{\mathrm{wb}}(t)\big) =
+\max\Big\{&
+  \min\big[\mathrm{COP}_{\mathrm{a}}^{\,0}
+  - \delta\,(T_{\mathrm{wb}}(t)-T_{\mathrm{wb},0}), \\
+& \overline{\mathrm{COP}}_{\mathrm{a}}\big],\; 0.5\Big\}.
+\end{aligned}
+\end{equation}
+The lower bound of 0.5 is a numerical safeguard; Houston wet-bulbs in the weather record do not reduce a physical chiller to this value because the crystallization gate engages first. With $\Delta T_{\mathrm{cw}}=5$~K as the cooling-tower approach, $T_{\mathrm{cry}}=32\,^\circ$C as the LiBr-crystallization-line cooling-water inlet, and $a_{\mathrm{m}}=0.95$ a maintenance availability that derates the unit to account for scheduled servicing, the availability indicator is
+\begin{equation}
+\label{eq:abs_avail}
+a(t) \;=\; \begin{cases} a_{\mathrm{m}} & \text{if } T_{\mathrm{wb}}(t) + \Delta T_{\mathrm{cw}} \le T_{\mathrm{cry}}, \\ 0 & \text{otherwise}, \end{cases}
+\end{equation}
+so the absorption chiller is forced fully offline whenever the cooling-water inlet would exceed the LiBr crystallization line, and otherwise operates at its maintenance-derated availability. Equivalently, with the $\Delta T_{\mathrm{cw}}=5$~K tower approach this is a wet-bulb gate at $T_{\mathrm{cry}}-\Delta T_{\mathrm{cw}}=32-5=27\,^\circ$C, the value marked in Figure~\ref{fig:inputs}a. Delivered absorption cooling is
+\begin{equation}
+\label{eq:abs_yield}
+Q_{\mathrm{a}}(t) \;=\; \mathrm{COP}_{\mathrm{a}}\!\big(T_{\mathrm{wb}}(t)\big)\cdot a(t)\cdot Q_{\mathrm{ext}}(t),
+\end{equation}
+and a parasitic electric load $\beta_{\mathrm{a}}\, Q_{\mathrm{a}}(t)$ with $\beta_{\mathrm{a}}=0.020~\mathrm{kW}_{\mathrm{e}}~\mathrm{kW}_{\mathrm{c}}^{-1}$ powers solution and refrigerant pumps. The vapor-compression backup carries the residual cooling load whenever $a(t)=0$.
+
+\runinhead{Cooling, BESS and grid blocks}
+Vapor-compression cooling links its electric input to its cooling output through a part-load coefficient of performance. A water-cooled centrifugal chiller gains efficiency at reduced load, with the coefficient of performance peaking near 40--50\% of rated duty before declining at very low load, following the integrated part-load value of ANSI/AHRI Standard~550/590 \citep{ahri2020standard550}. The chiller electricity is therefore a non-convex, piecewise-linear function of the cooling delivered, $P_{\mathrm{v}}(t)=f_{\mathrm{v}}\!\big(Q_{\mathrm{v}}(t)\big)$, anchored at the Houston-derated full-load value $\mathrm{COP}_{\mathrm{v}}=3.2$. In the closed-form Cases~0 and 3 the chiller is evaluated directly at the realized load fraction; in the nuclear Cases~1 and 2 the same curve enters the optimization as an SOS2 piecewise map, the single source of integer structure in the model. The lithium-ion BESS, sized at 100~MWh and 50~MW (C/2), follows the standard state-of-charge dynamics
+\begin{equation}
+\label{eq:bess_soc}
+E_{\mathrm{B}}(t) \;=\; (1-\rho_{\mathrm{B}})\,E_{\mathrm{B}}(t-1) + \big(\sqrt{\eta_{\mathrm{rt}}}\,B^{+}(t) - B^{-}(t)/\sqrt{\eta_{\mathrm{rt}}}\big)\Delta t,
+\end{equation}
+with cyclical closure $E_{\mathrm{B}}(|\mathcal{T}|) = E_{\mathrm{B}}(0)$, $\eta_{\mathrm{rt}}=0.85$, $\rho_{\mathrm{B}}=4.17\times10^{-5}$\,h$^{-1}$, and state-of-charge bounds $[0.05,\, 0.95]\,\mathrm{Cap}_{\mathrm{E}}$. Grid exchange is bounded by the point of common coupling, $0 \le P_{\mathrm{g}}^{+}(t),\, P_{\mathrm{g}}^{-}(t) \le \overline{P}_{\mathrm{pcc}}$, with $\overline{P}_{\mathrm{pcc}}=300$~MW for the baseline campus; in the size-matching sweep the interconnect scales with the data-center load, since it is part of the data-center build rather than the fixed reactor.
+
+\runinhead{Energy balances}
+Two equality constraints hold every hour. The electric balance equates supply, BESS discharge and grid imports to the data-center IT load, chiller drives, absorber parasitics, BESS charge and grid exports:
+\begin{align}
+\label{eq:elec_balance}
+P_{\mathrm{tn}}(t) + P_{\mathrm{g}}^{+}(t) + B^{-}(t)
+\;=\; & P_{\mathrm{IT}}(t) + P_{\mathrm{v}}(t) + \beta_{\mathrm{a}} Q_{\mathrm{a}}(t) \notag\\
+\;+\; & P_{\mathrm{g}}^{-}(t) + B^{+}(t).
+\end{align}
+The cooling balance equates total cooling supplied to the cooling demand of Eq.~\eqref{eq:cool_demand}:
+\begin{equation}
+\label{eq:cool_balance}
+Q_{\mathrm{a}}(t) + Q_{\mathrm{v}}(t) \;=\; Q_{\mathrm{cool}}^{\mathrm{dem}}(t).
+\end{equation}
+For Cases~0, 1 and 3 the absorption variables $Q_{\mathrm{a}}(t)$, $Q_{\mathrm{ext}}(t)$ are fixed to zero; for Case~3 the reactor and turbine variables are removed and the IT and chiller load is served entirely by the NGCC block at a full-load higher-heating-value (HHV) efficiency $\eta_{\mathrm{hhv}}=0.495$, with the part-load heat-rate penalty of Eq.~\eqref{eq:ngcc_fuel_cost}.
+
+\runinhead{Objective}
+The optimization minimizes TAC summed over seven accounting buckets:
+\begin{equation}
+\label{eq:tac}
+\begin{aligned}
+\min\; \mathrm{TAC} ={}&
+\sum_k \mathrm{CRF}_k\,\mathrm{CAPEX}_k S_k + \mathrm{FOM} + \mathrm{VOM}\\
+& + \Phi_{\mathrm{fuel}} + \Phi_{\mathrm{grid}} + \Phi_{\mathrm{CO}_2} - \Phi_{\mathrm{ptc}},
+\end{aligned}
+\end{equation}
+where the first term annualizes overnight capital expenditure (CAPEX) across reactor, turbine, absorption and VCC chillers, BESS and NGCC sized at $S_k$, each amortized over its own engineering life $N_k$ through an asset-specific capital recovery factor (CRF; reactor and turbine 20~yr, chillers 25~yr, NGCC 30~yr, battery 15~yr); $\mathrm{FOM}=\sum_k \mathrm{FOM}_k S_k$ aggregates fixed operations and maintenance (FOM), and $v_{\mathrm{x}}$ denotes the variable operations and maintenance (VOM) coefficient of stream $x$ (Table~\ref{tab:equipment}); the variable terms are
+\begin{align}
+\mathrm{VOM} ={}&
+  \sum_t \big[v_{\mathrm{rx}} P_{\mathrm{tn}}(t) + v_{\mathrm{v}} Q_{\mathrm{v}}(t) + v_{\mathrm{a}} Q_{\mathrm{a}}(t)\big]\Delta t
+  \notag\\
+& + \sum_t v_{\mathrm{B}}\big(B^{+}(t)+B^{-}(t)\big)\Delta t, \label{eq:vom}\\
+\Phi_{\mathrm{fuel}} ={}& \pi_{\mathrm{f}} \sum_t P_{\mathrm{rx}}(t)\Delta t, \label{eq:fuel_cost}\\
+\Phi_{\mathrm{grid}} ={}&
+  \sum_t \pi_{\mathrm{g}}(t)\big[P_{\mathrm{g}}^{+}(t) - P_{\mathrm{g}}^{-}(t)\big]\Delta t, \label{eq:grid_cost}\\
+\Phi_{\mathrm{CO}_2} ={}&
+  \pi_{\mathrm{CO}_2}\Theta \sum_t
+  \Big[\gamma_{\mathrm{rx}} P_{\mathrm{tn}}(t) + \theta(t)\big(P_{\mathrm{g}}^{+}(t)-P_{\mathrm{g}}^{-}(t)\big)\Big]\Delta t. \label{eq:carbon_cost}
+\end{align}
+For Case~3, the same accounting buckets are used but the reactor terms are replaced by the NGCC terms. The combined-cycle heat rate rises below the design point, so fuel use and combustion emissions are both scaled by a part-load multiplier $\phi_{\mathrm{ng}}(\ell)\ge 1$ of the electrical load fraction $\ell(t)=P_{\mathrm{ng}}(t)/\overline{P}_{\mathrm{ng}}$, taken from a representative F-class combined-cycle characteristic and equal to one at full load. The VOM term uses $v_{\mathrm{ng}}P_{\mathrm{ng}}(t)+v_{\mathrm{v}}Q_{\mathrm{v}}(t)$, where $P_{\mathrm{ng}}(t)$ is the NGCC electric output required by the IT and VCC loads, and the fuel and carbon terms become
+\begin{align}
+\Phi_{\mathrm{fuel}}^{\mathrm{ng}} ={}& \sum_t \pi_{\mathrm{ng}}(t)\,h_{\mathrm{ng}}\,\phi_{\mathrm{ng}}\!\big(\ell(t)\big)\,P_{\mathrm{ng}}(t)\Delta t, \label{eq:ngcc_fuel_cost}\\
+\Phi_{\mathrm{CO}_2}^{\mathrm{ng}} ={}&
+  \pi_{\mathrm{CO}_2}\Theta \sum_t
+  \gamma_{\mathrm{ng}}\,\phi_{\mathrm{ng}}\!\big(\ell(t)\big)\, P_{\mathrm{ng}}(t)\Delta t, \label{eq:ngcc_carbon_cost}
+\end{align}
+with full-load heat rate $h_{\mathrm{ng}}=3.412/\eta_{\mathrm{hhv}}$~MMBtu~MWh$_\mathrm{e}^{-1}$ and full-load lifecycle factor $\gamma_{\mathrm{ng}}=420$~g~CO$_2$-eq~kWh$_\mathrm{e}^{-1}$, equal to 360 direct-combustion and 60 upstream-methane g~CO$_2$-eq~kWh$_\mathrm{e}^{-1}$ \citep{alvarez2018methane}. Applying the same $\phi_{\mathrm{ng}}$ to both terms holds the fuel carbon content constant. The carbon term $\Phi_{\mathrm{CO}_2}$ multiplies the case carbon footprint by a uniform price $\pi_{\mathrm{CO}_2}$ and a unit-conversion factor $\Theta=10^{-3}$ t~CO$_2$~kg$^{-1}$. Exports credit the case at the ERCOT hourly average carbon intensity $\theta(t)$, derived from the U.S. Energy Information Administration (EIA)-930 generation mix \citep{eia930}, to reflect the time-varying emissions of the grid power exchanged, following time-resolved hourly emissions accounting rather than a static annual-average factor \citep{li2025ghgDemand}; this hourly average emission factor is used as a tractable proxy for the true marginal emission factor \citep{hawkes2010marginal,silerEvans2013regional}. Each asset is annualized over its own engineering life through $\mathrm{CRF}_k=i(1+i)^{N_k}/[(1+i)^{N_k}-1]$, with asset life $N_k$ as listed above and baseline WACC $i=6.7\%$; the battery additionally carries a 5\% end-of-life salvage credit. The WACC sensitivity in Section~\ref{sec:results:wacc} sweeps $i$ over $\{5\%, 6.7\%, 10\%\}$.
+
+\runinhead{Nuclear production tax credit}
+The nuclear cases earn the zero-emission nuclear production tax credit (Section~45U; 26~U.S.C.~\S\,45U), enacted in the Inflation Reduction Act of 2022 \citep{ira2022}, on their generation \citep{usc26_45u,irs45u}. At the prevailing-wage rate the credit is \$15~MWh$_\mathrm{e}^{-1}$ (1.5\textcent~kWh$_\mathrm{e}^{-1}$) and is subject to the statutory gross-receipts phaseout: it holds at the full value while the hourly market price $\pi_{\mathrm{g}}$ stays at or below the threshold $\pi_1=\$25~\mathrm{MWh}_\mathrm{e}^{-1}$ (2.5\textcent~kWh$_\mathrm{e}^{-1}$), then declines by \$0.80 for each \$1~MWh$_\mathrm{e}^{-1}$ above it, reaching zero at $\pi_2=\$43.75~\mathrm{MWh}_\mathrm{e}^{-1}$ (4.375\textcent~kWh$_\mathrm{e}^{-1}$),
+\begin{equation}
+\label{eq:ptc}
+c_{45\mathrm{U}}(\pi)=
+\begin{cases}
+\bar{c}, & \pi \le \pi_1,\\[2pt]
+\bar{c}\,\Big(1-\dfrac{\pi-\pi_1}{\pi_2-\pi_1}\Big), & \pi_1 < \pi < \pi_2,\\[6pt]
+0, & \pi \ge \pi_2,
+\end{cases}
+\end{equation}
+with full credit $\bar{c}=\$15~\mathrm{MWh}_\mathrm{e}^{-1}$. The annual credit is applied to net nuclear generation,
+\begin{equation}
+\label{eq:ptc_total}
+\Phi_{\mathrm{ptc}} \;=\; \sum_t c_{45\mathrm{U}}\!\big(\pi_{\mathrm{g}}(t)\big)\,P_{\mathrm{tn}}(t)\,\Delta t,
+\end{equation}
+using the hourly ERCOT price as the kWh-indexed gross-receipts proxy. The slope and breakpoints reproduce the statutory 16\% reduction at the prevailing-wage multiplier. We treat the credit as a baseline policy condition, assuming a power-purchase-agreement structure in which the data center is an unrelated offtaker so that delivered nuclear generation qualifies; statutory amounts are inflation-indexed after 2024 and the program runs through tax year 2032, both of which we hold at their nominal in-window values. Cases~0 and 3 carry no nuclear generation and therefore no credit.
+
+The cross-case figure of merit used throughout the rest of the paper is the grid-cost margin
+\begin{equation}
+\label{eq:margin}
+M_c \;=\; 1 \;-\; \frac{\mathrm{TAC}_c}{\mathrm{TAC}_0}\Big|_{\text{matched scenario}},
+\end{equation}
+defined as one minus the ratio of the case TAC to the Case~0 (grid-only) TAC at the same year, PUE and carbon price. A positive margin means the configuration is cheaper than grid procurement and a negative margin means it is more expensive; the magnitude is the relative cost difference. We report it for all four configurations as a common measure of cost competitiveness against the grid.
+
+\subsection{Data inputs}
+\label{sec:methods:data}
+
+Inputs to the optimization fall into three families: exogenous time series (hourly traces of IT load, electricity price, average carbon intensity and wet-bulb temperature), equipment parameters (capital and operating cost coefficients plus technical bounds for each plant block), and financial parameters (project lifetime and weighted-average cost of capital). All runs use 8760-hour annual operating horizons; leap-year raw files are trimmed to 8760 hourly records for cross-year comparability. The four characteristic input traces are shown in Supplementary Figure~\ref{fig:inputs}; aggregated values and source citations are listed in Supplementary Tables~\ref{tab:data} and~\ref{tab:equipment}.
+
+The Houston wet-bulb temperature distribution (Supplementary Figure~\ref{fig:inputs}a) drives the absorption-chiller availability constraint in Equation~\eqref{eq:abs_avail}. Monthly box plots from the Open-Meteo historical-weather archive \citep{openmeteo2023} for the 2023 calendar year show that wet-bulb exceeds 26~$^\circ$C (the absorption design anchor $T_{\mathrm{wb},0}$) in about 32\% of summer hours and crosses the LiBr crystallization gate at 27~$^\circ$C in about 5\% of summer hours, concentrated in July and August afternoons. The ERCOT day-ahead LMP duration curves (Supplementary Figure~\ref{fig:inputs}b), retrieved through gridstatus.io \citep{gridstatus}, capture the recent range of grid-procurement cost: 2022 represents the high natural-gas price regime, with an annual mean LMP of \$70~MWh$_\mathrm{e}^{-1}$ and frequent excursions above \$200~MWh$_\mathrm{e}^{-1}$; 2023 was a moderate year at \$57~MWh$_\mathrm{e}^{-1}$; and 2024 declined to \$28~MWh$_\mathrm{e}^{-1}$ as gas prices receded and renewable generation added supply. The IT-load profile (Supplementary Figure~\ref{fig:inputs}c) follows a typical hyperscale shape with mild diurnal seasonality and an annual capacity factor of 0.67; peak load reaches 142.4~MW$_\mathrm{e}$ and annual mean load is 94.7~MW$_\mathrm{e}$. The absorption-chiller COP$_a(T_{\mathrm{wb}})$ curve (Supplementary Figure~\ref{fig:inputs}d) parameterizes Equation~\eqref{eq:cop_abs}: COP decreases linearly from the nameplate cap of 1.30 at cool ambient wet-bulb to 1.10 at the design anchor of 26~$^\circ$C, after which the crystallization gate forces a binary cutoff and the VCC backup carries the cooling load.
+
+Scalar inputs are summarized in Supplementary Table~\ref{tab:data}, and the per-asset cost and technical parameters carried through the CAPEX, FOM, and VOM terms in Equation~\eqref{eq:tac} are listed in Supplementary Table~\ref{tab:equipment}. Reactor capital cost trajectories follow the NLR 2024 Annual Technology Baseline \citep{atb2024nuclear} at \$14{,}700, \$7{,}615 and \$2{,}250~kW$_\mathrm{e}^{-1}$ for FOAK, Moderate and NOAK cases. The absorption-chiller capital cost grid is anchored at \$750~kW$_\mathrm{c}^{-1}$ baseline and brackets the literature range from \$450~kW$_\mathrm{c}^{-1}$ (Bare-Low, Chinese manufacturer ex-works) to \$1{,}200~kW$_\mathrm{c}^{-1}$ (Turnkey-High, Western turnkey engineering, procurement and construction). The NGCC cost block follows the NLR ATB 2024 F-class Moderate values; natural-gas fuel cost is the hourly Henry Hub spot price \citep{eiaHenryHub} plus the Houston Ship Channel basis (mean \$0.10~MMBtu$^{-1}$). The data audit trail and provenance summary are provided in the Supplementary Information.
+
+\subsection{Scenario design}
+\label{sec:methods:scenarios}
+
+Eight sensitivity groups are evaluated relative to the baseline 2023, full-load PUE 1.35, ATB-Mid CAPEX and WACC 6.7\% configuration to probe the boundary conditions of the cogeneration economics. The full run ledger, consisting of four baseline case runs plus 96 sensitivity runs, is given in Supplementary Table~\ref{tab:scenarios}.
+
+The cooling-efficiency sweep tests the sensitivity of the absorption value proposition to the electric cooling efficiency, implemented by changing the VCC full-load COP and reporting the equivalent full-load PUE while holding the physical heat-rejection load fixed at Eq.~\eqref{eq:cool_demand}. The year sweep covers the recent range of Henry Hub and ERCOT prices. The BESS sweep tests whether 100~MWh of storage adds value at current Li-ion capital costs in the nuclear cases, with Case~0 and Case~3 retained as no-storage control rows. The SMR CAPEX sweep covers the published FOAK-to-NOAK range. The two-dimensional SMR $\times$ absorption CAPEX grid (group G5) is the central scenario: it asks whether any joint capital-cost trajectory makes Case~2 cheaper than Case~0 at the 2023 baseline. The carbon-price sweep identifies the carbon price at which the nuclear cases cross the grid-only baseline. The WACC sweep isolates the financing effect on Case~2 with the operating parameters held constant. The data-center size sweep (group G8) scales the IT-load trace and data-center-side cooling and NGCC capacities from 0.5$\times$ to 3.0$\times$ while holding the commercial BWRX-300 unit fixed, isolating the effect of unit-size matching.
+
+\section*{Data availability}
+All data that support the findings of this study, including the input parameters, scenario definitions, run-level summaries, hourly dispatch traces and figure source data, are available in the project GitHub repository at \url{https://github.com/Henryutd2021/Nuclear-DC} and will be deposited in a persistent public archive (Zenodo) with a citable DOI on acceptance. The individual exogenous data sources and their provenance are listed in Supplementary Note~4. No proprietary or restricted-access data are used.
+
+\section*{Code availability}
+The optimization framework, the scenario driver and the figure-generation notebooks that reproduce every result reported here are available in the same GitHub repository and will be archived alongside the data on acceptance.
+
+\section*{Acknowledgements}
+% Acknowledgements to be completed before submission.
+
+\section*{Author contributions}
+H.L. conceived the study, developed the optimization framework and the hourly absorption submodel, curated the input data, ran the scenarios, produced the figures and wrote the original draft. B.S. contributed to the methodology, validated the optimization results, and reviewed and edited the manuscript. J.Z. conceived and supervised the study, provided resources and funding, and reviewed and edited the manuscript. All authors approved the final manuscript.
+
+\section*{Competing interests}
+The authors declare no competing interests.
+
+\bibliography{references}
+
+
+\clearpage
+\setcounter{section}{0}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\thesubsection}{S\arabic{section}.\arabic{subsection}}
+\renewcommand{\thefigure}{S\arabic{figure}}\setcounter{figure}{0}
+\renewcommand{\thetable}{S\arabic{table}}\setcounter{table}{0}
+\renewcommand{\theequation}{S\arabic{equation}}\setcounter{equation}{0}
+\renewcommand{\theHsection}{S\arabic{section}}
+\renewcommand{\theHsubsection}{S\arabic{section}.\arabic{subsection}}
+\renewcommand{\theHfigure}{S\arabic{figure}}
+\renewcommand{\theHtable}{S\arabic{table}}
+\renewcommand{\theHequation}{S\arabic{equation}}
+
+% Line numbers are suppressed in the supplementary material (referenced by note,
+% table and figure number); this also avoids the lineno/longtable interaction.
+\nolinenumbers
+\section*{Supplementary Information}
+
+\subsection*{Supplementary Note 1: Nomenclature}
+The complete set of model sets, decision variables, parameters and abbreviations is
+listed in Supplementary Table~\ref{tab:nomen}.
+
+\renewcommand{\arraystretch}{1.20}
+\begin{longtable}{@{}>{$}l<{$}@{\hspace{1.5em}}p{0.78\linewidth}@{}}
+\caption{Nomenclature for the optimization model: sets and indices, decision variables, parameters and abbreviations.}\label{tab:nomen}\\
+\toprule
+\textnormal{Symbol} & Description \\
+\midrule
+\endfirsthead
+\multicolumn{2}{@{}l}{Supplementary Table~\ref{tab:nomen} (continued)}\\[2pt]
+\toprule
+\textnormal{Symbol} & Description \\
+\midrule
+\endhead
+\midrule
+\multicolumn{2}{r@{}}{continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+\multicolumn{2}{@{}l}{Sets and indices}\\*[2pt]
+t \in \mathcal{T} & hourly time step over an annual modeling horizon, $|\mathcal{T}|=8760$ \\
+c \in \mathcal{C} & system configuration, $\mathcal{C}=\{0,1,2,3\}$ \\
+\addlinespace[4pt]
+\multicolumn{2}{@{}l}{Decision variables (hour $t$)}\\*[2pt]
+P_{\mathrm{rx}}(t)         & reactor thermal output (MW$_\mathrm{th}$) \\
+P_{\mathrm{tg}}(t)         & turbine gross electric output (MW$_\mathrm{e}$) \\
+P_{\mathrm{tn}}(t)         & turbine net electric output (MW$_\mathrm{e}$) \\
+Q_{\mathrm{ext}}(t)        & mid-pressure steam extraction to absorber (MW$_\mathrm{th}$) \\
+Q_{\mathrm{a}}(t)          & absorption-chiller cooling delivered (MW$_\mathrm{c}$) \\
+P_{\mathrm{v}}(t)          & vapor-compression chiller (VCC) electric input (MW$_\mathrm{e}$) \\
+Q_{\mathrm{v}}(t)          & VCC cooling delivered (MW$_\mathrm{c}$) \\
+P_{\mathrm{g}}^{+}(t)      & grid import (MW$_\mathrm{e}$) \\
+P_{\mathrm{g}}^{-}(t)      & grid export (MW$_\mathrm{e}$) \\
+P_{\mathrm{ng}}(t)         & NGCC electric output, Case~3 (MW$_\mathrm{e}$) \\
+B^{+}(t)          & BESS charging power (MW$_\mathrm{e}$) \\
+B^{-}(t)          & BESS discharging power (MW$_\mathrm{e}$) \\
+E_{\mathrm{B}}(t)          & BESS state of charge (MWh) \\
+\addlinespace[4pt]
+\multicolumn{2}{@{}l}{Parameters}\\*[2pt]
+P_{\mathrm{IT}}(t)           & data-center IT load (MW$_\mathrm{e}$) \\
+\pi_{\mathrm{g}}(t)            & ERCOT day-ahead LMP (\$~MWh$_\mathrm{e}^{-1}$) \\
+\theta(t)           & ERCOT hourly average carbon intensity (g~CO$_2$~kWh$_\mathrm{e}^{-1}$) \\
+T_{\mathrm{wb}}(t)           & Houston wet-bulb temperature ($^\circ$C) \\
+\eta_{\mathrm{r}}            & turbine rated electric efficiency at zero extraction (--) \\
+\alpha_{\mathrm{w}}            & Willans extraction penalty (MW$_\mathrm{e}$~MW$_\mathrm{th}^{-1}$) \\
+\xi_{\mathrm{aux}}           & turbine auxiliary fraction (--) \\
+\mathrm{PUE}        & power usage effectiveness (--) \\
+\eta_{\mathrm{ch}}           & chilled-water chain efficiency (--) \\
+\mathrm{COP}_{\mathrm{a}}(T_{\mathrm{wb}}) & absorption chiller COP (--) \\
+a(t)                & absorption availability ($a_{\mathrm{m}}$ operating, 0 crystallization) \\
+a_{\mathrm{m}}                 & absorption maintenance availability (--) \\
+\mathrm{COP}_{\mathrm{v}}      & VCC full-load coefficient of performance (--) \\
+f_{\mathrm{v}}(\cdot)          & VCC part-load electricity map (MW$_\mathrm{e}$) \\
+\beta_{\mathrm{a}}             & absorber parasitic load intensity (kW$_\mathrm{e}$~kW$_\mathrm{c}^{-1}$) \\
+\eta_{\mathrm{rt}}           & BESS round-trip efficiency (--) \\
+\rho_{\mathrm{B}}              & BESS hourly self-discharge (--) \\
+\mathrm{Cap}_{\mathrm{E}}      & BESS energy capacity (MWh) \\
+\overline{\mathrm{CF}} & reactor annual capacity factor (--) \\
+\overline{P}_{\mathrm{rx}},\ \underline{P}_{\mathrm{rx}} & reactor maximum and minimum thermal output (MW$_\mathrm{th}$) \\
+\Delta P_{\mathrm{rx}}^{\max} & reactor ramp limit (MW$_\mathrm{th}$~h$^{-1}$) \\
+\overline{P}_{\mathrm{pcc}}  & point-of-common-coupling capacity (MW$_\mathrm{e}$) \\
+\mathrm{CAPEX}_k & overnight capital coefficient of asset $k$ \\
+\mathrm{FOM}_k & fixed O\&M coefficient of asset $k$ \\
+\mathrm{VOM}_k & variable O\&M coefficient of asset $k$ \\
+\mathrm{CRF}_k      & capital recovery factor of asset $k$ (--) \\
+N_k                 & engineering life of asset $k$ (yr) \\
+\pi_{\mathrm{f}}             & delivered nuclear fuel cost (\$~MWh$_\mathrm{th}^{-1}$) \\
+\pi_{\mathrm{ng}}(t) & delivered natural-gas price for NGCC (Henry Hub + basis; \$~MMBtu$^{-1}$) \\
+h_{\mathrm{ng}}      & NGCC full-load HHV heat rate (MMBtu~MWh$_\mathrm{e}^{-1}$) \\
+\eta_{\mathrm{hhv}}           & NGCC full-load HHV net efficiency (--) \\
+\overline{P}_{\mathrm{ng}} & NGCC rated electric capacity (MW$_\mathrm{e}$) \\
+\phi_{\mathrm{ng}}(\ell) & NGCC part-load heat-rate multiplier (--) \\
+\bar{c},\pi_1,\pi_2 & 45U full credit and phaseout breakpoints (\$~MWh$_\mathrm{e}^{-1}$) \\
+\pi_{\mathrm{CO}_2}          & carbon price (\(\$~\mathrm{tCO}_2^{-1}\)) \\
+\Delta t            & hourly time step length (h) \\
+\gamma_{\mathrm{rx}}         & reactor lifecycle emissions (g~CO$_2$~kWh$_\mathrm{e}^{-1}$) \\
+\gamma_{\mathrm{ng}} & NGCC lifecycle emissions (g~CO$_2$-eq~kWh$_\mathrm{e}^{-1}$) \\
+\Theta              & kg-to-tonne unit conversion ($=10^{-3}$) \\
+\addlinespace[4pt]
+\multicolumn{2}{@{}l}{Abbreviations}\\*[2pt]
+\textnormal{ATB}        & National Laboratory of the Rockies Annual Technology Baseline \\
+\textnormal{BWRX-300}   & GE--Hitachi 870 MW$_\mathrm{th}$, 270 MW$_\mathrm{e}$ Boiling Water small modular reactor \\
+\textnormal{CAPEX}      & overnight capital expenditure \\
+\textnormal{CRF}        & capital recovery factor \\
+\textnormal{COP}        & coefficient of performance \\
+\textnormal{ERCOT}      & Electric Reliability Council of Texas \\
+\textnormal{FOAK--NOAK} & first- and nth-of-a-kind reactor capital cost \\
+\textnormal{FOM, VOM}   & fixed and variable operations and maintenance \\
+\textnormal{IT}        & information-technology load \\
+M        & grid-cost margin, $1 - \mathrm{TAC}_c / \mathrm{TAC}_0$ (positive = cheaper than grid) \\
+\textnormal{LiBr--H}_2\textnormal{O} & lithium-bromide--water absorption pair \\
+\textnormal{LMP}        & locational marginal price \\
+\textnormal{NGCC}       & natural gas combined cycle \\
+\textnormal{PTC}        & production tax credit (Inflation Reduction Act Section 45U) \\
+\textnormal{PUE}        & power usage effectiveness \\
+\textnormal{SMR}        & small modular reactor \\
+\textnormal{TAC}        & total annualized cost (\$~yr$^{-1}$) \\
+\textnormal{VCC}        & vapor-compression chiller \\
+\textnormal{WACC}       & weighted-average cost of capital \\
+\end{longtable}
+
+\subsection*{Supplementary Note 2: Input data and equipment parameters}
+The scalar input data and the per-asset cost and performance parameters carried through the
+optimization are listed in Supplementary Tables~\ref{tab:data} and~\ref{tab:equipment}.
+
+\begin{table}[t]
+\centering
+\caption{Input data sources, baseline values and units. ERCOT denotes Electric Reliability Council of Texas; LMP, locational marginal price; IT, information technology; NLR ATB, National Laboratory of the Rockies Annual Technology Baseline; FOAK, first-of-a-kind; NOAK, nth-of-a-kind; O\&M, operations and maintenance; VCC, vapor-compression chiller; BESS, battery energy storage system; NGCC, natural gas combined cycle; WACC, weighted-average cost of capital; PTC, production tax credit.}
+\label{tab:data}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.10\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Quantity & Baseline value or range & Resolution & Source \\
+\midrule
+ERCOT day-ahead LMP, Houston Hub        & yearly mean \$28--70~MWh$_\mathrm{e}^{-1}$ (2022--2024) & hourly & gridstatus.io \\
+ERCOT average carbon intensity, ERCOT system & 320--351~g~CO$_2$~kWh$_\mathrm{e}^{-1}$ annual mean (hourly average emission factor) & hourly & EIA-930 + United Nations Economic Commission for Europe 2022 \\
+Delivered natural gas (Henry Hub + basis) & \$2.35--6.53~MMBtu$^{-1}$ (annual mean) & hourly & U.S. Energy Information Administration Henry Hub spot \\
+Houston wet-bulb temperature            & $-0.5$ to 28~$^\circ$C annual range & hourly & Open-Meteo historical \\
+Data-center IT load                     & 142.4 MW$_\mathrm{e}$ peak; 94.7 MW$_\mathrm{e}$ mean & hourly & Lawrence Berkeley National Laboratory hyperscale benchmark \\
+BWRX-300 capital cost                   & \$7{,}615~kW$_\mathrm{e}^{-1}$ Moderate; \$14{,}700~kW$_\mathrm{e}^{-1}$ FOAK; \$2{,}250~kW$_\mathrm{e}^{-1}$ NOAK & scalar & NLR ATB 2024 \citep{atb2024nuclear} \\
+BWRX-300 fixed O\&M                     & \$121~kW$_\mathrm{e}^{-1}$~yr$^{-1}$ & scalar & NLR ATB 2024 \\
+BWRX-300 capacity factor                & 0.92 (fleet average) & scalar & U.S. Energy Information Administration Electric Power Monthly Table 6.07.B \citep{eia2025capacityfactors} \\
+BWRX-300 lifecycle emissions            & 12~g~CO$_2$-eq~kWh$_\mathrm{e}^{-1}$ & scalar & United Nations Economic Commission for Europe 2022 \\
+Absorption chiller capital cost         & \$450--1{,}200~kW$_\mathrm{c}^{-1}$ (\$750 baseline) & scalar & American Society of Heating, Refrigerating and Air-Conditioning Engineers Technical Committee 8.3 + vendor literature \\
+VCC capital cost                        & \$250~kW$_\mathrm{c}^{-1}$ & scalar & American Society of Heating, Refrigerating and Air-Conditioning Engineers typical centrifugal \\
+Li-ion BESS capital cost                & \$405~kWh$^{-1}$ + \$1{,}620~kW$^{-1}$ & scalar & NLR ATB 2024 \\
+NGCC capital cost                       & \$1{,}330~kW$_\mathrm{e}^{-1}$ & scalar & NLR ATB 2024 F-class Moderate \\
+NGCC direct CO$_2$                      & 360~g~CO$_2$~kWh$_\mathrm{e}^{-1}$ + 60~g upstream CH$_4$ (CO$_2$-eq) & scalar & U.S. Energy Information Administration + Alvarez et al.\ (2018) \\
+WACC                                    & 6.7\% baseline; \{5, 6.7, 10\}\% in scenario group G7 & scalar & Massachusetts Institute of Technology nuclear-finance survey \\
+Asset amortization life                 & 20~yr reactor and turbine; 25~yr chillers; 30~yr NGCC; 15~yr battery & scalar & NLR ATB 2024 \\
+Nuclear PTC (Section 45U)               & \$15~MWh$_\mathrm{e}^{-1}$ full credit; phaseout \$25--43.75~MWh$_\mathrm{e}^{-1}$ & scalar & 26 U.S.C. 45U; U.S. Internal Revenue Service Form 7213 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Detailed equipment cost and performance parameters used in the optimization. CAPEX denotes overnight capital expenditure; FOM, fixed operations and maintenance; VOM, variable operations and maintenance; VCC, vapor-compression chiller; BESS, battery energy storage system; NGCC, natural gas combined cycle; HHV, higher heating value; ERCOT, Electric Reliability Council of Texas; PCC, point of common coupling. Each asset's CAPEX is annualized over its own listed lifetime through an asset-specific capital recovery factor; the battery additionally carries a 5\% end-of-life salvage credit.}
+\label{tab:equipment}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.14\textwidth}>{\raggedright\arraybackslash}p{0.11\textwidth}>{\raggedright\arraybackslash}p{0.12\textwidth}>{\raggedright\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Asset & CAPEX & FOM (yr$^{-1}$) & VOM & Lifetime & Other technical parameters \\
+\midrule
+BWRX-300 reactor (Cases 1, 2) & \$7{,}615~kW$_\mathrm{e}^{-1}$ & \$121~kW$_\mathrm{e}^{-1}$~yr$^{-1}$ & \$3.50~MWh$_\mathrm{e}^{-1}$ & 20 yr & 870~MW$_\mathrm{th}$, 270~MW$_\mathrm{e}$ net; $\eta_{\mathrm{r}}=0.345$; min-load fraction 0.50; ramp 1\%~min$^{-1}$; capacity factor 0.92; fuel \$6~MWh$_\mathrm{th}^{-1}$; lifecycle emissions 12~g~CO$_2$~kWh$_\mathrm{e}^{-1}$ \\
+Cascaded steam turbine (Cases 1, 2) & bundled into reactor overnight capital cost & bundled & bundled & 20 yr & $\eta_{\mathrm{r}}=0.345$ rated at zero extraction; auxiliary load 10\%; Willans slope $\alpha_{\mathrm{w}}=0.083~\mathrm{MW}_{\mathrm{e}}~\mathrm{MW}_{\mathrm{th}}^{-1}$ \\
+Double-effect absorption chiller (Case 2) & \$450--1{,}200~kW$_\mathrm{c}^{-1}$ (\$750 baseline) & \$20~kW$_\mathrm{c}^{-1}$~yr$^{-1}$ & \$0.40~MWh$_\mathrm{c}^{-1}$ & 25 yr & nameplate cap COP 1.30; design $T_{\mathrm{wb},0}=26\,^\circ$C, COP 1.10; de-rating 0.015~$^\circ\mathrm{C}^{-1}$; crystallization $T_{\mathrm{cry}}=32\,^\circ$C cooling-water inlet; tower approach 5 K; parasitic $\beta_{\mathrm{a}}=0.020~\mathrm{kW}_{\mathrm{e}}~\mathrm{kW}_{\mathrm{c}}^{-1}$; 160~MW$_\mathrm{c}$ nameplate \\
+Vapor-compression chiller (Cases 0, 1, 2, 3) & \$250~kW$_\mathrm{c}^{-1}$ & \$8~kW$_\mathrm{c}^{-1}$~yr$^{-1}$ & \$0.50~MWh$_\mathrm{c}^{-1}$ & 25 yr & water-cooled centrifugal; nameplate COP 3.5; Houston-derated COP 3.2; 160~MW$_\mathrm{c}$ in all cases \\
+Li-ion BESS (G3) & \$405~kWh$^{-1}$ + \$1{,}620~kW$^{-1}$ & \$25~kW$^{-1}$~yr$^{-1}$ & \$0.50~MWh$^{-1}$ & 15 yr & 100~MWh, 50~MW (C/2); round-trip $\eta_{\mathrm{rt}}=0.85$; self-discharge 0.1\%~day$^{-1}$; state-of-charge bounds [0.05, 0.95] \\
+NGCC (Case 3) & \$1{,}330~kW$_\mathrm{e}^{-1}$ & \$29.3~kW$_\mathrm{e}^{-1}$~yr$^{-1}$ & \$2.65~MWh$_\mathrm{e}^{-1}$ & 30 yr & 200~MW$_\mathrm{e}$ F-class; HHV $\eta_{\mathrm{hhv}}=0.495$; direct CO$_2$ 360~g~kWh$_\mathrm{e}^{-1}$; upstream CH$_4$ 60~g~kWh$_\mathrm{e}^{-1}$ (CO$_2$-eq); Henry Hub + Houston Ship Channel basis \$0.10~MMBtu$^{-1}$ \\
+ERCOT interconnection (Cases 0, 1, 2) & not capitalized & N/A & N/A & N/A & 300~MW PCC bidirectional; flat substation interconnection in baseline \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{Supplementary Note 3: Input traces}
+The four characteristic exogenous input traces driving the optimization are shown in
+Supplementary Figure~\ref{fig:inputs}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_inputs_overview.pdf}
+\caption{Hourly input traces driving the optimization. LiBr denotes lithium bromide; COP, coefficient of performance; ERCOT, Electric Reliability Council of Texas; LMP, locational marginal price; IT, information technology; VCC, vapor-compression chiller. (a)~Houston monthly wet-bulb distribution from the Open-Meteo historical-weather archive (year 2023). The dashed horizontal line marks the LiBr crystallization gate at $T_{\mathrm{wb}}\geq 27\,^\circ$C; the dotted line marks the COP design anchor $T_{\mathrm{wb},0}=26\,^\circ$C. (b)~Duration curves of ERCOT day-ahead LMP for the three modeled years (2022 high-gas-price regime; 2023 moderate regime; 2024 low-LMP regime). (c)~Data-center IT-load profile for a typical winter and summer week, with annual mean and peak overlaid. (d)~Double-effect LiBr--H$_2$O absorption-chiller COP as a function of wet-bulb temperature; the dashed segment shows the linear de-rating below the crystallization gate, and the shaded band marks the backup-cooling region in which the VCC carries the cooling load.}
+\label{fig:inputs}
+\end{figure}
+
+\subsection*{Supplementary Note 4: Exogenous data sources and provenance}
+Each exogenous input is drawn from a public, citable source and trimmed to an 8760-hour annual horizon. ERCOT day-ahead locational marginal prices at the Houston load zone are retrieved through the gridstatus.io public data interface \citep{gridstatus}. Hourly average grid carbon intensities are derived from the U.S. Energy Information Administration EIA-930 Hourly Electric Grid Monitor generation mix \citep{eia930} weighted by United Nations Economic Commission for Europe 2022 lifecycle emission factors for each technology \citep{unece2022lca}. Houston wet-bulb temperature is taken from the Open-Meteo historical-weather reanalysis archive \citep{openmeteo2023}. Delivered natural gas is the U.S. Energy Information Administration Henry Hub daily spot price \citep{eiaHenryHub} plus a fixed Houston Ship Channel basis. Reactor and NGCC overnight capital costs and fixed operations and maintenance follow the National Laboratory of the Rockies 2024 Annual Technology Baseline \citep{atb2024nuclear}; the reactor capacity factor is the U.S. Energy Information Administration fleet average \citep{eia2025capacityfactors}; and absorption-chiller capital costs are bracketed from American Society of Heating, Refrigerating and Air-Conditioning Engineers Technical Committee 8.3 absorption-chiller technical data and publicly available vendor literature. The Section~45U production tax credit follows the enacting statute \citep{usc26_45u,ira2022} and U.S. Internal Revenue Service guidance \citep{irs45u}. No proprietary or restricted-access data are used, and the audit trail linking each raw file to its processed model input is included in the project repository.
+
+\subsection*{Supplementary Note 5: Market inputs by operating year}
+The three modeled years bracket the recent range of ERCOT and natural-gas market conditions (Supplementary Table~\ref{tab:market_years}). 2022 is the high-gas-price regime, 2023 a moderate year with low gas but firm power prices, and 2024 a low-price year in which grid procurement is comparatively cheap. The on-site natural gas combined cycle (Case~3) beats grid supply only in 2023, when low delivered gas coincides with firm ERCOT prices; in 2022 the gas and grid prices move together and erase the advantage, and in 2024 the low ERCOT price makes grid procurement the cheapest option.
+
+\begin{table}[t]
+\centering
+\caption{Market inputs and on-site economics by operating year. ERCOT denotes Electric Reliability Council of Texas; LMP, locational marginal price; TAC, total annualized cost; NGCC, natural gas combined cycle. ERCOT LMP is the annual-mean Houston-zone day-ahead price; delivered gas is the annual-mean Henry Hub plus Houston Ship Channel basis. The grid-cost margin $M$ is positive when the configuration is cheaper than grid procurement.}
+\label{tab:market_years}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.34\linewidth}>{\raggedright\arraybackslash}X rrr@{}}
+\toprule
+Quantity & Unit & 2022 & 2023 & 2024 \\
+\midrule
+ERCOT day-ahead LMP        & \$~MWh$_\mathrm{e}^{-1}$ & 70 & 57 & 28 \\
+Delivered natural gas      & \$~MMBtu$^{-1}$ & 6.53 & 2.63 & 2.35 \\
+Grid-only (Case~0) TAC     & \$M~yr$^{-1}$ & 86.2 & 78.1 & 36.9 \\
+NGCC (Case~3) TAC          & \$M~yr$^{-1}$ & 87.1 & 55.7 & 53.6 \\
+NGCC grid-cost margin $M$  & \% & $-1.1$ & $+28.7$ & $-45.1$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{Supplementary Note 6: Cogeneration dispatch and storage detail}
+Over the full year the absorption chiller delivers 862~GWh$_\mathrm{c}$ of cooling and the vapor-compression backup 60~GWh$_\mathrm{c}$. The backup energy is spread over roughly 2{,}870~hours of partial top-up, which also cover the 5\% maintenance derating of the absorber. The crystallization gate of Equation~\eqref{eq:abs_avail} forces the absorber fully offline for about 115~hours, concentrated from late June through August, during which the vapor-compression chiller carries the entire 13.6~GWh$_\mathrm{c}$ cooling load of those hours. In the islanded gas case (Case~3) the 2023 day-ahead price falls below the NGCC running cost of about \$21~MWh$_\mathrm{e}^{-1}$ in roughly 42\% of hours, but the disconnected plant cannot import in those hours, so its comparison against grid supply is made on annual cost rather than hour by hour. The lithium-ion battery sweep (group G3) lowers total annualized cost by \$0.63~M~yr$^{-1}$ in each nuclear case, an improvement of about 0.8 percentage points in the grid-cost margin that never changes the configuration ranking, so it is reported as a secondary boundary rather than a main result.
+
+\subsection*{Supplementary Note 7: Marginal value of absorption cooling}
+Supplementary Figure~\ref{fig:cooling_response} and Supplementary Table~\ref{tab:value_decomp} report the marginal value of adding the absorption chiller to the SMR-only plant (Case~2 minus Case~1) at the 2023 ATB-Mid baseline and across the cooling-efficiency sweep. The gross avoided vapor-compression electricity grows with the reported PUE, so the chiller moves from a net penalty against an efficient electric chiller (PUE\,1.10) to a net saving against an inefficient one (PUE\,1.50), with break-even near a full-load PUE of 1.40.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_sensitivity_cooling_response.pdf}
+\caption{Cooling-side response of the absorption configuration at the 2023 ATB-Mid baseline. ATB-Mid denotes the mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; TAC, total annualized cost; PUE, power usage effectiveness; VCC, vapor-compression chiller. (a) Case~2 minus Case~1 TAC difference across full-load PUE; positive is a cogeneration penalty, negative a saving. (b) Net cooling-electricity saving from absorption, measured as gross avoided VCC electricity cost less Case~2 VCC backup/top-up, before fixed absorption capital and turbine-opportunity costs. (c) The same difference expressed as a grid-cost-margin gap across full-load PUE. (d) The margin gap across carbon price. Absorption becomes economic only when the competing electric chiller is inefficient (high PUE) or carbon is priced.}
+\label{fig:cooling_response}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Marginal annual value of adding the absorption chiller to a nuclear-only plant (Case~2 minus Case~1), at the 2023 ATB-Mid baseline (full-load PUE 1.35) and across the cooling-efficiency sweep. ATB-Mid denotes the mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; PUE, power usage effectiveness; VCC, vapor-compression chiller; O\&M, operations and maintenance. Positive values reduce Case~2 cost relative to Case~1; negative values increase it. All entries are \$M~yr$^{-1}$.}
+\label{tab:value_decomp}
+\begin{tabularx}{\linewidth}{@{}Xrrrr@{}}
+\toprule
+Component & Baseline & PUE 1.10 & PUE 1.30 & PUE 1.50 \\
+\midrule
+Gross avoided VCC electricity        & $+18.24$ & $+5.25$  & $+15.76$ & $+26.26$ \\
+VCC backup and top-up                & $-2.26$  & $-3.31$  & $-1.95$  & $-3.25$ \\
+Absorption capital $+$ fixed O\&M    & $-13.22$ & $-13.22$ & $-13.22$ & $-13.22$ \\
+Willans extraction opportunity cost  & $-4.15$  & $-1.46$  & $-4.15$  & $-4.15$ \\
+Production tax credit forgone        & $-0.62$  & $-0.03$  & $-0.62$  & $-0.62$ \\
+Direct site-water cost               & $-0.04$  & $-0.01$  & $-0.04$  & $-0.04$ \\
+Residual reconciliation              & $-0.35$  & $-0.18$  & $-0.35$  & $-0.35$ \\
+\midrule
+Net value of absorption              & $-2.39$  & $-12.96$ & $-4.56$  & $+4.64$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{Supplementary Note 8: Data-center size-matching results}
+Supplementary Figure~\ref{fig:size_matching} and Supplementary Table~\ref{tab:size_matching} report the size-matching sweep (group G8). Holding the BWRX-300 reactor fixed at 270~MW$_\mathrm{e}$ net while scaling the IT load, cooling and grid interconnect from 0.5$\times$ to 3.0$\times$ moves Case~2 from a deep merchant-export surplus at small scale to a net importer at 3.0$\times$. The annual dollar gap to grid supply is nearly flat because the larger campus also raises the grid-only counterfactual; what improves is the IT-energy-normalized cost intensity, which falls from \$235 to \$143~MWh$_\mathrm{IT}^{-1}$.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig12_s8_size_matching.pdf}
+\caption{Data-center size matching sensitivity (G8). IT denotes information technology; NGCC, natural gas combined cycle; TAC, total annualized cost. The IT-load trace and data-center-side cooling and NGCC capacities are scaled from 0.5$\times$ to 3.0$\times$ while the BWRX-300 reactor remains fixed at 270~MW$_\mathrm{e}$ net. (a) TAC-normalized grid-cost margin for the on-site cases against the matching grid-only baseline. (b) Case~2 TAC against the matching grid-only TAC, with the shaded area indicating the annual dollar gap. (c) IT-energy-normalized cost intensity; the shaded area is the excess Case~2 cost over grid supply. (d) Net grid export for the two nuclear cases; positive values indicate merchant export and negative values indicate net grid import. Arrow labels highlight the 2.5$\times$ load reference discussed in the text.}
+\label{fig:size_matching}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Data-center size-matching results for Case~2 (group G8) at the 2023 ATB-Mid baseline. ATB-Mid denotes the mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; IT, information technology; TAC, total annualized cost. The reactor is held at 270~MW$_\mathrm{e}$ net while the IT load and data-center-side capacities scale with the multiplier. $M$ is the grid-cost margin against the matched grid-only baseline; net export is annual grid sales minus purchases.}
+\label{tab:size_matching}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}rrrrrr@{}}
+\toprule
+Load multiplier & 0.5 & 1.0 & 1.5 & 2.0 & 2.5 & 3.0 \\
+\midrule
+Case~2 TAC (\$M~yr$^{-1}$)                   & 154.3 & 194.6 & 234.8 & 275.0 & 315.3 & 355.5 \\
+Grid-only TAC (\$M~yr$^{-1}$)                & 39.0  & 78.1  & 117.1 & 156.1 & 195.1 & 234.2 \\
+Annual gap (\$M~yr$^{-1}$)                   & 115.3 & 116.5 & 117.7 & 118.9 & 120.1 & 121.3 \\
+Grid-cost margin $M$ (\%)             & $-295$ & $-149$ & $-101$ & $-76$ & $-62$ & $-52$ \\
+Net grid export (TWh~yr$^{-1}$)              & $+1.89$ & $+1.43$ & $+0.97$ & $+0.51$ & $+0.04$ & $-0.42$ \\
+Cost intensity (\$~MWh$_\mathrm{IT}^{-1}$) & 372 & 235 & 189 & 166 & 152 & 143 \\
+Excess over grid (\$~MWh$_\mathrm{IT}^{-1}$) & 278 & 140 & 95 & 72 & 58 & 49 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{Supplementary Note 9: Scenario run ledger}
+The baseline and eight sensitivity groups, comprising the four baseline case runs and the 96 sensitivity runs evaluated in this study, are listed in Supplementary Table~\ref{tab:scenarios}.
+
+\begin{table}[t]
+\centering
+\caption{Baseline and sensitivity scenario run ledger. C0--C3 denote Cases~0--3; PUE, power usage effectiveness; ATB-Mid, mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; CAPEX, overnight capital expenditure; WACC, weighted-average cost of capital; ERCOT, Electric Reliability Council of Texas; BESS, battery energy storage system; SMR, small modular reactor; FOAK, first-of-a-kind; NOAK, nth-of-a-kind; IT, information technology. Cells marked \texttt{--} indicate that the case is not included in that scenario group.}
+\label{tab:scenarios}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\linewidth}{@{}llXrcccc@{}}
+\toprule
+Group & Sweep & Levels & Runs & C0 & C1 & C2 & C3 \\
+\midrule
+G0 & Baseline           & 2023, full-load PUE 1.35, ATB-Mid CAPEX, WACC 6.7\% & 4 & \checkmark & \checkmark & \checkmark & \checkmark \\
+\midrule
+G1 & Effective PUE      & 1.10, 1.30, 1.50           & 6   & -- & \checkmark & \checkmark & -- \\
+G2 & ERCOT year         & 2022, 2023, 2024           & 12  & \checkmark & \checkmark & \checkmark & \checkmark \\
+G3 & BESS               & on, off                    & 8   & control & \checkmark & \checkmark & control \\
+G4 & SMR CAPEX          & FOAK, ATB-Mid, NOAK        & 6   & -- & \checkmark & \checkmark & -- \\
+G5 & SMR $\times$ Abs.\ CAPEX & 5 $\times$ 5 grid         & 25  & -- & -- & \checkmark & -- \\
+G6 & Carbon price       & \(\$0\), \(\$50\) and \(\$100~\mathrm{tCO}_2^{-1}\)      & 12  & \checkmark & \checkmark & \checkmark & \checkmark \\
+G7 & WACC               & 5, 6.7, 10\%               & 3   & -- & -- & \checkmark & -- \\
+G8 & Data-center size   & 0.5--3.0$\times$ IT load   & 24  & \checkmark & \checkmark & \checkmark & \checkmark \\
+\midrule
+Total &                 &                            & 100 & & & & \\
+\bottomrule
+\end{tabularx}
+\begin{flushleft}
+\footnotesize Note: In G3, control denotes duplicated control rows retained in the run ledger; BESS dispatch is optimized only for Cases~1 and~2 because Cases~0 and~3 are closed-form annual cost evaluations.
+\end{flushleft}
+\end{table}
+
+\end{document}
+% NOTE: Springer Nature prohibits AI-generated content. Substantially rewrite this draft in your own voice before submission. See journal AI policy.
