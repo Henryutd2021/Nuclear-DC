@@ -45,7 +45,7 @@ ngcc:
   capex_usd_per_kWe:                1330      # NLR ATB 2024 NGCC F-class Moderate
   fixed_om_usd_per_kWe_year:        29.3
   variable_om_usd_per_mwh_e:        2.65
-  net_efficiency_lhv:               0.55      # for fuel-energy → electricity
+  net_efficiency_lhv:               0.55      # informational ATB LHV value; fuel-cost conversion uses HHV below
   net_efficiency_hhv:               0.495     # HH prices are HHV-basis → use HHV η for $/MWh fuel
   co2_direct_g_per_kwh_e:           360       # paper value, commonly cited NGCC direct emissions
   co2_upstream_ch4_g_per_kwh_e:     60        # Alvarez 2018 methane leakage (CO2-equivalent)

@@ -19,8 +19,8 @@ economics:
   delivered_fuel_range_usd_per_mmbtu: [1.6, 9.0]   # observed 2022-2024 monthly
 
 technical:
-  net_efficiency_lhv: 0.55                     # F-class GT + steam bottoming
-  net_efficiency_hhv: 0.495                    # for fuel-cost conversion
+  net_efficiency_lhv: 0.55                     # informational ATB LHV value; not used for fuel-cost conversion
+  net_efficiency_hhv: 0.495                    # HHV basis used for fuel-cost conversion
   thermal_capacity_MWth: 100                   # nominal (sized to match 50 MWe net + ~50 MWth recoverable)
   electric_capacity_MWe: 50
   recoverable_heat_MWth: 40                    # exhaust + steam blow-down (used for absorption or HRSG)
@@ -41,9 +41,9 @@ sources:
     title: "NLR ATB 2024 — Natural Gas (NGCC)"
     publisher: "NLR"
     year: 2024
-    url: "https://atb.nrel.gov/electricity/2024/natural_gas"
+    url: "https://atb.nlr.gov/electricity/2024/natural_gas"
     used_for: ["economics.overnight_capital_cost_usd_per_kWe", "economics.fixed_om_usd_per_kWe_year",
-               "economics.variable_om_usd_per_mwh", "technical.net_efficiency_lhv"]
+               "economics.variable_om_usd_per_mwh", "technical.net_efficiency_hhv"]
 
   - id: "EIA-NaturalGas-2024"
     title: "U.S. Natural Gas Prices — Henry Hub and Regional Hubs"

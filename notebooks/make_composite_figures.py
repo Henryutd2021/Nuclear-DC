@@ -18,6 +18,7 @@ matplotlib.use("Agg")
 PROJECT_ROOT = Path("/home/honglin/Nuclear-DC")
 NB = PROJECT_ROOT / "notebooks" / "paper_figures.ipynb"
 NAT_FIGS = PROJECT_ROOT / "MANUSCRIPT" / "Nature Energy" / "figures"
+APPLIED_FIGS = PROJECT_ROOT / "MANUSCRIPT" / "Applied Energy" / "figures"
 
 # --- load notebook setup cells (palette, helpers, df) into this namespace ----
 nb = json.load(open(NB))
@@ -315,7 +316,7 @@ def panel_value_decomp(ax):
         level = bottoms[i] + heights[i]
         ax.plot([i + bar_width / 2, i + 1 - bar_width / 2], [level, level], color="#BDBDBD",
                 linewidth=0.55, alpha=0.85, solid_capstyle="butt", zorder=2.2)
-    small_label_offsets = {"VCC\nbackup": (-3, 3), "PTC\nforgone": (-3, 10), "Water\ncost": (3, 8)}
+    small_value_label_offset_pt = VALUE_LABEL_OFFSET_PT
     vfs = 8.0
     for i, (x, h, b) in enumerate(zip(x_pos[:-1], heights[:-1], bottoms[:-1])):
         y = b + h
@@ -328,11 +329,11 @@ def panel_value_decomp(ax):
                     fps = True
                 annotate_vertical_value(ax, i, y, f"{h:+.1f}", fontsize=vfs, force_positive_side=fps)
         else:
-            dx, dy = small_label_offsets.get(x, (10, 10))
-            ax.annotate(f"{h:+.2f}", xy=(i, y), xycoords="data", xytext=(dx, dy),
-                        textcoords="offset points", ha="center", va="bottom", fontsize=vfs,
-                        color="#000000", zorder=10,
-                        arrowprops=dict(arrowstyle="-", color="#666666", linewidth=0.55, shrinkA=0, shrinkB=0))
+            annotate_vertical_value(
+                ax, i, y, f"{h:+.2f}", fontsize=vfs,
+                offset_pt=small_value_label_offset_pt,
+                force_positive_side=h >= 0,
+            )
     annotate_vertical_value(ax, len(x_pos) - 1, net, f"{net:+.1f}", fontsize=vfs, color="#000000")
     ax.axhline(0, **ZERO_LINE_KW)
     ax.set_ylabel(r"Δ vs Case 1 TAC (M\$ yr$^{-1}$)")
@@ -413,9 +414,9 @@ def build_baseline_economics(dirs):
 
 import traceback
 try:
-    build_operation_value([NAT_FIGS])
+    build_operation_value([NAT_FIGS, APPLIED_FIGS])
     build_baseline_economics([NAT_FIGS])
-    print("OK: wrote fig_operation_value and fig_baseline_economics (Nature Energy)")
+    print("OK: wrote fig_operation_value (Nature Energy, Applied Energy) and fig_baseline_economics (Nature Energy)")
 except Exception:
     traceback.print_exc()
     raise

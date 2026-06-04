@@ -1,3 +1,8 @@
+# DEPRECATED LEGACY FILE.
+# Retained only for old toy examples; the current Nature Energy analysis
+# pipeline does not load this file. Active cost inputs are defined in
+# config/plant_case*.yaml plus data/economics/ and data/equipment/.
+#
 # Cost parameters (all in USD)
 
 # Financial parameters
@@ -35,4 +40,3 @@ grid_price_export: 30.0
 # Penalty costs (should be zero in feasible solutions)
 penalty_unmet_it: 10000      # $/MWh unmet IT load
 penalty_unmet_cooling: 5000  # $/MWh_th unmet cooling
-

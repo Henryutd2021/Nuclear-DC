@@ -91,7 +91,7 @@ sources:
     title: "NREL ATB 2024 — Geothermal Binary (analog for ORC bottoming)"
     publisher: "NREL"
     year: 2024
-    url: "https://atb.nrel.gov/electricity/2024/geothermal"
+    url: "https://atb.nlr.gov/electricity/2024/geothermal"
     used_for: ["capex_range_usd_per_kWe"]
     notes: "Binary geothermal plant cost = good proxy for ORC bottoming cycle at similar T_hot range."
 

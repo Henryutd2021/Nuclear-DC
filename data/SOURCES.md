@@ -155,7 +155,7 @@ schema and aggregates back to canonical fuel buckets.
   URL: https://www.world-nuclear-news.org/articles/what-is-the-budget-for-canadas-first-smr-project
 
 - **NLR ATB 2024 Nuclear-SMR:** Moderate 7,615 $/kWe.
-  URL: https://atb.nrel.gov/electricity/2024/nuclear
+  URL: https://atb.nlr.gov/electricity/2024/nuclear
 
 - **MIT ANP-201 (Shirvan 2024):** FOAK $194 (with IRA ITC + LPO); NOAK $95.
   URL: https://web.mit.edu/kshirvan/www/research/ANP201%20TR%20CANES.pdf

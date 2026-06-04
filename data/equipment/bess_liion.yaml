@@ -41,7 +41,7 @@ sources:
     title: "NLR ATB 2024 — Battery Storage (4-hour duration, Utility-Scale)"
     publisher: "NLR"
     year: 2024
-    url: "https://atb.nrel.gov/electricity/2024/utility-scale_battery_storage"
+    url: "https://atb.nlr.gov/electricity/2024/utility-scale_battery_storage"
     used_for: ["economics.capex_*", "economics.fixed_om_usd_per_kw_year",
                "economics.variable_om_usd_per_mwh"]
 

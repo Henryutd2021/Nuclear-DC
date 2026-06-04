@@ -72,7 +72,7 @@ All parameters are specified in YAML files in the `config/` directory:
 - **`plant_case2.yaml`** - Case 2 (nuclear + cascaded HP extraction + double-effect absorption, Willans slope locked at 0.083 MWe/MWth)
 - **`plant_case3.yaml`** - Case 3 (NGCC on-site, off-grid)
 - **`capex_grid_s5.yaml`** - 5×5 SMR × absorption CAPEX grid for the S5 2D feasibility scan
-- **`costs.yaml`** - CAPEX, fixed & variable O&M, fuel costs, penalties
+- **`costs.yaml`** - Deprecated legacy cost scaffold; not loaded by the current Nature Energy analysis pipeline
 
 ### Input Data
 
@@ -106,7 +106,7 @@ Nuclear-DC/
 │   ├── plant_case2.yaml       # Case 2 (nuclear + cascaded HP extraction + absorption)
 │   ├── plant_case3.yaml       # Case 3 (NGCC on-site)
 │   ├── capex_grid_s5.yaml     # S5 5×5 SMR × absorption CAPEX grid
-│   └── costs.yaml             # Economic parameters
+│   └── costs.yaml             # Deprecated legacy cost scaffold
 ├── data/                      # Input time-series + raw fetchers
 │   ├── it_load.csv            # IT electric load
 │   ├── cooling_load.csv       # Cooling demand (optional)

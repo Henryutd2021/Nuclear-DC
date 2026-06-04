@@ -35,7 +35,7 @@ sources:
     title: "NLR ATB 2024 — Financial Assumptions"
     publisher: "NLR"
     year: 2024
-    url: "https://atb.nrel.gov/electricity/2024/financial_cases_&_methods"
+    url: "https://atb.nlr.gov/electricity/2024/financial_cases_&_methods"
     used_for: ["WACC_nominal", "WACC_real", "inflation_rate", "project_lifetime_years",
                "capital_recovery_factor"]
 

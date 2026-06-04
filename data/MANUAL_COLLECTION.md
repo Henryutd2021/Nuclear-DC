@@ -49,10 +49,10 @@ specific values used in the paper are already in our YAMLs (`reactor/`,
 
 1. Visit NLR ATB 2024 download page: https://atb.nlr.gov/electricity/2024/data
 2. Download CSV files for:
-   - **Nuclear (SMR):** https://atb.nrel.gov/electricity/2024/nuclear
-   - **Natural Gas:** https://atb.nrel.gov/electricity/2024/natural_gas
-   - **Battery Storage:** https://atb.nrel.gov/electricity/2024/utility-scale_battery_storage
-   - **Geothermal (Binary):** https://atb.nrel.gov/electricity/2024/geothermal
+   - **Nuclear (SMR):** https://atb.nlr.gov/electricity/2024/nuclear
+   - **Natural Gas:** https://atb.nlr.gov/electricity/2024/natural_gas
+   - **Battery Storage:** https://atb.nlr.gov/electricity/2024/utility-scale_battery_storage
+   - **Geothermal (Binary):** https://atb.nlr.gov/electricity/2024/geothermal
 3. Save raw CSVs to `data/economics/nrel_atb_2024_raw/`.
 4. The specific values used in our YAMLs are already cited and traceable,
    so the raw CSVs are SI-only (manuscript appendix Table SI-1).
