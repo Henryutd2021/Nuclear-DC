@@ -17,6 +17,15 @@
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{Z}{>{\centering\arraybackslash}X}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+\newcommand{\maintablefont}{\small}
+\newcommand{\sitablefont}{\footnotesize}
+% sn-jnl defines \scriptsize larger than \footnotesize, so keep dense SI tables tied to the SI table font.
+\newcommand{\densetablefont}{\sitablefont}
 \usepackage{makecell}
 \usepackage{float}
 \usepackage{longtable}
@@ -206,8 +215,8 @@ Case~0 represents the conventional grid-supplied data center. All electricity is
 \centering
 \caption{System configurations modeled in this study. \checkmark denotes that the block is enabled; -- that it is disabled. SMR denotes small modular reactor; NGCC, natural gas combined cycle; ERCOT, Electric Reliability Council of Texas; PCC, point of common coupling; VCC, vapor-compression chiller; LiBr, lithium bromide; BESS, battery energy storage system.}
 \label{tab:cases}
-{\small\setlength{\tabcolsep}{4.5pt}
-\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{3.4cm}cccc@{}}
+{\maintablefont\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}L{0.12\linewidth}L{0.25\linewidth}*{4}{Z}@{}}
 \toprule
  &  & Case~0 & Case~1 & Case~2 & Case~3 \\
 \midrule
@@ -218,7 +227,7 @@ Cooling    & VCC, water-cooled            & \checkmark\,(primary) & \checkmark\,
            & Double-effect LiBr absorber  & --        & --         & \checkmark            & --        \\
 Storage    & Li-ion BESS, 100 MWh, 50 MW & -- & sensitivity & sensitivity & -- \\
 \bottomrule
-\end{tabular}}
+\end{tabularx}}
 \end{table}
 
 The data-center IT load follows an annual hourly trace synthesized from a 200~MW$_\mathrm{e}$ hyperscale reference profile with a peak hour of 142.4~MW$_\mathrm{e}$, an annual average of 94.7~MW$_\mathrm{e}$, and an annual utilization of 0.67. The same trace is used in every case and every scenario; the IT load is not a decision variable. We treat the full IT electrical draw as heat that the cooling system must reject, so the hourly cooling demand is
@@ -409,8 +418,9 @@ The authors declare no competing interests.
 The complete set of model sets, decision variables, parameters and abbreviations is
 listed in Supplementary Table~\ref{tab:nomen}.
 
-\renewcommand{\arraystretch}{1.20}
-\begin{longtable}{@{}>{$}l<{$}@{\hspace{1.5em}}p{0.78\linewidth}@{}}
+{\sitablefont
+\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{@{}>{$}l<{$}@{\hspace{1.5em}}L{0.78\linewidth}@{}}
 \caption{Nomenclature for the optimization model: sets and indices, decision variables, parameters and abbreviations.}\label{tab:nomen}\\
 \toprule
 \textnormal{Symbol} & Description \\
@@ -507,6 +517,7 @@ M        & grid-cost margin, $1 - \mathrm{TAC}_c / \mathrm{TAC}_0$ (positive = c
 \textnormal{VCC}        & vapor-compression chiller \\
 \textnormal{WACC}       & weighted-average cost of capital \\
 \end{longtable}
+}
 
 \subsection*{Supplementary Note 2: Input data and equipment parameters}
 The scalar input data and the per-asset cost and performance parameters carried through the
@@ -516,9 +527,9 @@ optimization are listed in Supplementary Tables~\ref{tab:data} and~\ref{tab:equi
 \centering
 \caption{Input data sources, baseline values and units. ERCOT denotes Electric Reliability Council of Texas; LMP, locational marginal price; IT, information technology; NLR ATB, National Laboratory of the Rockies Annual Technology Baseline; FOAK, first-of-a-kind; NOAK, nth-of-a-kind; O\&M, operations and maintenance; VCC, vapor-compression chiller; BESS, battery energy storage system; NGCC, natural gas combined cycle; WACC, weighted-average cost of capital; PTC, production tax credit.}
 \label{tab:data}
+{\sitablefont
 \renewcommand{\arraystretch}{1.08}
-{\footnotesize
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.10\textwidth}>{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\textwidth}{@{}L{0.20\textwidth}L{0.30\textwidth}C{0.10\textwidth}Y@{}}
 \toprule
 Quantity & Baseline value or range & Resolution & Source \\
 \midrule
@@ -547,10 +558,10 @@ Nuclear PTC (Section 45U)               & \$15~MWh$_\mathrm{e}^{-1}$ full credit
 \centering
 \caption{Detailed equipment cost and performance parameters used in the optimization. CAPEX denotes overnight capital expenditure; FOM, fixed operations and maintenance; VOM, variable operations and maintenance; VCC, vapor-compression chiller; BESS, battery energy storage system; NGCC, natural gas combined cycle; HHV, higher heating value; ERCOT, Electric Reliability Council of Texas; PCC, point of common coupling. Each asset's CAPEX is annualized over its own listed lifetime through an asset-specific capital recovery factor; the battery additionally carries a 5\% end-of-life salvage credit.}
 \label{tab:equipment}
+{\densetablefont
 \renewcommand{\arraystretch}{1.0}
-{\scriptsize
 \setlength{\tabcolsep}{2.5pt}
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.08\textwidth}@{}}
+\begin{tabularx}{\textwidth}{@{}L{0.25\textwidth}L{0.18\textwidth}L{0.20\textwidth}L{0.17\textwidth}C{0.08\textwidth}@{}}
 \multicolumn{5}{@{}l}{\textit{Cost and lifetime inputs.}}\\[0.15em]
 \toprule
 Asset & CAPEX & FOM & VOM & Life \\
@@ -566,7 +577,7 @@ ERCOT interconnection (Cases 0, 1, 2) & not capitalized & N/A & N/A & N/A \\
 \end{tabularx}
 \vspace{0.45em}
 
-\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}X@{}}
+\begin{tabularx}{\textwidth}{@{}L{0.25\textwidth}Y@{}}
 \multicolumn{2}{@{}l}{\textit{Technical parameters.}}\\[0.15em]
 \toprule
 Asset & Other technical parameters \\
@@ -603,7 +614,9 @@ The three modeled years bracket the recent range of ERCOT and natural-gas market
 \centering
 \caption{Market inputs and on-site economics by operating year. ERCOT denotes Electric Reliability Council of Texas; LMP, locational marginal price; TAC, total annualized cost; NGCC, natural gas combined cycle. ERCOT LMP is the annual-mean Houston-zone day-ahead price; delivered gas is the annual-mean Henry Hub plus Houston Ship Channel basis. The grid-cost margin $M$ is positive when the configuration is cheaper than grid procurement.}
 \label{tab:market_years}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.34\linewidth}>{\raggedright\arraybackslash}X rrr@{}}
+{\sitablefont
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\linewidth}{@{}L{0.34\linewidth}C{0.24\linewidth}*{3}{R}@{}}
 \toprule
 Quantity & Unit & 2022 & 2023 & 2024 \\
 \midrule
@@ -614,16 +627,17 @@ NGCC (Case~3) TAC          & \$M~yr$^{-1}$ & 87.1 & 55.7 & 53.6 \\
 NGCC grid-cost margin $M$  & \% & $-1.1$ & $+28.7$ & $-45.1$ \\
 \bottomrule
 \end{tabularx}
+}
 \end{table}
 
 \begin{table}[t]
 \centering
 \caption{Baseline secondary cost and carbon endpoints at the 2023 ATB-Mid baseline. LCOE denotes levelized cost of electricity (\$~MWh$_\mathrm{e}^{-1}$); LCOC, levelized cost of cooling (\$~MWh$_\mathrm{c}^{-1}$); EPBT, energy payback time (yr); CAC, carbon abatement cost (\$~tCO$_2^{-1}$). Net CO$_2$ is reported in kt~yr$^{-1}$. CAC is reported only for the low-carbon nuclear configurations relative to the grid-only case. Cells marked \texttt{--} are not defined for that configuration in the run-level KPI table.}
 \label{tab:secondary_kpis_cost_carbon}
+{\sitablefont
 \renewcommand{\arraystretch}{1.05}
-{\footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.22\linewidth}*{5}{>{\centering\arraybackslash}X}@{}}
+\begin{tabularx}{\linewidth}{@{}L{0.25\linewidth}*{5}{R}@{}}
 \toprule
 Configuration & LCOE & LCOC & Net CO$_2$ & EPBT & CAC \\
 \midrule
@@ -639,10 +653,10 @@ Case~3 NGCC            & 67.1  & \texttt{--} & $+486$ & 0.18 & \texttt{--} \\
 \centering
 \caption{Baseline water-footprint endpoints at the 2023 ATB-Mid baseline. Direct site water includes data-center and cooling-system water use; indirect generation water accounts for the upstream electricity or on-site generation water factor. Direct, indirect and total water are reported in L~MWh$_\mathrm{e}^{-1}$; scarcity-weighted water is reported in m$^3$ world-eq~MWh$_\mathrm{e}^{-1}$.}
 \label{tab:secondary_kpis_water}
+{\sitablefont
 \renewcommand{\arraystretch}{1.05}
-{\footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.22\linewidth}*{4}{>{\centering\arraybackslash}X}@{}}
+\begin{tabularx}{\linewidth}{@{}L{0.25\linewidth}*{4}{R}@{}}
 \toprule
 Configuration & Direct site & Indirect gen. & Total water & Scarcity-weighted \\
 \midrule
@@ -671,7 +685,9 @@ Supplementary Figure~\ref{fig:cooling_response} and Supplementary Table~\ref{tab
 \centering
 \caption{Marginal annual value of adding the absorption chiller to a nuclear-only plant (Case~2 minus Case~1), at the 2023 ATB-Mid baseline (full-load PUE 1.35) and across the cooling-efficiency sweep. ATB-Mid denotes the mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; PUE, power usage effectiveness; VCC, vapor-compression chiller; O\&M, operations and maintenance. Positive values reduce Case~2 cost relative to Case~1; negative values increase it. All entries are \$M~yr$^{-1}$.}
 \label{tab:value_decomp}
-\begin{tabularx}{\linewidth}{@{}Xrrrr@{}}
+{\sitablefont
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\linewidth}{@{}Yrrrr@{}}
 \toprule
 Component & Baseline & PUE 1.10 & PUE 1.30 & PUE 1.50 \\
 \midrule
@@ -686,6 +702,7 @@ Residual reconciliation              & $-0.35$  & $-0.18$  & $-0.35$  & $-0.35$ 
 Net value of absorption              & $-2.39$  & $-12.96$ & $-4.56$  & $+4.64$ \\
 \bottomrule
 \end{tabularx}
+}
 \end{table}
 
 \subsection*{Supplementary Note 8: Data-center size-matching results}
@@ -702,19 +719,22 @@ Supplementary Figure~\ref{fig:size_matching} and Supplementary Table~\ref{tab:si
 \centering
 \caption{Data-center size-matching results for Case~2 (group G8) at the 2023 ATB-Mid baseline. ATB-Mid denotes the mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; IT, information technology; TAC, total annualized cost. The reactor is held at 270~MW$_\mathrm{e}$ net while the IT load, cooling and NGCC capacities scale with the multiplier; the PCC remains 300~MW below 1$\times$ and scales upward above 1$\times$. $M$ is the grid-cost margin against the matched grid-only baseline; net export is annual grid sales minus purchases.}
 \label{tab:size_matching}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}rrrrrr@{}}
+{\sitablefont
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\linewidth}{@{}L{0.34\linewidth}*{6}{R}@{}}
 \toprule
 Load multiplier & 0.5 & 1.0 & 1.5 & 2.0 & 2.5 & 3.0 \\
 \midrule
 Case~2 TAC (\$M~yr$^{-1}$)                   & 154.3 & 194.6 & 234.8 & 275.0 & 315.3 & 355.5 \\
 Grid-only TAC (\$M~yr$^{-1}$)                & 39.0  & 78.1  & 117.1 & 156.1 & 195.1 & 234.2 \\
 Annual gap (\$M~yr$^{-1}$)                   & 115.3 & 116.5 & 117.7 & 118.9 & 120.1 & 121.3 \\
-Grid-cost margin $M$ (\%)             & $-295$ & $-149$ & $-101$ & $-76$ & $-62$ & $-52$ \\
+Grid-cost margin $M$ (\%)                    & $-295$ & $-149$ & $-101$ & $-76$ & $-62$ & $-52$ \\
 Net grid export (TWh~yr$^{-1}$)              & $+1.89$ & $+1.43$ & $+0.97$ & $+0.51$ & $+0.04$ & $-0.42$ \\
 Cost intensity (\$~MWh$_\mathrm{IT}^{-1}$) & 372 & 235 & 189 & 166 & 152 & 143 \\
 Excess over grid (\$~MWh$_\mathrm{IT}^{-1}$) & 278 & 140 & 95 & 72 & 58 & 49 \\
 \bottomrule
 \end{tabularx}
+}
 \end{table}
 
 \subsection*{Supplementary Note 9: Scenario run ledger}
@@ -724,8 +744,9 @@ The baseline and eight sensitivity groups, comprising the four baseline case run
 \centering
 \caption{Baseline and sensitivity scenario run ledger. C0--C3 denote Cases~0--3; PUE, power usage effectiveness; ATB-Mid, mid-range National Laboratory of the Rockies Annual Technology Baseline reactor-capital case; CAPEX, overnight capital expenditure; WACC, weighted-average cost of capital; ERCOT, Electric Reliability Council of Texas; BESS, battery energy storage system; SMR, small modular reactor; FOAK, first-of-a-kind; NOAK, nth-of-a-kind; IT, information technology. Cells marked \texttt{--} indicate that the case is not included in that scenario group.}
 \label{tab:scenarios}
+{\sitablefont
 \renewcommand{\arraystretch}{1.05}
-\begin{tabularx}{\linewidth}{@{}llXrcccc@{}}
+\begin{tabularx}{\linewidth}{@{}llYrcccc@{}}
 \toprule
 Group & Sweep & Levels & Runs & C0 & C1 & C2 & C3 \\
 \midrule
@@ -744,8 +765,9 @@ Total &                 &                            & 100 & & & & \\
 \bottomrule
 \end{tabularx}
 \begin{flushleft}
-\footnotesize Note: In G3, control denotes duplicated control rows retained in the run ledger; BESS dispatch is optimized only for Cases~1 and~2 because Cases~0 and~3 are closed-form annual cost evaluations.
+Note: In G3, control denotes duplicated control rows retained in the run ledger; BESS dispatch is optimized only for Cases~1 and~2 because Cases~0 and~3 are closed-form annual cost evaluations.
 \end{flushleft}
+}
 \end{table}
 
 \end{document}
