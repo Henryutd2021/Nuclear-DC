@@ -504,6 +504,7 @@ def execute_run(spec: RunSpec) -> dict[str, Any]:
             "crf_effective": float(cfg.financial.capital_recovery_factor),
             "num_hours": ts.num_hours,
             "solve_seconds": round(solve_seconds, 3),
+            "mip_gap_achieved": getattr(result, "mip_gap_achieved", None),
         },
     }
     with (spec.output_dir / "summary.json").open("w") as f:
@@ -736,6 +737,18 @@ def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
         "carbon_price_usd_per_tco2",
     ]
     case0_rows = df[df["case_id"] == 0].set_index(key_cols)
+    # Several groups carry an identical Case-0 control row (same key, same
+    # deterministic solve). to_dict() keeps the last duplicate, which is only
+    # safe while duplicates agree — assert that instead of relying on it.
+    for col in ("tac_usd_per_yr", "co2_annual_tonnes"):
+        spread = case0_rows.groupby(level=key_cols)[col].agg(
+            lambda v: v.max() - v.min()
+        )
+        if (spread > 1e-6 * case0_rows[col].abs().max()).any():
+            raise RuntimeError(
+                f"Case-0 duplicate-key rows disagree on {col}; "
+                "the baseline lookup would be order-dependent."
+            )
     baseline_tac = case0_rows["tac_usd_per_yr"].to_dict()
     baseline_co2 = case0_rows["co2_annual_tonnes"].to_dict()
     main_case0 = df[(df["group"] == "main_baseline") & (df["case_id"] == 0)].iloc[0]
@@ -807,6 +820,9 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
     ]
     cols = leading + [c for c in df.columns if c not in leading]
     df = df[cols]
+    # Parallel execution appends rows in as_completed() order; sort so the
+    # headline artifact is byte-diffable run-to-run.
+    df = df.sort_values(["group", "run_id"], kind="mergesort").reset_index(drop=True)
     df.to_csv(OUTPUTS / "master_kpi_table.csv", index=False)
     return df
 
@@ -834,7 +850,8 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
             ],
             "post_processed": [
                 "outputs/figures/value_decomp_case2.csv "
-                "(Plan v2.7 Patch 1 — absorption-chiller waterfall)",
+                "(absorption-chiller waterfall; written by this driver after "
+                "the run grid completes)",
                 "outputs/figures/fig12_s8_size_matching.* "
                 "(Plan v2.8 — data-center size matching against fixed BWRX-300)",
             ],
@@ -938,6 +955,13 @@ def main() -> None:
         f"Wrote {len(df)} rows to outputs/master_kpi_table.csv; "
         f"manifest at outputs/manifest.json"
     )
+
+    # Post-process: the Case-2 value decomposition feeds two manuscript
+    # figures (fig_operation_value panel c, fig_sensitivity_cooling_response),
+    # so produce it here rather than as an undocumented manual step.
+    from src.results.value_decomposition import main as value_decomposition_main
+
+    value_decomposition_main()
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ memory file `reference_workstation-specs`.
 
 from __future__ import annotations
 
+import math
 from typing import Optional
 
 import pyomo.environ as pyo
@@ -21,7 +22,7 @@ def solve_model(
     model: pyo.ConcreteModel,
     solver_name: str = "gurobi",
     solver_config: Optional[SolverConfig] = None,
-    mip_gap: float = 0.005,
+    mip_gap: float = 1e-4,
     time_limit: Optional[float] = None,
     quiet: bool = True,
 ) -> None:
@@ -36,7 +37,8 @@ def solve_model(
             through to Gurobi so the yaml-declared values actually take
             effect.
         mip_gap: optimality gap fallback (used only when ``solver_config``
-            is None). LPs ignore this.
+            is None); matches the config/base.yaml default so ad-hoc callers
+            get the same tolerance as the production grid. LPs ignore this.
         time_limit: optional hard timeout in seconds (fallback only).
         quiet: suppress solver console output.
     """
@@ -67,3 +69,24 @@ def solve_model(
         raise RuntimeError(
             f"Solver terminated with non-optimal condition: {term}"
         )
+
+    # Record achieved solve quality on the model so extract_result can
+    # propagate it into summary.json (the results object is otherwise
+    # discarded and the realized gap would be unrecoverable from artifacts).
+    lb: float | None = None
+    ub: float | None = None
+    gap: float | None = None
+    try:
+        lb = float(results.problem.lower_bound)
+        ub = float(results.problem.upper_bound)
+        if math.isfinite(lb) and math.isfinite(ub):
+            gap = abs(ub - lb) / max(1.0, abs(ub))
+        else:
+            lb = ub = None
+    except (AttributeError, TypeError, ValueError):
+        lb = ub = None
+    model._solver_quality = {
+        "lower_bound": lb,
+        "upper_bound": ub,
+        "mip_gap_achieved": gap,
+    }

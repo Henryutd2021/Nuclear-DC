@@ -18,26 +18,8 @@ solver:
   seed: 42            # Reproducibility
 
 physics:
-  # Thermal Energy Storage
-  tes_charge_efficiency: 0.95
-  tes_discharge_efficiency: 0.95
-  tes_loss_rate_per_hour: 0.001  # 0.1% per hour
-
-  # Chilled water system
-  chw_supply_temp: 7.0   # °C
-  chw_return_temp: 12.0  # °C
-
-  # Pump parasitics: P_pump = pump_power_per_flow * Q_flow + pump_power_base
-  pump_power_per_flow: 0.01  # MW per MWth flow
-  pump_power_base: 0.1       # MW
-
   # Cooling chain: heat to reject = P_IT / eta_chain. PUE is a reported outcome
   # (1 + cooling parasitics / P_IT), not an input to the heat load. pue_default
   # is retained only as a fallback label for legacy call paths.
   pue_default: 1.35
   cooling_chain_efficiency: 0.9
-
-optimization:
-  capacity_optimization: false  # false = dispatch only; true = co-design
-  enable_ramping: true          # Turbine ramping constraints
-  enable_unit_commitment: false # Binary on/off variables

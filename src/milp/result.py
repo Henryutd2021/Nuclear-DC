@@ -55,6 +55,10 @@ class NuclearCaseResult:
     co2_grid_import_tonnes: float = 0.0
     co2_export_credit_tonnes: float = 0.0
 
+    # Realized relative MIP gap reported by the solver (None when the
+    # solver interface does not expose bounds).
+    mip_gap_achieved: float | None = None
+
 
 def _to_series(component, T) -> pd.Series:
     """Pull a Pyomo variable or parameter index over T into a pandas Series."""
@@ -116,4 +120,7 @@ def extract_result(
         co2_rx_lifecycle_tonnes=co2_rx_kg / 1000.0,
         co2_grid_import_tonnes=co2_grid_kg / 1000.0,
         co2_export_credit_tonnes=co2_offset_kg / 1000.0,
+        mip_gap_achieved=getattr(model, "_solver_quality", {}).get(
+            "mip_gap_achieved"
+        ),
     )

@@ -129,3 +129,20 @@ def test_case0_2022_grid_cost_exceeds_2024_full_year(cfg):
     r22 = solve_case0(cfg, ts22)
     r24 = solve_case0(cfg, ts24)
     assert r22.grid_annual_usd > r24.grid_annual_usd
+
+
+def test_case0_zero_load_hour_yields_zero_vcc_power_not_nan(cfg, ts_2023_168h):
+    """An idle hour (P_IT = 0) must give P_VCC = 0, not 0/0 = NaN: the
+    relative-COP curve passes through (0, 0), so the unguarded division
+    would silently propagate NaN into grid cost and emissions."""
+    import dataclasses
+
+    it_load = ts_2023_168h.it_load_MW.copy()
+    it_load.iloc[10] = 0.0
+    ts_idle = dataclasses.replace(ts_2023_168h, it_load_MW=it_load)
+
+    result = solve_case0(cfg, ts_idle)
+    assert not result.P_VCC_elec_MW.isna().any()
+    assert not result.P_grid_buy_MW.isna().any()
+    assert result.P_VCC_elec_MW.iloc[10] == 0.0
+    assert result.grid_cost_usd_per_h.iloc[10] == 0.0

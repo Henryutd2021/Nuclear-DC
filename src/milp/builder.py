@@ -226,7 +226,11 @@ def build_model(
     # cooling can never exceed the installed nameplate, even in cool hours
     # when the COP rises above the design point.
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
-        Q_abs_cool_max = cap.absorption_capacity_MWth or 100.0
+        Q_abs_cool_max = (
+            cap.absorption_capacity_MWth
+            if cap.absorption_capacity_MWth is not None
+            else 100.0
+        )
         Q_to_abs_max = Q_abs_cool_max / max(
             0.5, cfg.case.absorption.cop_houston_baseline
         )
@@ -342,7 +346,7 @@ def build_model(
         m.vcc_eq = pyo.Constraint(m.T, rule=lambda mdl, t: mdl.P_vcc[t] == 0.0)
 
     # ---- Grid (v2.6 §A: PCC interconnect limit) ----------------------------
-    pcc_cap = cap.pcc_capacity_MW or 300.0
+    pcc_cap = cap.pcc_capacity_MW if cap.pcc_capacity_MW is not None else 300.0
     if eq.grid_import_enabled:
         m.P_grid_buy = pyo.Var(
             m.T, domain=pyo.NonNegativeReals, bounds=(0, pcc_cap)
@@ -458,7 +462,11 @@ def build_model(
     fom_annual_expr += vcc.fixed_om_usd_per_kWth_year * Q_vcc_max * 1000.0
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
         ab = cfg.case.absorption
-        abs_cap_MWth = cap.absorption_capacity_MWth or 100.0
+        abs_cap_MWth = (
+            cap.absorption_capacity_MWth
+            if cap.absorption_capacity_MWth is not None
+            else 100.0
+        )
         capex_annual_expr += annualized_capex(
             ab.capex_usd_per_kWth * abs_cap_MWth * 1000.0, wacc, ab.lifetime_years
         )
@@ -522,8 +530,10 @@ def build_model(
     # v2.7 §S6: carbon cost = price × net annual CO2 (tonnes).
     # Mirrors result.extract_result's accounting so the optimizer sees the
     # same emissions number that ends up in summary.json. Net = reactor LCA
-    # + imported grid AEF − exported grid AEF (export credits the dirtier
-    # ERCOT marginal mix that the cogen displaces).
+    # + imported grid AEF − exported grid AEF. Exports are credited at the
+    # ERCOT hourly AVERAGE emission factor (AEF, lifecycle-weighted), a
+    # conservative proxy for the gas-dominated marginal mix actually
+    # displaced; see data/_raw/build_real_carbon_intensity.py.
     carbon_price = cfg.base.physics.carbon_price_usd_per_tco2
     co2_net_kg_expr = (
         sum(rx.co2_lifecycle_g_per_kwh_e * m.P_turb_net[t] for t in m.T)

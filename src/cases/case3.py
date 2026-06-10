@@ -24,6 +24,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from src.config import RunConfig
@@ -132,7 +133,13 @@ def solve_case3(
         vcc.cop_wet_bulb_relief_cap,
     )
     cop_load = vcc_cop_at_load(Q_cool / Q_capacity, vcc.cop_houston) * relief
-    P_VCC = Q_cool / pd.Series(cop_load, index=Q_cool.index)
+    # The relative-COP curve passes through (0, 0), so an exactly-zero load
+    # hour would produce 0/0 = NaN; an idle chiller draws no power.
+    _q = Q_cool.to_numpy(dtype=float)
+    P_VCC = pd.Series(
+        np.divide(_q, cop_load, out=np.zeros_like(_q), where=_q > 0.0),
+        index=Q_cool.index,
+    )
     P_NGCC = P_IT + P_VCC
     if P_NGCC.max() > NGCC_capacity + 1e-6:
         raise ValueError(

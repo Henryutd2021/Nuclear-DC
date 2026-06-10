@@ -1,0 +1,174 @@
+{
+  "plan_version": "v2.8",
+  "executed_at_utc": "2026-06-10T00:59:14.995214+00:00",
+  "num_runs": 100,
+  "total_solve_seconds": 952.4,
+  "groups": {
+    "main_baseline": {
+      "num_runs": 4,
+      "run_ids": [
+        "case0",
+        "case1",
+        "case2",
+        "case3"
+      ]
+    },
+    "s1_pue": {
+      "num_runs": 6,
+      "run_ids": [
+        "case1_pue110",
+        "case1_pue130",
+        "case1_pue150",
+        "case2_pue110",
+        "case2_pue130",
+        "case2_pue150"
+      ]
+    },
+    "s2_price": {
+      "num_runs": 12,
+      "run_ids": [
+        "case0_year2022",
+        "case1_year2022",
+        "case2_year2022",
+        "case3_year2022",
+        "case0_year2023",
+        "case1_year2023",
+        "case2_year2023",
+        "case3_year2023",
+        "case0_year2024",
+        "case1_year2024",
+        "case2_year2024",
+        "case3_year2024"
+      ]
+    },
+    "s3_battery": {
+      "num_runs": 8,
+      "run_ids": [
+        "case0_bess_off",
+        "case0_bess_on",
+        "case1_bess_off",
+        "case1_bess_on",
+        "case2_bess_off",
+        "case2_bess_on",
+        "case3_bess_off",
+        "case3_bess_on"
+      ]
+    },
+    "s4_capex": {
+      "num_runs": 6,
+      "run_ids": [
+        "case1_FOAK",
+        "case1_ATB_Mid",
+        "case1_NOAK",
+        "case2_FOAK",
+        "case2_ATB_Mid",
+        "case2_NOAK"
+      ]
+    },
+    "s5_feasibility_2d": {
+      "num_runs": 25,
+      "run_ids": [
+        "case2_smr_NOAK_abs_Bare_Low",
+        "case2_smr_NOAK_abs_Mid_Low",
+        "case2_smr_NOAK_abs_Baseline",
+        "case2_smr_NOAK_abs_Mid_High",
+        "case2_smr_NOAK_abs_Turnkey_High",
+        "case2_smr_Low_Mid_abs_Bare_Low",
+        "case2_smr_Low_Mid_abs_Mid_Low",
+        "case2_smr_Low_Mid_abs_Baseline",
+        "case2_smr_Low_Mid_abs_Mid_High",
+        "case2_smr_Low_Mid_abs_Turnkey_High",
+        "case2_smr_ATB_Mid_abs_Bare_Low",
+        "case2_smr_ATB_Mid_abs_Mid_Low",
+        "case2_smr_ATB_Mid_abs_Baseline",
+        "case2_smr_ATB_Mid_abs_Mid_High",
+        "case2_smr_ATB_Mid_abs_Turnkey_High",
+        "case2_smr_High_Mid_abs_Bare_Low",
+        "case2_smr_High_Mid_abs_Mid_Low",
+        "case2_smr_High_Mid_abs_Baseline",
+        "case2_smr_High_Mid_abs_Mid_High",
+        "case2_smr_High_Mid_abs_Turnkey_High",
+        "case2_smr_FOAK_abs_Bare_Low",
+        "case2_smr_FOAK_abs_Mid_Low",
+        "case2_smr_FOAK_abs_Baseline",
+        "case2_smr_FOAK_abs_Mid_High",
+        "case2_smr_FOAK_abs_Turnkey_High"
+      ]
+    },
+    "s6_carbon_price": {
+      "num_runs": 12,
+      "run_ids": [
+        "case0_co2_0",
+        "case1_co2_0",
+        "case2_co2_0",
+        "case3_co2_0",
+        "case0_co2_50",
+        "case1_co2_50",
+        "case2_co2_50",
+        "case3_co2_50",
+        "case0_co2_100",
+        "case1_co2_100",
+        "case2_co2_100",
+        "case3_co2_100"
+      ]
+    },
+    "s7_wacc": {
+      "num_runs": 3,
+      "run_ids": [
+        "case2_wacc_50",
+        "case2_wacc_67",
+        "case2_wacc_100"
+      ]
+    },
+    "s8_size_matching": {
+      "num_runs": 24,
+      "run_ids": [
+        "case0_load_x050",
+        "case1_load_x050",
+        "case2_load_x050",
+        "case3_load_x050",
+        "case0_load_x100",
+        "case1_load_x100",
+        "case2_load_x100",
+        "case3_load_x100",
+        "case0_load_x150",
+        "case1_load_x150",
+        "case2_load_x150",
+        "case3_load_x150",
+        "case0_load_x200",
+        "case1_load_x200",
+        "case2_load_x200",
+        "case3_load_x200",
+        "case0_load_x250",
+        "case1_load_x250",
+        "case2_load_x250",
+        "case3_load_x250",
+        "case0_load_x300",
+        "case1_load_x300",
+        "case2_load_x300",
+        "case3_load_x300"
+      ]
+    }
+  },
+  "files": {
+    "master_table_csv": "outputs/master_kpi_table.csv",
+    "per_run_dir": "outputs/<group>/<run_id>/",
+    "per_run_artifacts": [
+      "summary.json (scalar KPIs + metadata)",
+      "dispatch.csv.gz (8760 hourly rows)"
+    ],
+    "post_processed": [
+      "outputs/figures/value_decomp_case2.csv (Plan v2.7 Patch 1 \u2014 absorption-chiller waterfall)",
+      "outputs/figures/fig12_s8_size_matching.* (Plan v2.8 \u2014 data-center size matching against fixed BWRX-300)"
+    ]
+  },
+  "notes": [
+    "Cases 0 and 3 are deterministic LP/closed-form; Cases 1-2 are Pyomo MILP solved with Gurobi (LP relaxation in practice \u2014 no binaries are introduced by S3 BESS).",
+    "S3 BESS rows for Cases 0/3 carry bess_applied=False because those cases have no BESS block; rows preserved for table shape.",
+    "S5 fixes year=2023 / full-load PUE=1.35 / ATB-Mid-equivalent baseline; the 25 cells span SMR \u2208 {2250..14700} $/kWe \u00d7 absorption \u2208 {450..1200} $/kWth driven by config/capex_grid_s5.yaml.",
+    "S6 sweeps carbon price {$0, $50, $100}/tCO2 across all four cases.",
+    "S7 (v2.7) sweeps WACC {5%, 6.7%, 10%} on Case 2 only; CRF is recomputed from i*(1+i)^20/((1+i)^20-1) for each row.",
+    "S8 (v2.8) scales the IT-load trace and data-center-side equipment capacities by {0.5, 1.0, 1.5, 2.0, 2.5, 3.0} while holding the commercial BWRX-300 reactor capacity fixed.",
+    "Premium is computed against the Case-0 TAC at matching (year, pue, load_multiplier, carbon_price), falling back to (year, pue, load_multiplier, bess=False) if needed. S7 rows compare against the ATB-baseline Case 0 (the WACC scan deliberately holds the baseline fixed so the \u0394Premium isolates the financing lever)."
+  ]
+}

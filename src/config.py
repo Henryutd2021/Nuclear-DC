@@ -235,7 +235,9 @@ class SolverConfig(BaseModel):
 
 
 class PhysicsConfig(BaseModel):
-    model_config = ConfigDict(extra="allow")
+    # forbid: an undeclared physics key in base.yaml means dead config — a
+    # knob with no model behind it must fail loudly, not validate silently.
+    model_config = ConfigDict(extra="forbid")
 
     pue_default: float = Field(1.35, ge=1.0)
     cooling_chain_efficiency: float = Field(0.9, gt=0.0, le=1.0)
@@ -245,15 +247,10 @@ class PhysicsConfig(BaseModel):
     carbon_price_usd_per_tco2: float = Field(0.0, ge=0.0)
 
 
-class OptimizationConfig(BaseModel):
-    model_config = ConfigDict(extra="allow")
-
-
 class BaseConfig(BaseModel):
     time: TimeConfig
     solver: SolverConfig
     physics: PhysicsConfig
-    optimization: OptimizationConfig
 
 
 # ---------------------------------------------------------------------------
