@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-06-10T08:27:00.221481</dc:date>
+    <dc:date>2026-06-10T18:27:42.594419</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -41,12 +41,12 @@ z
     <g id="xtick_1">
      <g id="line2d_1">
       <defs>
-       <path id="mc603eaf9d1" d="M 0 0
+       <path id="m02ec471acb" d="M 0 0
 L 0 3.5
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#mc603eaf9d1" x="71.9425" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m02ec471acb" x="71.9425" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_1">
@@ -56,7 +56,7 @@ L 0 3.5
     <g id="xtick_2">
      <g id="line2d_2">
       <g>
-       <use xlink:href="#mc603eaf9d1" x="148.839559" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m02ec471acb" x="148.839559" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_2">
@@ -66,7 +66,7 @@ L 0 3.5
     <g id="xtick_3">
      <g id="line2d_3">
       <g>
-       <use xlink:href="#mc603eaf9d1" x="225.736618" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m02ec471acb" x="225.736618" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_3">
@@ -76,7 +76,7 @@ L 0 3.5
     <g id="xtick_4">
      <g id="line2d_4">
       <g>
-       <use xlink:href="#mc603eaf9d1" x="302.633676" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m02ec471acb" x="302.633676" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_4">
@@ -86,7 +86,7 @@ L 0 3.5
     <g id="xtick_5">
      <g id="line2d_5">
       <g>
-       <use xlink:href="#mc603eaf9d1" x="379.530735" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m02ec471acb" x="379.530735" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_5">
@@ -96,7 +96,7 @@ L 0 3.5
     <g id="xtick_6">
      <g id="line2d_6">
       <g>
-       <use xlink:href="#mc603eaf9d1" x="456.427794" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#m02ec471acb" x="456.427794" y="182.096733" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_6">
@@ -139,16 +139,16 @@ L 0 3.5
      <g id="line2d_7">
       <path d="M 71.9425 173.911544
 L 490.2625 173.911544
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
      </g>
      <g id="line2d_8">
       <defs>
-       <path id="ma3cbd7c049" d="M 0 0
+       <path id="me4d27cb1dd" d="M 0 0
 L -3.5 0
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#ma3cbd7c049" x="71.9425" y="173.911544" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me4d27cb1dd" x="71.9425" y="173.911544" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_8">
@@ -159,11 +159,11 @@ L -3.5 0
      <g id="line2d_9">
       <path d="M 71.9425 153.448573
 L 490.2625 153.448573
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
      </g>
      <g id="line2d_10">
       <g>
-       <use xlink:href="#ma3cbd7c049" x="71.9425" y="153.448573" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me4d27cb1dd" x="71.9425" y="153.448573" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_9">
@@ -174,11 +174,11 @@ L 490.2625 153.448573
      <g id="line2d_11">
       <path d="M 71.9425 132.985602
 L 490.2625 132.985602
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
      </g>
      <g id="line2d_12">
       <g>
-       <use xlink:href="#ma3cbd7c049" x="71.9425" y="132.985602" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me4d27cb1dd" x="71.9425" y="132.985602" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_10">
@@ -189,11 +189,11 @@ L 490.2625 132.985602
      <g id="line2d_13">
       <path d="M 71.9425 112.522631
 L 490.2625 112.522631
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
      </g>
      <g id="line2d_14">
       <g>
-       <use xlink:href="#ma3cbd7c049" x="71.9425" y="112.522631" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me4d27cb1dd" x="71.9425" y="112.522631" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_11">
@@ -204,11 +204,11 @@ L 490.2625 112.522631
      <g id="line2d_15">
       <path d="M 71.9425 92.05966
 L 490.2625 92.05966
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
      </g>
      <g id="line2d_16">
       <g>
-       <use xlink:href="#ma3cbd7c049" x="71.9425" y="92.05966" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me4d27cb1dd" x="71.9425" y="92.05966" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_12">
@@ -219,11 +219,11 @@ L 490.2625 92.05966
      <g id="line2d_17">
       <path d="M 71.9425 71.596689
 L 490.2625 71.596689
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
      </g>
      <g id="line2d_18">
       <g>
-       <use xlink:href="#ma3cbd7c049" x="71.9425" y="71.596689" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me4d27cb1dd" x="71.9425" y="71.596689" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_13">
@@ -234,11 +234,11 @@ L 490.2625 71.596689
      <g id="line2d_19">
       <path d="M 71.9425 51.133718
 L 490.2625 51.133718
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
      </g>
      <g id="line2d_20">
       <g>
-       <use xlink:href="#ma3cbd7c049" x="71.9425" y="51.133718" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me4d27cb1dd" x="71.9425" y="51.133718" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_14">
@@ -249,11 +249,11 @@ L 490.2625 51.133718
      <g id="line2d_21">
       <path d="M 71.9425 30.670747
 L 490.2625 30.670747
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.3; stroke-width: 0.5"/>
      </g>
      <g id="line2d_22">
       <g>
-       <use xlink:href="#ma3cbd7c049" x="71.9425" y="30.670747" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#me4d27cb1dd" x="71.9425" y="30.670747" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_15">
@@ -287,7 +287,7 @@ L 325.111605 182.096733
 L 325.111605 22.485559
 L 162.08159 22.485559
 z
-" clip-path="url(#pfe8b3644a3)" style="fill: #bee8ff; opacity: 0.16"/>
+" clip-path="url(#p39a2a96928)" style="fill: #bee8ff; opacity: 0.16"/>
    </g>
    <g id="patch_4">
     <path d="M 325.111605 182.096733
@@ -295,41 +295,470 @@ L 456.427794 182.096733
 L 456.427794 22.485559
 L 325.111605 22.485559
 z
-" clip-path="url(#pfe8b3644a3)" style="fill: #ff7f7f; opacity: 0.13"/>
+" clip-path="url(#p39a2a96928)" style="fill: #ff7f7f; opacity: 0.13"/>
    </g>
    <g id="line2d_23">
-    <path d="M 71.9425 152.73724
-L 456.427794 78.541643
-L 456.427794 78.541643
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke: #ff7f7f; stroke-width: 1.85; stroke-linecap: square"/>
+    <path d="M 225.736618 182.096733
+L 225.736618 22.485559
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke: #9a9a9a; stroke-opacity: 0.65; stroke-width: 0.8; stroke-linecap: square"/>
    </g>
    <g id="line2d_24">
-    <path d="M 71.9425 122.041875
-L 456.427794 192.359091
-L 456.427794 192.359091
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke: #63c0ef; stroke-width: 1.85; stroke-linecap: square"/>
+    <path d="M 71.9425 152.73724
+L 73.450285 152.446277
+L 74.958071 152.155313
+L 76.465856 151.86435
+L 77.973642 151.573387
+L 79.481427 151.282424
+L 80.989213 150.991461
+L 82.496998 150.700498
+L 84.004784 150.409535
+L 85.512569 150.118572
+L 87.020355 149.827608
+L 88.52814 149.536645
+L 90.035926 149.245682
+L 91.543711 148.954719
+L 93.051497 148.663756
+L 94.559282 148.372793
+L 96.067067 148.08183
+L 97.574853 147.790867
+L 99.082638 147.499903
+L 100.590424 147.20894
+L 102.098209 146.917977
+L 103.605995 146.627014
+L 105.11378 146.336051
+L 106.621566 146.045088
+L 108.129351 145.754125
+L 109.637137 145.463162
+L 111.144922 145.172198
+L 112.652708 144.881235
+L 114.160493 144.590272
+L 115.668279 144.299309
+L 117.176064 144.008346
+L 118.683849 143.717383
+L 120.191635 143.42642
+L 121.69942 143.135457
+L 123.207206 142.844493
+L 124.714991 142.55353
+L 126.222777 142.262567
+L 127.730562 141.971604
+L 129.238348 141.680641
+L 130.746133 141.389678
+L 132.253919 141.098715
+L 133.761704 140.807752
+L 135.26949 140.516788
+L 136.777275 140.225825
+L 138.285061 139.934862
+L 139.792846 139.643899
+L 141.300631 139.352936
+L 142.808417 139.061973
+L 144.316202 138.77101
+L 145.823988 138.480047
+L 147.331773 138.189083
+L 148.839559 137.89812
+L 150.347344 137.607157
+L 151.85513 137.316194
+L 153.362915 137.025231
+L 154.870701 136.734268
+L 156.378486 136.443305
+L 157.886272 136.152341
+L 159.394057 135.861378
+L 160.901843 135.570415
+L 162.409628 135.279452
+L 163.917413 134.988489
+L 165.425199 134.697526
+L 166.932984 134.406563
+L 168.44077 134.1156
+L 169.948555 133.824636
+L 171.456341 133.533673
+L 172.964126 133.24271
+L 174.471912 132.951747
+L 175.979697 132.660784
+L 177.487483 132.369821
+L 178.995268 132.078858
+L 180.503054 131.787895
+L 182.010839 131.496931
+L 183.518625 131.205968
+L 185.02641 130.915005
+L 186.534196 130.624042
+L 188.041981 130.333079
+L 189.549766 130.042116
+L 191.057552 129.751153
+L 192.565337 129.46019
+L 194.073123 129.169226
+L 195.580908 128.878263
+L 197.088694 128.5873
+L 198.596479 128.296337
+L 200.104265 128.005374
+L 201.61205 127.714411
+L 203.119836 127.423448
+L 204.627621 127.132485
+L 206.135407 126.841521
+L 207.643192 126.550558
+L 209.150978 126.259595
+L 210.658763 125.968632
+L 212.166548 125.677669
+L 213.674334 125.386706
+L 215.182119 125.095743
+L 216.689905 124.80478
+L 218.19769 124.513816
+L 219.705476 124.222853
+L 221.213261 123.93189
+L 222.721047 123.640927
+L 224.228832 123.349964
+L 225.736618 123.059001
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke: #ff7f7f; stroke-width: 1.85; stroke-linecap: square"/>
    </g>
    <g id="line2d_25">
-    <path d="M 71.9425 114.491827
-L 456.427794 189.415089
-L 456.427794 189.415089
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke: #b9b9b9; stroke-width: 1.85; stroke-linecap: square"/>
+    <path d="M 225.736618 123.059001
+L 456.427794 78.541643
+L 456.427794 78.541643
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 5.92,4.07; stroke-dashoffset: 0; stroke: #ff7f7f; stroke-width: 1.85"/>
    </g>
    <g id="line2d_26">
-    <path d="M 71.9425 169.346811
-L 456.427794 69.926431
-L 456.427794 69.926431
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke: #ffd37f; stroke-width: 1.85; stroke-linecap: square"/>
+    <path d="M 71.9425 122.041875
+L 73.450285 122.317629
+L 74.958071 122.593383
+L 76.465856 122.869136
+L 77.973642 123.14489
+L 79.481427 123.420644
+L 80.989213 123.696398
+L 82.496998 123.972151
+L 84.004784 124.247905
+L 85.512569 124.523659
+L 87.020355 124.799413
+L 88.52814 125.075167
+L 90.035926 125.35092
+L 91.543711 125.626674
+L 93.051497 125.902428
+L 94.559282 126.178182
+L 96.067067 126.453936
+L 97.574853 126.729689
+L 99.082638 127.005443
+L 100.590424 127.281197
+L 102.098209 127.556951
+L 103.605995 127.832704
+L 105.11378 128.108458
+L 106.621566 128.384212
+L 108.129351 128.659966
+L 109.637137 128.93572
+L 111.144922 129.211473
+L 112.652708 129.487227
+L 114.160493 129.762981
+L 115.668279 130.038735
+L 117.176064 130.314489
+L 118.683849 130.590242
+L 120.191635 130.865996
+L 121.69942 131.14175
+L 123.207206 131.417504
+L 124.714991 131.693258
+L 126.222777 131.969011
+L 127.730562 132.244765
+L 129.238348 132.520519
+L 130.746133 132.796273
+L 132.253919 133.072026
+L 133.761704 133.34778
+L 135.26949 133.623534
+L 136.777275 133.899288
+L 138.285061 134.175042
+L 139.792846 134.450795
+L 141.300631 134.726549
+L 142.808417 135.002303
+L 144.316202 135.278057
+L 145.823988 135.553811
+L 147.331773 135.829564
+L 148.839559 136.105318
+L 150.347344 136.381072
+L 151.85513 136.656826
+L 153.362915 136.93258
+L 154.870701 137.208333
+L 156.378486 137.484087
+L 157.886272 137.759841
+L 159.394057 138.035595
+L 160.901843 138.311348
+L 162.409628 138.587102
+L 163.917413 138.862856
+L 165.425199 139.13861
+L 166.932984 139.414364
+L 168.44077 139.690117
+L 169.948555 139.965871
+L 171.456341 140.241625
+L 172.964126 140.517379
+L 174.471912 140.793133
+L 175.979697 141.068886
+L 177.487483 141.34464
+L 178.995268 141.620394
+L 180.503054 141.896148
+L 182.010839 142.171901
+L 183.518625 142.447655
+L 185.02641 142.723409
+L 186.534196 142.999163
+L 188.041981 143.274917
+L 189.549766 143.55067
+L 191.057552 143.826424
+L 192.565337 144.102178
+L 194.073123 144.377932
+L 195.580908 144.653686
+L 197.088694 144.929439
+L 198.596479 145.205193
+L 200.104265 145.480947
+L 201.61205 145.756701
+L 203.119836 146.032455
+L 204.627621 146.308208
+L 206.135407 146.583962
+L 207.643192 146.859716
+L 209.150978 147.13547
+L 210.658763 147.411223
+L 212.166548 147.686977
+L 213.674334 147.962731
+L 215.182119 148.238485
+L 216.689905 148.514239
+L 218.19769 148.789992
+L 219.705476 149.065746
+L 221.213261 149.3415
+L 222.721047 149.617254
+L 224.228832 149.893008
+L 225.736618 150.168761
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke: #63c0ef; stroke-width: 1.85; stroke-linecap: square"/>
    </g>
    <g id="line2d_27">
-    <path d="M 162.08159 182.096733
-L 162.08159 22.485559
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #224686"/>
+    <path d="M 225.736618 150.168761
+L 456.427794 192.359091
+L 456.427794 192.359091
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 5.92,4.07; stroke-dashoffset: 0; stroke: #63c0ef; stroke-width: 1.85"/>
    </g>
    <g id="line2d_28">
+    <path d="M 71.9425 114.491827
+L 73.450285 114.785644
+L 74.958071 115.079461
+L 76.465856 115.373278
+L 77.973642 115.667094
+L 79.481427 115.960911
+L 80.989213 116.254728
+L 82.496998 116.548544
+L 84.004784 116.842361
+L 85.512569 117.136178
+L 87.020355 117.429995
+L 88.52814 117.723811
+L 90.035926 118.017628
+L 91.543711 118.311445
+L 93.051497 118.605261
+L 94.559282 118.899078
+L 96.067067 119.192895
+L 97.574853 119.486712
+L 99.082638 119.780528
+L 100.590424 120.074345
+L 102.098209 120.368162
+L 103.605995 120.661978
+L 105.11378 120.955795
+L 106.621566 121.249612
+L 108.129351 121.543429
+L 109.637137 121.837245
+L 111.144922 122.131062
+L 112.652708 122.424879
+L 114.160493 122.718695
+L 115.668279 123.012512
+L 117.176064 123.306329
+L 118.683849 123.600145
+L 120.191635 123.893962
+L 121.69942 124.187779
+L 123.207206 124.481596
+L 124.714991 124.775412
+L 126.222777 125.069229
+L 127.730562 125.363046
+L 129.238348 125.656862
+L 130.746133 125.950679
+L 132.253919 126.244496
+L 133.761704 126.538313
+L 135.26949 126.832129
+L 136.777275 127.125946
+L 138.285061 127.419763
+L 139.792846 127.713579
+L 141.300631 128.007396
+L 142.808417 128.301213
+L 144.316202 128.59503
+L 145.823988 128.888846
+L 147.331773 129.182663
+L 148.839559 129.47648
+L 150.347344 129.770296
+L 151.85513 130.064113
+L 153.362915 130.35793
+L 154.870701 130.651747
+L 156.378486 130.945563
+L 157.886272 131.23938
+L 159.394057 131.533197
+L 160.901843 131.827013
+L 162.409628 132.12083
+L 163.917413 132.414647
+L 165.425199 132.708464
+L 166.932984 133.00228
+L 168.44077 133.296097
+L 169.948555 133.589914
+L 171.456341 133.88373
+L 172.964126 134.177547
+L 174.471912 134.471364
+L 175.979697 134.76518
+L 177.487483 135.058997
+L 178.995268 135.352814
+L 180.503054 135.646631
+L 182.010839 135.940447
+L 183.518625 136.234264
+L 185.02641 136.528081
+L 186.534196 136.821897
+L 188.041981 137.115714
+L 189.549766 137.409531
+L 191.057552 137.703348
+L 192.565337 137.997164
+L 194.073123 138.290981
+L 195.580908 138.584798
+L 197.088694 138.878614
+L 198.596479 139.172431
+L 200.104265 139.466248
+L 201.61205 139.760065
+L 203.119836 140.053881
+L 204.627621 140.347698
+L 206.135407 140.641515
+L 207.643192 140.935331
+L 209.150978 141.229148
+L 210.658763 141.522965
+L 212.166548 141.816782
+L 213.674334 142.110598
+L 215.182119 142.404415
+L 216.689905 142.698232
+L 218.19769 142.992048
+L 219.705476 143.285865
+L 221.213261 143.579682
+L 222.721047 143.873499
+L 224.228832 144.167315
+L 225.736618 144.461132
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke: #b9b9b9; stroke-width: 1.85; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_29">
+    <path d="M 225.736618 144.461132
+L 456.427794 189.415089
+L 456.427794 189.415089
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 5.92,4.07; stroke-dashoffset: 0; stroke: #b9b9b9; stroke-width: 1.85"/>
+   </g>
+   <g id="line2d_30">
+    <path d="M 71.9425 169.346811
+L 73.450285 168.956927
+L 74.958071 168.567043
+L 76.465856 168.177159
+L 77.973642 167.787275
+L 79.481427 167.397391
+L 80.989213 167.007507
+L 82.496998 166.617624
+L 84.004784 166.22774
+L 85.512569 165.837856
+L 87.020355 165.447972
+L 88.52814 165.058088
+L 90.035926 164.668204
+L 91.543711 164.278321
+L 93.051497 163.888437
+L 94.559282 163.498553
+L 96.067067 163.108669
+L 97.574853 162.718785
+L 99.082638 162.328901
+L 100.590424 161.939018
+L 102.098209 161.549134
+L 103.605995 161.15925
+L 105.11378 160.769366
+L 106.621566 160.379482
+L 108.129351 159.989598
+L 109.637137 159.599714
+L 111.144922 159.209831
+L 112.652708 158.819947
+L 114.160493 158.430063
+L 115.668279 158.040179
+L 117.176064 157.650295
+L 118.683849 157.260411
+L 120.191635 156.870528
+L 121.69942 156.480644
+L 123.207206 156.09076
+L 124.714991 155.700876
+L 126.222777 155.310992
+L 127.730562 154.921108
+L 129.238348 154.531225
+L 130.746133 154.141341
+L 132.253919 153.751457
+L 133.761704 153.361573
+L 135.26949 152.971689
+L 136.777275 152.581805
+L 138.285061 152.191921
+L 139.792846 151.802038
+L 141.300631 151.412154
+L 142.808417 151.02227
+L 144.316202 150.632386
+L 145.823988 150.242502
+L 147.331773 149.852618
+L 148.839559 149.462735
+L 150.347344 149.072851
+L 151.85513 148.682967
+L 153.362915 148.293083
+L 154.870701 147.903199
+L 156.378486 147.513315
+L 157.886272 147.123431
+L 159.394057 146.733548
+L 160.901843 146.343664
+L 162.409628 145.95378
+L 163.917413 145.563896
+L 165.425199 145.174012
+L 166.932984 144.784128
+L 168.44077 144.394245
+L 169.948555 144.004361
+L 171.456341 143.614477
+L 172.964126 143.224593
+L 174.471912 142.834709
+L 175.979697 142.444825
+L 177.487483 142.054942
+L 178.995268 141.665058
+L 180.503054 141.275174
+L 182.010839 140.88529
+L 183.518625 140.495406
+L 185.02641 140.105522
+L 186.534196 139.715638
+L 188.041981 139.325755
+L 189.549766 138.935871
+L 191.057552 138.545987
+L 192.565337 138.156103
+L 194.073123 137.766219
+L 195.580908 137.376335
+L 197.088694 136.986452
+L 198.596479 136.596568
+L 200.104265 136.206684
+L 201.61205 135.8168
+L 203.119836 135.426916
+L 204.627621 135.037032
+L 206.135407 134.647149
+L 207.643192 134.257265
+L 209.150978 133.867381
+L 210.658763 133.477497
+L 212.166548 133.087613
+L 213.674334 132.697729
+L 215.182119 132.307845
+L 216.689905 131.917962
+L 218.19769 131.528078
+L 219.705476 131.138194
+L 221.213261 130.74831
+L 222.721047 130.358426
+L 224.228832 129.968542
+L 225.736618 129.578659
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke: #ffd37f; stroke-width: 1.85; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_31">
+    <path d="M 225.736618 129.578659
+L 456.427794 69.926431
+L 456.427794 69.926431
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 5.92,4.07; stroke-dashoffset: 0; stroke: #ffd37f; stroke-width: 1.85"/>
+   </g>
+   <g id="line2d_32">
+    <path d="M 162.08159 182.096733
+L 162.08159 22.485559
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #224686"/>
+   </g>
+   <g id="line2d_33">
     <path d="M 325.111605 182.096733
 L 325.111605 22.485559
-" clip-path="url(#pfe8b3644a3)" style="fill: none; stroke-dasharray: 0.9,1.485; stroke-dashoffset: 0; stroke: #555555; stroke-width: 0.9"/>
+" clip-path="url(#p39a2a96928)" style="fill: none; stroke-dasharray: 0.9,1.485; stroke-dashoffset: 0; stroke: #555555; stroke-width: 0.9"/>
    </g>
    <g id="patch_5">
     <path d="M 71.9425 182.096733
@@ -360,23 +789,26 @@ L 490.2625 182.096733
     <text style="font-size: 8px; font-family: 'Arial', sans-serif; fill: #555555" transform="translate(331.26337 39.33434)">~165</text>
    </g>
    <g id="text_21">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #ff7f7f" x="461.810588" y="86.750534" transform="rotate(-0 461.810588 86.750534)">C0 grid</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; fill: #777777" transform="translate(219.439044 71.564634) rotate(-90)">solved range</text>
    </g>
    <g id="text_22">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #63c0ef" x="461.810588" y="187.060546" transform="rotate(-0 461.810588 187.060546)">C1 nuclear</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #ff7f7f" x="461.810588" y="86.750534" transform="rotate(-0 461.810588 86.750534)">C0 grid</text>
    </g>
    <g id="text_23">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #6f6f6f" x="461.810588" y="199.307893" transform="rotate(-0 461.810588 199.307893)">C2 absorption</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #63c0ef" x="461.810588" y="187.060546" transform="rotate(-0 461.810588 187.060546)">C1 nuclear</text>
    </g>
    <g id="text_24">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #ffd37f" x="461.810588" y="65.446405" transform="rotate(-0 461.810588 65.446405)">C3 NGCC</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #6f6f6f" x="461.810588" y="199.307893" transform="rotate(-0 461.810588 199.307893)">C2 absorption</text>
    </g>
    <g id="text_25">
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #ffd37f" x="461.810588" y="65.446405" transform="rotate(-0 461.810588 65.446405)">C3 NGCC</text>
+   </g>
+   <g id="text_26">
     <text style="font-weight: 700; font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start" x="21.7441" y="12.92625" transform="rotate(-0 21.7441 12.92625)">a</text>
    </g>
    <g id="PathCollection_1">
     <defs>
-     <path id="mb6524fff7b" d="M 0 3.1
+     <path id="m2613b4611b" d="M 0 3.1
 C 0.82213 3.1 1.610698 2.773364 2.192031 2.192031
 C 2.773364 1.610698 3.1 0.82213 3.1 0
 C 3.1 -0.82213 2.773364 -1.610698 2.192031 -2.192031
@@ -388,54 +820,54 @@ C -1.610698 2.773364 -0.82213 3.1 0 3.1
 z
 " style="stroke: #ffffff"/>
     </defs>
-    <g clip-path="url(#pfe8b3644a3)">
-     <use xlink:href="#mb6524fff7b" x="71.9425" y="152.73724" style="fill: #b9b9b9; stroke: #ffffff"/>
-     <use xlink:href="#mb6524fff7b" x="148.839559" y="137.89812" style="fill: #b9b9b9; stroke: #ffffff"/>
-     <use xlink:href="#mb6524fff7b" x="225.736618" y="123.059001" style="fill: #b9b9b9; stroke: #ffffff"/>
+    <g clip-path="url(#p39a2a96928)">
+     <use xlink:href="#m2613b4611b" x="71.9425" y="152.73724" style="fill: #b9b9b9; stroke: #ffffff"/>
+     <use xlink:href="#m2613b4611b" x="148.839559" y="137.89812" style="fill: #b9b9b9; stroke: #ffffff"/>
+     <use xlink:href="#m2613b4611b" x="225.736618" y="123.059001" style="fill: #b9b9b9; stroke: #ffffff"/>
     </g>
    </g>
    <g id="PathCollection_2">
     <defs>
-     <path id="m0032602775" d="M -3.1 3.1
+     <path id="m6b318e1847" d="M -3.1 3.1
 L 3.1 3.1
 L 3.1 -3.1
 L -3.1 -3.1
 z
 " style="stroke: #ffffff"/>
     </defs>
-    <g clip-path="url(#pfe8b3644a3)">
-     <use xlink:href="#m0032602775" x="71.9425" y="122.041875" style="fill: #b9b9b9; stroke: #ffffff"/>
-     <use xlink:href="#m0032602775" x="148.839559" y="136.105318" style="fill: #b9b9b9; stroke: #ffffff"/>
-     <use xlink:href="#m0032602775" x="225.736618" y="150.168761" style="fill: #b9b9b9; stroke: #ffffff"/>
+    <g clip-path="url(#p39a2a96928)">
+     <use xlink:href="#m6b318e1847" x="71.9425" y="122.041875" style="fill: #b9b9b9; stroke: #ffffff"/>
+     <use xlink:href="#m6b318e1847" x="148.839559" y="136.105318" style="fill: #b9b9b9; stroke: #ffffff"/>
+     <use xlink:href="#m6b318e1847" x="225.736618" y="150.168761" style="fill: #b9b9b9; stroke: #ffffff"/>
     </g>
    </g>
    <g id="PathCollection_3">
     <defs>
-     <path id="m1adaf60770" d="M -0 4.384062
+     <path id="m367e963bd0" d="M -0 4.384062
 L 4.384062 0
 L 0 -4.384062
 L -4.384062 -0
 z
 " style="stroke: #ffffff"/>
     </defs>
-    <g clip-path="url(#pfe8b3644a3)">
-     <use xlink:href="#m1adaf60770" x="71.9425" y="114.491827" style="fill: #b9b9b9; stroke: #ffffff"/>
-     <use xlink:href="#m1adaf60770" x="148.839559" y="129.358491" style="fill: #b9b9b9; stroke: #ffffff"/>
-     <use xlink:href="#m1adaf60770" x="225.736618" y="144.461132" style="fill: #b9b9b9; stroke: #ffffff"/>
+    <g clip-path="url(#p39a2a96928)">
+     <use xlink:href="#m367e963bd0" x="71.9425" y="114.491827" style="fill: #b9b9b9; stroke: #ffffff"/>
+     <use xlink:href="#m367e963bd0" x="148.839559" y="129.358491" style="fill: #b9b9b9; stroke: #ffffff"/>
+     <use xlink:href="#m367e963bd0" x="225.736618" y="144.461132" style="fill: #b9b9b9; stroke: #ffffff"/>
     </g>
    </g>
    <g id="PathCollection_4">
     <defs>
-     <path id="m431160cb7f" d="M 0 -3.1
+     <path id="mcebd8c4c08" d="M 0 -3.1
 L -3.1 3.1
 L 3.1 3.1
 z
 " style="stroke: #ffffff"/>
     </defs>
-    <g clip-path="url(#pfe8b3644a3)">
-     <use xlink:href="#m431160cb7f" x="71.9425" y="169.346811" style="fill: #b9b9b9; stroke: #ffffff"/>
-     <use xlink:href="#m431160cb7f" x="148.839559" y="149.462735" style="fill: #b9b9b9; stroke: #ffffff"/>
-     <use xlink:href="#m431160cb7f" x="225.736618" y="129.578659" style="fill: #b9b9b9; stroke: #ffffff"/>
+    <g clip-path="url(#p39a2a96928)">
+     <use xlink:href="#mcebd8c4c08" x="71.9425" y="169.346811" style="fill: #b9b9b9; stroke: #ffffff"/>
+     <use xlink:href="#mcebd8c4c08" x="148.839559" y="149.462735" style="fill: #b9b9b9; stroke: #ffffff"/>
+     <use xlink:href="#mcebd8c4c08" x="225.736618" y="129.578659" style="fill: #b9b9b9; stroke: #ffffff"/>
     </g>
    </g>
   </g>
@@ -450,202 +882,202 @@ z
    </g>
    <g id="matplotlib.axis_3">
     <g id="xtick_7">
-     <g id="line2d_29">
+     <g id="line2d_34">
       <path d="M 81.523399 405.813559
 L 81.523399 220.084192
-" clip-path="url(#pc477e2b70f)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
+" clip-path="url(#pe8f897c2b0)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
      </g>
-     <g id="line2d_30">
+     <g id="line2d_35">
       <defs>
-       <path id="mb03bf3d741" d="M 0 0
+       <path id="mc639595fb7" d="M 0 0
 L 0 3
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#mb03bf3d741" x="81.523399" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mc639595fb7" x="81.523399" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_26">
+     <g id="text_27">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: middle" x="81.523399" y="418.039809" transform="rotate(-0 81.523399 418.039809)">−400</text>
      </g>
     </g>
     <g id="xtick_8">
-     <g id="line2d_31">
+     <g id="line2d_36">
       <path d="M 160.634482 405.813559
 L 160.634482 220.084192
-" clip-path="url(#pc477e2b70f)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
+" clip-path="url(#pe8f897c2b0)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
      </g>
-     <g id="line2d_32">
+     <g id="line2d_37">
       <g>
-       <use xlink:href="#mb03bf3d741" x="160.634482" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mc639595fb7" x="160.634482" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_27">
+     <g id="text_28">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: middle" x="160.634482" y="418.039809" transform="rotate(-0 160.634482 418.039809)">−300</text>
      </g>
     </g>
     <g id="xtick_9">
-     <g id="line2d_33">
+     <g id="line2d_38">
       <path d="M 239.745565 405.813559
 L 239.745565 220.084192
-" clip-path="url(#pc477e2b70f)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
+" clip-path="url(#pe8f897c2b0)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
      </g>
-     <g id="line2d_34">
+     <g id="line2d_39">
       <g>
-       <use xlink:href="#mb03bf3d741" x="239.745565" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mc639595fb7" x="239.745565" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_28">
+     <g id="text_29">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: middle" x="239.745565" y="418.039809" transform="rotate(-0 239.745565 418.039809)">−200</text>
      </g>
     </g>
     <g id="xtick_10">
-     <g id="line2d_35">
+     <g id="line2d_40">
       <path d="M 318.856649 405.813559
 L 318.856649 220.084192
-" clip-path="url(#pc477e2b70f)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
+" clip-path="url(#pe8f897c2b0)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
      </g>
-     <g id="line2d_36">
+     <g id="line2d_41">
       <g>
-       <use xlink:href="#mb03bf3d741" x="318.856649" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mc639595fb7" x="318.856649" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_29">
+     <g id="text_30">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: middle" x="318.856649" y="418.039809" transform="rotate(-0 318.856649 418.039809)">−100</text>
      </g>
     </g>
     <g id="xtick_11">
-     <g id="line2d_37">
+     <g id="line2d_42">
       <path d="M 397.967732 405.813559
 L 397.967732 220.084192
-" clip-path="url(#pc477e2b70f)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
+" clip-path="url(#pe8f897c2b0)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
      </g>
-     <g id="line2d_38">
+     <g id="line2d_43">
       <g>
-       <use xlink:href="#mb03bf3d741" x="397.967732" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mc639595fb7" x="397.967732" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_30">
+     <g id="text_31">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: middle" x="397.967732" y="418.039809" transform="rotate(-0 397.967732 418.039809)">0</text>
      </g>
     </g>
     <g id="xtick_12">
-     <g id="line2d_39">
+     <g id="line2d_44">
       <path d="M 477.078815 405.813559
 L 477.078815 220.084192
-" clip-path="url(#pc477e2b70f)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
+" clip-path="url(#pe8f897c2b0)" style="fill: none; stroke-dasharray: 1.85,0.8; stroke-dashoffset: 0; stroke: #b0b0b0; stroke-opacity: 0.25; stroke-width: 0.5"/>
      </g>
-     <g id="line2d_40">
+     <g id="line2d_45">
       <g>
-       <use xlink:href="#mb03bf3d741" x="477.078815" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mc639595fb7" x="477.078815" y="405.813559" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_31">
+     <g id="text_32">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: middle" x="477.078815" y="418.039809" transform="rotate(-0 477.078815 418.039809)">100</text>
      </g>
     </g>
-    <g id="text_32">
+    <g id="text_33">
      <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: middle" x="281.1025" y="429.453559" transform="rotate(-0 281.1025 429.453559)">Case 2 grid-cost margin (%)</text>
     </g>
    </g>
    <g id="matplotlib.axis_4">
     <g id="ytick_9">
-     <g id="line2d_41">
+     <g id="line2d_46">
       <defs>
-       <path id="mf24d1013d5" d="M 0 0
+       <path id="mf58dcecb8a" d="M 0 0
 L -3 0
 " style="stroke: #000000; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#mf24d1013d5" x="71.9425" y="233.042055" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mf58dcecb8a" x="71.9425" y="233.042055" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_33">
+     <g id="text_34">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(12.08625 232.198305)">Reactor capital</text>
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(16.08 240.776805)">(span 321 pp)</text>
      </g>
     </g>
     <g id="ytick_10">
-     <g id="line2d_42">
+     <g id="line2d_47">
       <g>
-       <use xlink:href="#mf24d1013d5" x="71.9425" y="254.638493" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mf58dcecb8a" x="71.9425" y="254.638493" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_34">
+     <g id="text_35">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(23.21125 253.747868)">Market year</text>
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(16.08 262.420118)">(span 297 pp)</text>
      </g>
     </g>
     <g id="ytick_11">
-     <g id="line2d_43">
+     <g id="line2d_48">
       <g>
-       <use xlink:href="#mf24d1013d5" x="71.9425" y="276.234931" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mf58dcecb8a" x="71.9425" y="276.234931" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_35">
+     <g id="text_36">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(41.3 275.391181)">WACC</text>
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(16.67 283.969681)">(span 119 pp)</text>
      </g>
     </g>
     <g id="ytick_12">
-     <g id="line2d_44">
+     <g id="line2d_49">
       <g>
-       <use xlink:href="#mf24d1013d5" x="71.9425" y="297.831369" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mf58dcecb8a" x="71.9425" y="297.831369" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_36">
+     <g id="text_37">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(19.645 297.036369)">Carbon price</text>
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(20.52875 305.614869)">(span 85 pp)</text>
      </g>
     </g>
     <g id="ytick_13">
-     <g id="line2d_45">
+     <g id="line2d_50">
       <g>
-       <use xlink:href="#mf24d1013d5" x="71.9425" y="319.427807" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mf58dcecb8a" x="71.9425" y="319.427807" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_37">
+     <g id="text_38">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(7.2 318.584057)">Data-center size</text>
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(20.52875 327.162557)">(span 82 pp)</text>
      </g>
     </g>
     <g id="ytick_14">
-     <g id="line2d_46">
+     <g id="line2d_51">
       <g>
-       <use xlink:href="#mf24d1013d5" x="71.9425" y="341.024245" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mf58dcecb8a" x="71.9425" y="341.024245" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_38">
+     <g id="text_39">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(7.6375 340.180495)">Absorber capital</text>
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(20.52875 348.758995)">(span 13 pp)</text>
      </g>
     </g>
     <g id="ytick_15">
-     <g id="line2d_47">
+     <g id="line2d_52">
       <g>
-       <use xlink:href="#mf24d1013d5" x="71.9425" y="362.620683" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mf58dcecb8a" x="71.9425" y="362.620683" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_39">
+     <g id="text_40">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(48.9925 361.776933)">PUE</text>
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(20.52875 370.355433)">(span 12 pp)</text>
      </g>
     </g>
     <g id="ytick_16">
-     <g id="line2d_48">
+     <g id="line2d_53">
       <g>
-       <use xlink:href="#mf24d1013d5" x="71.9425" y="384.217121" style="stroke: #000000; stroke-width: 0.8"/>
+       <use xlink:href="#mf58dcecb8a" x="71.9425" y="384.217121" style="stroke: #000000; stroke-width: 0.8"/>
       </g>
      </g>
-     <g id="text_40">
+     <g id="text_41">
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(22.00125 383.373371)">BESS on/off</text>
       <text style="font-size: 8px; font-family: 'Arial', sans-serif" transform="translate(24.9775 391.951871)">(span 1 pp)</text>
      </g>
     </g>
    </g>
-   <g clip-path="url(#pc477e2b70f)">
+   <g clip-path="url(#pe8f897c2b0)">
     <image xlink:href="data:image/png;base64,
-iVBORw0KGgoAAAANSUhEUgAACkUAAAVbCAYAAACVxj/hAABFVklEQVR4nOzcQW4b5xmA4W9k1oGTAkFX2fcazQF6lqIX8C7aFN71Ir1Cs2jQa3TtZFUkRVDDltmFmkCRKYoUKY/95nkAgpzhP/98pGAvrBdeBgAAAAAAAD4A//h2+8XMvHz2ZObTzcyzJzOfPpl5dv36u6dPli/WnhEAAIAP28XaAwAAAAAAAAAAAACcgygSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPy6LGsPAAAAAAAAAD/55tvtZmY2n21mbj5+u5nZXMzM27cz2+3180+vbx/vWnP73K7jU9ZcXd29ft/5fftcXR123fXjarm8fL32zw8AAGBtm7UHAAAAAAAAgBv+PDN/vX1yWeafM/OH9z/OR+PFzDxfewgAAIC1Xaw9AAAAAAAAAAAAAMA5iCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAA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AAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABI2aw8AAAAAAMBOr2fmu7WHAPiA/DD+XoTH9p+1BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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AAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQ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AAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAA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AAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACf8FIicg/bEPcPAAAAAASUVORK5CYII=" id="image2695293026" transform="scale(1 -1) translate(0 -164.52)" x="143" y="-226.817309" width="315.48" height="164.52"/>
+iVBORw0KGgoAAAANSUhEUgAACkUAAAVbCAYAAACVxj/hAABFVklEQVR4nOzcQW4b5xmA4W9k1oGTAkFX2fcazQF6lqIX8C7aFN71Ir1Cs2jQa3TtZFUkRVDDltmFmkCRKYoUKY/95nkAgpzhP/98pGAvrBdeBgAAAAAAAD4A//h2+8XMvHz2ZObTzcyzJzOfPpl5dv36u6dPli/WnhEAAIAP28XaAwAAAAAAAAAAAACcgygSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPy6LGsPAAAAAAAAAD/55tvtZmY2n21mbj5+u5nZXMzM27cz2+3180+vbx/vWnP73K7jU9ZcXd29ft/5fftcXR123fXjarm8fL32zw8AAGBtm7UHAAAAAAAAgBv+PDN/vX1yWeafM/OH9z/OR+PFzDxfewgAAIC1Xaw9AAAAAAAAAAAAAMA5iCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAA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AAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABI2aw8AAAAAAMBOr2fmu7WHAPiA/DD+XoTH9p+1BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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AAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAAC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AAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAA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AAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACaJIAAAAAAAAAAAAIEEUCQAAAAAAAAAAACSIIgEAAAAAAAAAAIAEUSQAAAAAAAAAAACQIIoEAAAAAAAAAAAAEkSRAAAAAAAAAAAAQIIoEgAAAAAAAAAAAEgQRQIAAAAAAAAAAAAJokgAAAAAAAAAAAAgQRQJAAAAAAAAAAAAJIgiAQAAAAAAAAAAgARRJAAAAAAAAAAAAJAgigQAAAAAAAAAAAASRJEAAAAAAAAAAABAgigSAAAAAAAAAAAASBBFAgAAAAAAAAAAAAmiSAAAAAAAAAAAACBBFAkAAAAAAAAAAAAkiCIBAAAAAAAAAACABFEkAAAAAAAAAAAAkCCKBAAAAAAAAAAAABJEkQAAAAAAAAAAAECCKBIAAAAAAAAAAABIEEUCAAAAAAAAAAAACf8FIicg/bEPcPAAAAAASUVORK5CYII=" id="image7623ea4ddf" transform="scale(1 -1) translate(0 -164.52)" x="143" y="-226.817309" width="315.48" height="164.52"/>
    </g>
    <g id="patch_8">
     <path d="M 71.9425 405.813559
@@ -657,7 +1089,7 @@ L 71.9425 220.084192
 L 490.2625 405.813559
 " style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
-   <g id="text_41">
+   <g id="text_42">
     <text style="font-weight: 700; font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start" x="21.7441" y="212.933561" transform="rotate(-0 21.7441 212.933561)">b</text>
    </g>
    <g id="legend_1">
@@ -669,7 +1101,7 @@ L 79.1425 376.205221
 z
 " style="fill: #bee8ff; stroke: #ffffff; stroke-linejoin: miter"/>
     </g>
-    <g id="text_42">
+    <g id="text_43">
      <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start" x="101.5425" y="381.805221" transform="rotate(-0 101.5425 381.805221)">more negative than baseline</text>
     </g>
     <g id="patch_11">
@@ -680,73 +1112,73 @@ L 79.1425 387.615221
 z
 " style="fill: #ff7f7f; stroke: #ffffff; stroke-linejoin: miter"/>
     </g>
-    <g id="text_43">
+    <g id="text_44">
      <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start" x="101.5425" y="393.215221" transform="rotate(-0 101.5425 393.215221)">less negative than baseline</text>
     </g>
    </g>
-   <g id="line2d_49">
+   <g id="line2d_54">
     <path d="M 349.245929 405.813559
 L 349.245929 220.084192
-" clip-path="url(#pc477e2b70f)" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #333333"/>
-   </g>
-   <g id="text_44">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #333333" x="354.245929" y="225.393658" transform="rotate(-0 354.245929 225.393658)">ATB-Mid baseline (-62)</text>
+" clip-path="url(#pe8f897c2b0)" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #333333"/>
    </g>
    <g id="text_45">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="199.809471" y="235.11018" transform="rotate(-0 199.809471 235.11018)">-244</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #333333" x="354.245929" y="225.393658" transform="rotate(-0 354.245929 225.393658)">ATB-Mid baseline (-62)</text>
    </g>
    <g id="text_46">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="463.618067" y="235.11018" transform="rotate(-0 463.618067 235.11018)">77</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="199.809471" y="235.11018" transform="rotate(-0 199.809471 235.11018)">-244</text>
    </g>
    <g id="text_47">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="138.142475" y="256.706618" transform="rotate(-0 138.142475 256.706618)">-322</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="463.618067" y="235.11018" transform="rotate(-0 463.618067 235.11018)">77</text>
    </g>
    <g id="text_48">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="383.395828" y="256.706618" transform="rotate(-0 383.395828 256.706618)">-25</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="138.142475" y="256.706618" transform="rotate(-0 138.142475 256.706618)">-322</text>
    </g>
    <g id="text_49">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="280.127978" y="278.303056" transform="rotate(-0 280.127978 278.303056)">-143</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="383.395828" y="256.706618" transform="rotate(-0 383.395828 256.706618)">-25</text>
    </g>
    <g id="text_50">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="384.180889" y="278.303056" transform="rotate(-0 384.180889 278.303056)">-24</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="280.127978" y="278.303056" transform="rotate(-0 280.127978 278.303056)">-143</text>
    </g>
    <g id="text_51">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="344.245929" y="299.899494" transform="rotate(-0 344.245929 299.899494)">-62</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="384.180889" y="278.303056" transform="rotate(-0 384.180889 278.303056)">-24</text>
    </g>
    <g id="text_52">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="421.415909" y="299.899494" transform="rotate(-0 421.415909 299.899494)">23</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="344.245929" y="299.899494" transform="rotate(-0 344.245929 299.899494)">-62</text>
    </g>
    <g id="text_53">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="305.151502" y="321.495932" transform="rotate(-0 305.151502 321.495932)">-111</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="421.415909" y="299.899494" transform="rotate(-0 421.415909 299.899494)">23</text>
    </g>
    <g id="text_54">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="380.30888" y="321.495932" transform="rotate(-0 380.30888 321.495932)">-29</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="305.151502" y="321.495932" transform="rotate(-0 305.151502 321.495932)">-111</text>
    </g>
    <g id="text_55">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="337.976697" y="343.09237" transform="rotate(-0 337.976697 343.09237)">-70</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="380.30888" y="321.495932" transform="rotate(-0 380.30888 321.495932)">-29</text>
    </g>
    <g id="text_56">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="358.425417" y="343.09237" transform="rotate(-0 358.425417 343.09237)">-56</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="337.976697" y="343.09237" transform="rotate(-0 337.976697 343.09237)">-70</text>
    </g>
    <g id="text_57">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="343.530103" y="364.688808" transform="rotate(-0 343.530103 364.688808)">-62</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="358.425417" y="343.09237" transform="rotate(-0 358.425417 343.09237)">-56</text>
    </g>
    <g id="text_58">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="362.830251" y="364.688808" transform="rotate(-0 362.830251 364.688808)">-51</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="343.530103" y="364.688808" transform="rotate(-0 343.530103 364.688808)">-62</text>
    </g>
    <g id="text_59">
-    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="343.451598" y="386.285246" transform="rotate(-0 343.451598 386.285246)">-63</text>
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="362.830251" y="364.688808" transform="rotate(-0 362.830251 364.688808)">-51</text>
    </g>
    <g id="text_60">
+    <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: end; fill: #224686" x="343.451598" y="386.285246" transform="rotate(-0 343.451598 386.285246)">-63</text>
+   </g>
+   <g id="text_61">
     <text style="font-size: 8px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #a46a4d" x="354.245929" y="386.285246" transform="rotate(-0 354.245929 386.285246)">-62</text>
    </g>
   </g>
  </g>
  <defs>
-  <clipPath id="pfe8b3644a3">
+  <clipPath id="p39a2a96928">
    <rect x="71.9425" y="22.485559" width="418.32" height="159.611174"/>
   </clipPath>
-  <clipPath id="pc477e2b70f">
+  <clipPath id="pe8f897c2b0">
    <rect x="71.9425" y="220.084192" width="418.32" height="185.729366"/>
   </clipPath>
  </defs>
