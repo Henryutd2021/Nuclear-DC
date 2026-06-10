@@ -58,14 +58,21 @@ def test_case0_cooling_load_matches_eta_chain_definition(cfg, ts_2023_168h):
 
 
 def test_case0_vcc_power_uses_houston_derated_partload_cop(cfg, ts_2023_168h):
-    """P_VCC = Q_cool / COP(load), the Houston-derated COP evaluated at the
-    realized cooling-load fraction (the IPLV part-load curve), not a flat
-    full-load value."""
-    from src.performance import vcc_cop_at_load
+    """P_VCC = Q_cool / (COP(load) × relief(T_wb)): the design-point COP
+    evaluated at the realized cooling-load fraction (the IPLV part-load
+    curve) times the hourly wet-bulb relief, not a flat full-load value."""
+    from src.performance import vcc_cop_at_load, vcc_wet_bulb_relief
 
     result = solve_case0(cfg, ts_2023_168h)
     q_max = cfg.case.capacities.electric_chiller_capacity_MWth
-    cop_load = vcc_cop_at_load(result.Q_cool_MWth / q_max, cfg.case.vcc.cop_houston)
+    vcc = cfg.case.vcc
+    relief = vcc_wet_bulb_relief(
+        ts_2023_168h.wet_bulb_C.to_numpy(),
+        vcc.cop_design_wet_bulb_C,
+        vcc.cop_wet_bulb_relief_per_K,
+        vcc.cop_wet_bulb_relief_cap,
+    )
+    cop_load = vcc_cop_at_load(result.Q_cool_MWth / q_max, vcc.cop_houston) * relief
     expected = result.Q_cool_MWth / cop_load
     diff = (result.P_VCC_elec_MW - expected).abs().max()
     assert diff < 1e-9

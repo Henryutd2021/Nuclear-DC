@@ -1,18 +1,18 @@
 """Tests for per-component capital annualization (Tier 1 L1 + L2) and the
-Section 45U nuclear production tax credit.
+Section 45Y clean-electricity PTC levelization.
 
 L1: each asset is amortized over its own engineering life via its own CRF,
 instead of a single project-wide 20-year CRF.
 L2: assets with an end-of-life salvage value get a sinking-fund credit, so the
 annual capital charge is (P - F) recovered, i.e. EAC = P*CRF - F*SFF.
-45U: the IRA-2022 zero-emission nuclear PTC is a per-MWh credit that phases out
-with the market price (gross receipts) per 26 U.S.C. 45U(b).
+45Y: the technology-neutral clean-electricity PTC (26 U.S.C. 45Y) is a flat
+per-MWh credit paid for a 10-year statutory window and levelized over the
+longer TAC horizon by the ratio of annuity present-value factors.
 """
 
-import numpy as np
 import pytest
 
-from src.finance import crf, annualized_capex, section_45u_credit_usd_per_mwh
+from src.finance import crf, annualized_capex, levelized_ptc_usd_per_mwh
 
 
 def test_crf_20yr_at_6_7pct_matches_paper_value():
@@ -53,51 +53,47 @@ def test_annualized_capex_salvage_matches_sinking_fund_formula():
 
 
 # ---------------------------------------------------------------------------
-# Section 45U nuclear PTC: piecewise credit C_45U(P_market), 26 U.S.C. 45U(b).
-# Full 1.5 cents/kWh ($15/MWh, prevailing-wage rate) below the 2.5 cents/kWh
-# ($25/MWh) gross-receipts threshold, then a linear ramp to $0 at 4.375 cents/kWh
-# ($43.75/MWh). The ramp slope (0.8 $/$) is the statutory 16% reduction x5.
+# Section 45Y clean-electricity PTC: flat $30/MWh (CY2025 prevailing-wage,
+# inflation-adjusted) paid for the statutory 10-year window, levelized across
+# the 20-year TAC horizon by A(i,10)/A(i,20).
 # ---------------------------------------------------------------------------
-def test_45u_full_credit_below_threshold():
-    assert section_45u_credit_usd_per_mwh(20.0) == pytest.approx(15.0)
-    assert section_45u_credit_usd_per_mwh(0.0) == pytest.approx(15.0)
-
-
-def test_45u_full_credit_at_threshold():
-    assert section_45u_credit_usd_per_mwh(25.0) == pytest.approx(15.0)
-
-
-def test_45u_zero_at_and_above_phaseout_end():
-    assert section_45u_credit_usd_per_mwh(43.75) == pytest.approx(0.0, abs=1e-9)
-    assert section_45u_credit_usd_per_mwh(50.0) == pytest.approx(0.0)
-    assert section_45u_credit_usd_per_mwh(120.0) == pytest.approx(0.0)
-
-
-def test_45u_linear_ramp_midpoint():
-    # Midpoint of the $25-$43.75 band -> half credit.
-    assert section_45u_credit_usd_per_mwh(34.375) == pytest.approx(7.5)
-
-
-def test_45u_linear_ramp_slope_is_point_eight():
-    # Each $1/MWh of price above the threshold removes $0.80 of credit.
-    assert section_45u_credit_usd_per_mwh(30.0) == pytest.approx(15.0 - 0.8 * 5.0)
-
-
-def test_45u_accepts_array_and_is_monotone_nonincreasing():
-    prices = np.array([10.0, 25.0, 30.0, 43.75, 60.0])
-    out = section_45u_credit_usd_per_mwh(prices)
-    assert out.shape == (5,)
-    assert np.all(np.diff(out) <= 1e-12)  # never increases with price
-    assert out[0] == pytest.approx(15.0)
-    assert out[-1] == pytest.approx(0.0)
-
-
-def test_45u_custom_breakpoints():
-    # The full credit and band are configurable (e.g. inflation-adjusted amounts).
-    # p=30 is in the ramp: slope = 16.5/(48.125-27.5) = 0.8;
-    # credit = 16.5 - 0.8*(30-27.5) = 14.5.
-    out = section_45u_credit_usd_per_mwh(
-        30.0, full_credit_usd_per_mwh=16.5, phaseout_start_usd_per_mwh=27.5,
-        phaseout_end_usd_per_mwh=48.125,
+def test_45y_levelized_rate_at_paper_baseline():
+    # A(6.7%,10)/A(6.7%,20) = 0.6567 -> 30 * 0.6567 = 19.70 $/MWh.
+    assert levelized_ptc_usd_per_mwh(30.0, 0.067, 10, 20) == pytest.approx(
+        19.70, abs=0.01
     )
-    assert out == pytest.approx(14.5)
+
+
+def test_45y_levelization_matches_annuity_ratio():
+    i, d, w = 0.067, 10, 20
+    a = lambda n: (1 - (1 + i) ** -n) / i  # noqa: E731
+    expected = 30.0 * a(d) / a(w)
+    assert levelized_ptc_usd_per_mwh(30.0, i, d, w) == pytest.approx(expected)
+
+
+def test_45y_full_rate_when_duration_covers_window():
+    assert levelized_ptc_usd_per_mwh(30.0, 0.067, 20, 20) == pytest.approx(30.0)
+    assert levelized_ptc_usd_per_mwh(30.0, 0.067, 25, 20) == pytest.approx(30.0)
+
+
+def test_45y_levelized_rate_scales_linearly_with_credit():
+    half = levelized_ptc_usd_per_mwh(15.0, 0.067, 10, 20)
+    full = levelized_ptc_usd_per_mwh(30.0, 0.067, 10, 20)
+    assert full == pytest.approx(2.0 * half)
+
+
+def test_45y_higher_discount_rate_lowers_levelized_value_share():
+    # Discounting weights the credited early years more, so the levelized
+    # share rises with the discount rate.
+    low_i = levelized_ptc_usd_per_mwh(30.0, 0.03, 10, 20) / 30.0
+    high_i = levelized_ptc_usd_per_mwh(30.0, 0.12, 10, 20) / 30.0
+    assert high_i > low_i
+
+
+def test_45y_rejects_invalid_inputs():
+    with pytest.raises(ValueError):
+        levelized_ptc_usd_per_mwh(30.0, -0.01, 10, 20)
+    with pytest.raises(ValueError):
+        levelized_ptc_usd_per_mwh(30.0, 0.067, 0, 20)
+    with pytest.raises(ValueError):
+        levelized_ptc_usd_per_mwh(30.0, 0.067, 10, 0)

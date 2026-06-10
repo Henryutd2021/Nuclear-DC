@@ -65,12 +65,21 @@ def test_case2_reactor_min_load_and_ramp(cfg, ts_2023_168h):
 
 
 def test_case2_absorption_active_in_normal_hours(cfg, ts_2023_168h):
-    """Cooling is dominantly served by absorption (free heat) when LMP > 0 and reactor on."""
+    """Absorption dispatches where it is economic, not unconditionally.
+
+    Under the flat 45Y generation credit, diverting steam forfeits the
+    credit on lost output while the VCC's draw only costs the LMP, so the
+    chillers split by price: the VCC serves cheap-LMP hours and absorption
+    takes over as the LMP (and the VCC's part-load marginal) rises. For a
+    mixed-price week the aggregate share sits well inside (0, 1).
+    """
     r = solve_case2(cfg, ts_2023_168h)
-    # In aggregate, abs should cover at least 60% of cooling (rest is VCC backup or
-    # hours where exporting electricity is more valuable than driving abs).
     abs_share = r.Q_abs_cool_MWth.sum() / r.Q_cool_demand_MWth.sum()
-    assert abs_share > 0.6
+    assert 0.05 < abs_share < 0.95
+    # Absorption actually runs in a meaningful number of hours...
+    assert (r.Q_abs_cool_MWth > 1.0).sum() >= 24
+    # ...and delivered cooling respects the installed nameplate.
+    assert r.Q_abs_cool_MWth.max() <= 160.0 + 1e-6
 
 
 def test_case2_capex_includes_absorption(cfg, ts_2023_168h):

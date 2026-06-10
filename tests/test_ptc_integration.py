@@ -1,6 +1,6 @@
-"""Integration tests for the Section 45U nuclear PTC wired into the Cases 1-2
-MILP. The credit is a price-dependent per-MWh reduction on net nuclear
-generation, default-on in the baseline.
+"""Integration tests for the Section 45Y clean-electricity PTC wired into the
+Cases 1-2 MILP. The credit is a flat per-MWh reduction on net nuclear
+generation, levelized over the TAC window, default-on in the baseline.
 """
 
 from pathlib import Path
@@ -10,7 +10,7 @@ import pytest
 
 from src.config import load_config, with_nuclear_ptc
 from src.data import load_time_series
-from src.finance import section_45u_credit_usd_per_mwh
+from src.finance import levelized_ptc_usd_per_mwh
 from src.milp.builder import build_model
 from src.milp.solve import solve_model
 
@@ -29,7 +29,8 @@ def ts():
 def test_ptc_default_enabled():
     cfg = load_config(case_id=1, project_root=PROJECT_ROOT)
     assert cfg.financial.nuclear_ptc_enabled is True
-    assert cfg.financial.ptc_usd_per_mwh_assumed == pytest.approx(15.0)
+    assert cfg.financial.ptc_usd_per_mwh_assumed == pytest.approx(30.0)
+    assert cfg.financial.ptc_credit_duration_years == 10
 
 
 def test_ptc_expression_present_on_model(ts):
@@ -39,25 +40,22 @@ def test_ptc_expression_present_on_model(ts):
 
 
 @_solver_skip
-def test_ptc_credit_matches_price_dependent_formula(ts):
+def test_ptc_credit_matches_levelized_flat_rate(ts):
     cfg = load_config(case_id=1, project_root=PROJECT_ROOT)
     m = build_model(cfg, ts, pue=1.30)
     solve_model(m, solver_config=cfg.base.solver)
     fin = cfg.financial
     dt = cfg.base.time.delta_t
     annual_scale = 8760.0 / ts.num_hours
-    expected = -sum(
-        float(
-            section_45u_credit_usd_per_mwh(
-                float(ts.price_import_usd_per_mwh.iloc[t]),
-                fin.ptc_usd_per_mwh_assumed,
-                fin.ptc_45u_phaseout_start_usd_per_mwh,
-                fin.ptc_45u_phaseout_end_usd_per_mwh,
-            )
-        )
-        * pyo.value(m.P_turb_net[t])
-        for t in m.T
-    ) * dt * annual_scale
+    rate = levelized_ptc_usd_per_mwh(
+        fin.ptc_usd_per_mwh_assumed,
+        cfg.financial.WACC_nominal,
+        fin.ptc_credit_duration_years,
+        fin.project_lifetime_years,
+    )
+    expected = (
+        -sum(rate * pyo.value(m.P_turb_net[t]) for t in m.T) * dt * annual_scale
+    )
     assert pyo.value(m.ptc_annual) == pytest.approx(expected, rel=1e-9)
     assert pyo.value(m.ptc_annual) < 0.0  # it is a credit
 

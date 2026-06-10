@@ -33,6 +33,9 @@ capacities:
 vcc:
   cop_baseline:    3.5
   cop_houston:     3.2
+  cop_design_wet_bulb_C:      26.0      # hourly wet-bulb relief — see plant_case0.yaml
+  cop_wet_bulb_relief_per_K:  0.01364
+  cop_wet_bulb_relief_cap:    1.182
   fixed_om_usd_per_kWth_year: 8
   variable_om_usd_per_mwh_th: 0.5
   capex_usd_per_kWth: 250
@@ -47,26 +50,33 @@ reactor:
   capex_usd_per_kWe:            7615      # NLR ATB 2024 Moderate baseline
   fixed_om_usd_per_kWe_year:    121       # NLR ATB 2024
   variable_om_usd_per_mwh_e:    3.50      # NLR ATB 2024
-  fuel_cost_usd_per_mwh_th:     6.0       # EIA 2024 fleet avg
+  fuel_cost_usd_per_mwh_e:      10.0      # $/MWh_e net basis (Li et al. 2026 Nat. Commun.);
+                                          # builder converts to thermal via 270/870
   co2_lifecycle_g_per_kwh_e:    12        # UNECE 2022 LCA
   min_load_fraction:            0.50      # P1-B BWRX min load (IAEA ARIS 2024)
   ramp_rate_pct_per_min:        1.0       # P1-B BWRX ramp (GE-H brochure)
-  capacity_factor:              0.92      # mature US BWR fleet baseline
-  lifetime_years:               20        # paper TAC amortization window
+  capacity_factor:              0.92      # realized via scheduled refueling outage window
+  lifetime_years:               40        # NLR ATB 2024 SMR amortization convention
 
+# Gross output follows a Willans line in reactor thermal input, fitted to
+# data/perf/turbine_hr.csv (least squares, constrained through the 870 MWth
+# -> 300 MWe design point; R^2 > 0.999). The no-load intercept captures the
+# part-load efficiency droop a constant 0.345 misses (~7.6% at min load).
 turbine:
-  rated_efficiency:               0.345    # matches reactor 300/870
+  rated_efficiency:               0.345    # design-point check value (= 300/870)
+  main_willans_slope_MWe_per_MWth: 0.37119
+  main_willans_intercept_MWe:      22.94
   capex_usd_per_kWe:              0        # bundled into reactor OCC (NLR ATB convention)
   fixed_om_usd_per_kWe_year:      0        # bundled
   variable_om_usd_per_mwh_e:      0        # bundled
   aux_load_fraction:              0.10     # ~10% net-vs-gross (300→270 MWe)
 
-# Lithium-ion BESS — data/equipment/bess_liion.yaml (NLR ATB 2024 Moderate).
+# Lithium-ion BESS — data/equipment/bess_liion.yaml (NLR ATB 2024 Moderate,
+# 2-hour duration matching the 100 MWh / 50 MW configuration).
 # Used only when equipment.bess_enabled is flipped on for the S3 sensitivity.
 bess:
-  capex_usd_per_kwh:           405      # NLR ATB 2024 Moderate
-  capex_usd_per_kw:            1620     # 4-hour duration (=405×4)
-  fixed_om_usd_per_kw_year:    25
+  capex_usd_per_kwh:           529      # NLR ATB 2024 2-hr utility-scale battery OCC (2022$)
+  fixed_om_usd_per_kw_year:    26.5     # NLR ATB 2024 2-hr Moderate
   variable_om_usd_per_mwh:     0.5
   round_trip_efficiency:       0.85
   self_discharge_per_hour:     0.0000417  # 0.1% per day / 24

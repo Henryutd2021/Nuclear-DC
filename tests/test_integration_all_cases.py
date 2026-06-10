@@ -58,20 +58,22 @@ def test_nuclear_cases_lose_to_case0_at_atb_mid_capex():
 
 
 def test_case2_drives_absorption_at_realistic_pue():
-    """v2.6 cascade extraction must actually utilize absorption.
+    """v2.6 cascade extraction must actually utilize absorption when economic.
 
-    At the baseline heat-rejection load, Case 2 should serve nearly all
-    cooling via absorption (VCC engages only during P1-A
-    crystallization windows). This is a regression check that the
-    Willans-penalty model doesn't accidentally shut the chiller off.
+    With the heat-balance Willans penalty (0.20 MWe/MWth) and the flat 45Y
+    generation credit, absorption competes hour-by-hour with the VCC: steam
+    diversion forfeits the credit on lost generation, so cheap-LMP hours go
+    to the VCC and higher-priced hours to absorption. The regression check
+    is that the penalty model neither shuts the chiller off entirely nor
+    hands it the whole load unconditionally.
     """
     ts = load_time_series(project_root=PROJECT_ROOT, year=2023, num_hours=168)
     cfg2 = load_config(case_id=2, project_root=PROJECT_ROOT)
     r2 = solve_case2(cfg2, ts, pue=1.35)
     abs_share = float(r2.Q_abs_cool_MWth.sum() / r2.Q_cool_demand_MWth.sum())
-    assert abs_share > 0.85, (
-        f"Expected absorption to serve > 85% of cooling at baseline PUE label; "
-        f"got {abs_share:.0%}"
+    assert 0.05 < abs_share < 0.95, (
+        f"Expected a price-split absorption/VCC dispatch in a mixed-price week; "
+        f"got absorption share {abs_share:.0%}"
     )
 
 

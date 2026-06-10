@@ -64,7 +64,7 @@ def test_case3_ngcc_30yr_life_is_cheaper_than_old_global_20yr(ts):
     assert ngcc_capex * crf(wacc, 30) < ngcc_capex * crf(wacc, 20)
 
 
-def test_case1_reactor_capex_unchanged_at_20yr_but_vcc_uses_25yr(ts):
+def test_case1_reactor_capex_at_40yr_and_vcc_at_25yr(ts):
     cfg = load_config(case_id=1, project_root=PROJECT_ROOT)
     m = build_model(cfg, ts, pue=1.30)
     rx, vcc = cfg.case.reactor, cfg.case.vcc
@@ -78,7 +78,7 @@ def test_case1_reactor_capex_unchanged_at_20yr_but_vcc_uses_25yr(ts):
     ) + annualized_capex(
         vcc.capex_usd_per_kWth * cap_vcc * 1000.0, wacc, vcc.lifetime_years
     )
-    assert rx.lifetime_years == 20  # reactor CRF must be unchanged
+    assert rx.lifetime_years == 40  # NLR ATB 2024 SMR amortization convention
     assert pyo.value(m.capex_annual) == pytest.approx(expected, rel=1e-9)
 
 
@@ -105,19 +105,22 @@ def test_bess_capex_includes_salvage_credit(ts):
 
 
 # ----------------------------------------------------------------------------
-# L3 - absorption chiller maintenance availability (<1) derates its output
+# L3 - absorption chiller maintenance coincides with the refueling outage
 # ----------------------------------------------------------------------------
-def test_absorption_availability_field_present_and_below_one():
+def test_absorption_availability_is_unity_with_coincident_maintenance():
+    # Absorber maintenance is scheduled inside the reactor refueling outage
+    # window (it has no steam source then), so no separate continuous
+    # availability derate is applied to its hourly yield.
     cfg = load_config(case_id=2, project_root=PROJECT_ROOT)
-    assert 0.0 < cfg.case.absorption.availability < 1.0
+    assert cfg.case.absorption.availability == pytest.approx(1.0)
 
 
-def test_absorption_available_param_scaled_by_maintenance_availability(ts):
+def test_absorption_available_param_is_gate_times_availability(ts):
     cfg = load_config(case_id=2, project_root=PROJECT_ROOT)
     m = build_model(cfg, ts, pue=1.30)
     avail = cfg.case.absorption.availability
-    # In hours when the crystallization gate is open the availability param is
-    # the maintenance factor (e.g. 0.95), not 1.0; otherwise it is 0.
+    # In hours when the crystallization gate is open (and outside the outage
+    # window) the availability param equals the configured factor; otherwise 0.
     vals = {pyo.value(m.absorption_available[t]) for t in m.T}
     assert vals <= {0.0, avail}
     assert avail in vals  # at least some hours are crystallization-open

@@ -23,9 +23,23 @@ from src.performance import (
     ngcc_efficiency_at_load,
     vcc_cop_at_load,
     vcc_pwl_points,
+    vcc_wet_bulb_relief,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _relief(cfg, ts, t):
+    """Hourly wet-bulb relief multiplier on the design-point VCC COP."""
+    vcc = cfg.case.vcc
+    return float(
+        vcc_wet_bulb_relief(
+            float(ts.wet_bulb_C.iloc[t]),
+            vcc.cop_design_wet_bulb_C,
+            vcc.cop_wet_bulb_relief_per_K,
+            vcc.cop_wet_bulb_relief_cap,
+        )
+    )
 
 _GUROBI = pyo.SolverFactory("gurobi")
 _HAS_GUROBI = _GUROBI.available(exception_flag=False)
@@ -60,7 +74,8 @@ def test_case1_vcc_solves_and_follows_partload_curve(ts):
         q = pyo.value(m.Q_vcc_cool[t])
         p = pyo.value(m.P_vcc[t])
         if q > 1e-6:
-            assert p == pytest.approx(float(np.interp(q, q_pts, p_pts)), abs=1e-4, rel=1e-4)
+            expected = float(np.interp(q, q_pts, p_pts)) / _relief(cfg, ts, t)
+            assert p == pytest.approx(expected, abs=1e-4, rel=1e-4)
             checked += 1
     assert checked > 0  # VCC actually carried cooling in some hour
 
@@ -87,9 +102,10 @@ def test_case0_vcc_power_uses_partload_cop(ts):
     res = solve_case0(cfg, ts)
     vcc = cfg.case.vcc
     q_max = cfg.case.capacities.electric_chiller_capacity_MWth
-    for q, p in zip(res.Q_cool_MWth, res.P_VCC_elec_MW):
+    for t, (q, p) in enumerate(zip(res.Q_cool_MWth, res.P_VCC_elec_MW)):
         if q > 1e-9:
             cop_here = float(vcc_cop_at_load(q / q_max, vcc.cop_houston))
+            cop_here *= _relief(cfg, ts, t)
             assert p == pytest.approx(q / cop_here, rel=1e-9)
 
 
@@ -109,9 +125,10 @@ def test_case3_vcc_power_uses_partload_cop(ts):
     res = solve_case3(cfg, ts)
     vcc = cfg.case.vcc
     q_max = cfg.case.capacities.electric_chiller_capacity_MWth
-    for q, p in zip(res.Q_cool_MWth, res.P_VCC_elec_MW):
+    for t, (q, p) in enumerate(zip(res.Q_cool_MWth, res.P_VCC_elec_MW)):
         if q > 1e-9:
             cop_here = float(vcc_cop_at_load(q / q_max, vcc.cop_houston))
+            cop_here *= _relief(cfg, ts, t)
             assert p == pytest.approx(q / cop_here, rel=1e-9)
 
 

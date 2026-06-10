@@ -34,9 +34,16 @@ capacities:
 # Vapor-compression chiller performance (v2.5 §B reference; no per-equipment
 # YAML exists for VCC yet, so values inlined here from ASHRAE typical centrifugal
 # chiller at Houston-grade ambient).
+# cop_houston is the design-point (T_wb = 26 °C) effective system COP; the
+# hourly wet-bulb relief below mirrors the relative linear COP(T_wb) response
+# the absorption chiller carries (0.015/1.10 per K, capped at 1.30/1.10), so
+# both cooling technologies see the same condenser-water benefit in cool hours.
 vcc:
   cop_baseline:    3.5     # nameplate water-cooled centrifugal
-  cop_houston:     3.2     # ~8% derating at Houston wet-bulb 26°C (cooling-tower 32°C inlet)
+  cop_houston:     3.2     # design point at Houston wet-bulb 26°C (cooling-tower 31°C inlet)
+  cop_design_wet_bulb_C:      26.0
+  cop_wet_bulb_relief_per_K:  0.01364   # relative, = absorption 0.015/1.10
+  cop_wet_bulb_relief_cap:    1.182     # relative cap, = absorption 1.30/1.10
   fixed_om_usd_per_kWth_year: 8
   variable_om_usd_per_mwh_th: 0.5
   capex_usd_per_kWth: 250  # installed turnkey (centrifugal, water-cooled)

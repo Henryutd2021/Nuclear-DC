@@ -66,7 +66,6 @@ from src.config import (  # noqa: E402
 )
 from src.data import TimeSeries, load_time_series  # noqa: E402
 from src.kpi import (  # noqa: E402
-    carbon_abatement_cost_usd_per_tco2,
     epbt_years,
     heat_recovery_premium,
     water_footprint_l_per_mwh,
@@ -222,7 +221,7 @@ def _result_to_scalars(
         out["co2_export_credit_tonnes"] = float(r.co2_export_credit_tonnes)
         out["fuel_annual_usd"] = float(r.fuel_annual_usd)
         out["grid_annual_usd"] = float(r.grid_annual_usd)
-        # Section 45U nuclear PTC (negative = a credit, already in tac_usd_per_yr).
+        # Section 45Y clean-electricity PTC (negative = a credit, already in tac_usd_per_yr).
         out["ptc_annual_usd"] = float(r.ptc_annual_usd)
         out["Q_abs_cool_annual_MWh"] = float(
             r.Q_abs_cool_MWth.sum() * dt * annual_scale
@@ -771,15 +770,6 @@ def _add_premium_columns(df: pd.DataFrame) -> pd.DataFrame:
         ),
         axis=1,
     )
-    df["carbon_abatement_cost_usd_per_tco2"] = df.apply(
-        lambda r: carbon_abatement_cost_usd_per_tco2(
-            tac_baseline_usd_per_yr=r["tac_case0_baseline_usd_per_yr"],
-            tac_case_usd_per_yr=r["tac_usd_per_yr"],
-            co2_baseline_tonnes=r["co2_case0_baseline_tonnes"],
-            co2_case_tonnes=r["co2_annual_tonnes"],
-        ),
-        axis=1,
-    )
     return df
 
 
@@ -805,7 +795,6 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
         "tac_usd_per_yr",
         "tac_case0_baseline_usd_per_yr",
         "heat_recovery_premium",
-        "carbon_abatement_cost_usd_per_tco2",
         "lcoe_usd_per_mwh_e",
         "lcoc_usd_per_mwh_c",
         "co2_annual_tonnes",

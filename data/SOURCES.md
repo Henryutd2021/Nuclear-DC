@@ -150,8 +150,10 @@ schema and aggregates back to canonical fuel buckets.
 | ATB-Mid | 7,615 | 130 | NLR ATB 2024 SMR Moderate |
 | NOAK | 2,250 | 95 | GE-Hitachi target + MIT ANP-201 |
 
-- **OPG Darlington 2024:** CAD 6.1B + CAD 1.6B = CAD 7.7B total for one
-  300 MWe-net unit. At 2024-Q3 FX 0.73 USD/CAD → **$14,700/kWe**.
+- **OPG Darlington 2024:** SMR-unit budget CAD 6.1B for one 300 MWe-net unit
+  (the separate CAD 1.6B site-infrastructure budget covers common works shared
+  across the four planned Darlington units and is excluded from the unit-level
+  anchor). At 2024-Q3 FX 0.73 USD/CAD → ~$14,800/kWe, rounded to **$14,700/kWe**.
   URL: https://www.world-nuclear-news.org/articles/what-is-the-budget-for-canadas-first-smr-project
 
 - **NLR ATB 2024 Nuclear-SMR:** Moderate 7,615 $/kWe.
@@ -194,10 +196,11 @@ All equipment YAMLs compile values from peer-reviewed/standard references.
 > Alvarez, R.A., et al. (2018). Science, 361(6398), 186–188. https://doi.org/10.1126/science.aar7204
 
 ### 3.4 BESS Li-ion — `bess_liion.yaml`
-- CAPEX 405 $/kWh, 4-hour: NLR ATB 2024 + Cole & Karmakar 2024
+- CAPEX 529 $/kWh OCC, 2-hour (matches the 100 MWh / 50 MW system): NLR ATB 2024
+  utility-scale battery storage, Moderate, 2024 COD (ATBe.csv v3.0.0 dataset)
 
 **Citation:**
-> Cole, W., & Karmakar, A. (2024). NREL TP-6A40-89625. https://www.nrel.gov/docs/fy24osti/89625.pdf
+> NLR (2024). Annual Technology Baseline 2024 — Utility-Scale Battery Storage. https://atb.nlr.gov/electricity/2024/utility-scale_battery_storage
 
 ---
 
@@ -352,13 +355,14 @@ from WattTime would be slightly different. Replace if needed
 | Field | Value | Source |
 |---|---|---|
 | WACC nominal | 6.7 % | NLR ATB 2024 |
-| Project life | 20 yr | NLR ATB 2024 |
-| CRF | 0.0907 | **DERIVED** from i, n |
-| IRA ITC 30%, PTC $30/MWh | IRA 2022 |
+| Project life | 20 yr (non-reactor); reactor 40 yr | NLR ATB 2024 |
+| CRF | 0.0922 (20 yr) / 0.0724 (40 yr) | **DERIVED** from i, n |
+| Section 45Y PTC $30/MWh, 10-yr | 26 U.S.C. 45Y; 90 FR (2025) CY2025 amounts |
 
 ### 8.2 Nuclear Fuel — `REAL` — `nuclear_fuel_cost.yaml`
-- Fleet avg $6/MWh_th: EIA Form 923 2024
-- Component breakdown: World Nuclear Association
+- $10/MWh_e net-electric basis (≈ $3.10/MWh_th at 270/870): Li et al. 2026,
+  Nature Communications, DOI 10.1038/s41467-026-73630-y
+- Front-end component context: World Nuclear Association
 
 ### 8.3 Henry Hub — `REAL` — `henry_hub_*`
 
@@ -430,13 +434,11 @@ All entries below have stable URLs/DOIs and are properly formatted for BibTeX.
 - Stull 2011 (J. Appl. Meteor.) — DOI 10.1175/JAMC-D-11-0143.1
 - Hersbach et al. 2020 (QJRMS) — DOI 10.1002/qj.3803
 - Patterson et al. 2022 (arXiv 2104.10350)
-- Cole & Karmakar 2024 (NREL TP-6A40-89625)
 - Vercellino et al. 2026 (arXiv 2604.07345)
 
 **Authoritative public data references:**
 - ERCOT MIS (NP4-183-CD DAM, NP6-905-CD RTM)
 - EIA-930 Hourly Electric Grid Monitor — ERCO
-- EIA Form 923 (nuclear fuel)
 - EIA Henry Hub Spot Prices (NG.RNGWHHD.D)
 - NLR ATB 2024 (Nuclear, NG, Storage, Geothermal-Binary, Financial)
 - EPA AVERT 2024 (2023 emission factors)

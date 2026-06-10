@@ -5,27 +5,28 @@ financial:
   WACC_nominal: 0.067                    # 6.7% — NLR ATB 2024 default for nuclear, US, private financing
   WACC_real: 0.044                       # ~ (1 + WACC_nominal) / (1 + inflation) - 1, with inflation ~2.2%
   inflation_rate: 0.022                  # US long-run CPI assumption
-  project_lifetime_years: 20             # paper convention (NB: physical asset life much longer)
+  project_lifetime_years: 20             # paper TAC comparison window (non-reactor assets)
   capital_recovery_factor: 0.0922        # CRF(i=6.7%, n=20); corrected from 0.0907 on 2026-05-19
   capital_recovery_factor_formula: "i*(1+i)^n / ((1+i)^n - 1)"
 
-  # Reactor-specific physical life (for LCOE only; TAC uses 20-year window)
+  # Reactor island amortization follows the NLR ATB 2024 SMR convention
+  # (40 years, CRF 0.0724 at 6.7%) set per-case via reactor.lifetime_years
+  # in config/plant_case{1,2}.yaml; physical life is longer still.
   reactor_physical_life_years: 60
-  reactor_lcoe_amortization_years: 40    # NLR ATB 2024 SMR convention
-  reactor_crf_40yr_at_67: 0.0724         # CRF(i=6.7%, n=40); corrected from 0.0734 on 2026-05-19
 
-  # Tax / subsidy environment
-  itc_rate_assumed: 0.30                 # IRA Section 48E investment credit (alternative to 45U, not stacked)
-  # Section 45U zero-emission nuclear PTC at the prevailing-wage rate. Full credit
-  # 1.5 cents/kWh = $15/MWh while gross receipts stay at/below 2.5 cents/kWh
-  # ($25/MWh); reduced by 16% x5 of the excess (0.8 $/$ slope) and reaching $0 at
-  # 4.375 cents/kWh ($43.75/MWh). Nominal 2024 amounts; statute inflation-adjusts
-  # after 2024. Refs: 26 U.S.C. 45U(b); IRA 2022 Sec. 13105; IRS Form 7213.
-  ptc_usd_per_mwh_assumed: 15            # full prevailing-wage 45U credit ($/MWh)
-  ptc_45u_phaseout_start_usd_per_mwh: 25.0
-  ptc_45u_phaseout_end_usd_per_mwh: 43.75
+  # Tax / subsidy environment — Section 45Y clean electricity production
+  # credit (26 U.S.C. 45Y), the technology-neutral PTC available to zero-GHG
+  # facilities placed in service after 2024 (a new-build SMR qualifies; the
+  # legacy Section 45U credit was restricted to reactors already in service
+  # before the IRA's enactment and is therefore not modeled). At the
+  # prevailing-wage rate the inflation-adjusted credit for calendar 2025 is
+  # 3.0 cents/kWh = $30/MWh (90 FR, Aug 25 2025). The credit is flat (no
+  # gross-receipts phaseout) and runs for the statutory 10-year window from
+  # commissioning; builder.py levelizes it across the 20-year TAC window via
+  # the annuity-factor ratio (x0.657 at 6.7% -> $19.70/MWh effective).
+  ptc_usd_per_mwh_assumed: 30            # prevailing-wage 45Y credit, CY2025 inflation-adjusted ($/MWh)
+  ptc_credit_duration_years: 10          # 26 U.S.C. 45Y: 10-year credit period
   nuclear_ptc_enabled: true              # default-on in the Cases 1-2 baseline
-  ptc_phaseout_year: 2032                # statutory sunset (tax years before 2033)
 
 # ==============================================================================
 # SOURCES
@@ -39,24 +40,31 @@ sources:
     used_for: ["WACC_nominal", "WACC_real", "inflation_rate", "project_lifetime_years",
                "capital_recovery_factor"]
 
-  - id: "IRA-2022-Subsidies"
-    title: "Inflation Reduction Act of 2022 — Sections 45U (PTC) and 48E (ITC)"
-    publisher: "U.S. Congress / Department of Treasury"
-    year: 2022
-    url: "https://www.congress.gov/bill/117th-congress/house-bill/5376"
-    used_for: ["itc_rate_assumed", "ptc_usd_per_mwh_assumed", "ptc_phaseout_year"]
-
-  - id: "USC-26-45U"
-    title: "26 U.S.C. 45U — Zero-emission nuclear power production credit (credit amount and gross-receipts phaseout)"
+  - id: "USC-26-45Y"
+    title: "26 U.S.C. 45Y — Clean electricity production credit (credit amount, zero-GHG eligibility, 10-year credit period)"
     publisher: "Office of the Law Revision Counsel, U.S. Code"
     year: 2022
-    url: "https://uscode.house.gov/view.xhtml?req=(title:26+section:45U+edition:prelim)"
-    used_for: ["ptc_usd_per_mwh_assumed", "ptc_45u_phaseout_start_usd_per_mwh",
-               "ptc_45u_phaseout_end_usd_per_mwh"]
+    url: "https://uscode.house.gov/view.xhtml?req=(title:26+section:45Y+edition:prelim)"
+    used_for: ["ptc_usd_per_mwh_assumed", "ptc_credit_duration_years"]
 
-  - id: "IRS-45U-ZENPPC"
-    title: "Zero-Emission Nuclear Power Production Credit (Section 45U), claimed on Form 7213"
+  - id: "FR-2025-45Y-Amounts"
+    title: "Publication of Inflation Adjustment Factor and Applicable Amounts for Clean Electricity Production Credit for Calendar Year 2025 (3.0 cents/kWh with prevailing wage and apprenticeship)"
+    publisher: "Federal Register / Internal Revenue Service"
+    year: 2025
+    url: "https://www.federalregister.gov/documents/2025/08/25/2025-16249/publication-of-inflation-adjustment-factor-and-applicable-amounts-for-clean-electricity-production"
+    used_for: ["ptc_usd_per_mwh_assumed"]
+
+  - id: "IRS-45Y-CEPC"
+    title: "Clean Electricity Production Credit (Section 45Y) — eligibility and credit amounts"
     publisher: "Internal Revenue Service"
-    year: 2024
-    url: "https://www.irs.gov/credits-deductions/zero-emission-nuclear-power-production-credit"
+    year: 2025
+    url: "https://www.irs.gov/credits-deductions/clean-electricity-production-credit"
     used_for: ["ptc_usd_per_mwh_assumed", "nuclear_ptc_enabled"]
+
+  - id: "Li-2026-NatCommun"
+    title: "Rethinking the economics and flexibility of U.S. nuclear power through hydrogen integration and policy support"
+    publisher: "Nature Communications"
+    year: 2026
+    doi: "10.1038/s41467-026-73630-y"
+    used_for: ["ptc_usd_per_mwh_assumed", "ptc_credit_duration_years"]
+    notes: "Companion modeling study using the same $30/MWh, 10-year 45Y parameterization."

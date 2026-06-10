@@ -33,6 +33,7 @@ from src.performance import (
     ngcc_efficiency_at_load,
     ngcc_hr_multiplier,
     vcc_cop_at_load,
+    vcc_wet_bulb_relief,
 )
 
 _MMBTU_PER_MWh: float = 3.412  # HHV basis conversion
@@ -122,7 +123,15 @@ def solve_case3(
 
     # Part-load: the chiller COP varies with the cooling-load fraction (the IPLV
     # hump), so VCC electricity uses the load-dependent COP, not a flat value.
-    cop_load = vcc_cop_at_load(Q_cool / Q_capacity, vcc.cop_houston)
+    # Hourly wet-bulb relief on the design-point COP keeps the VCC treatment
+    # symmetric with the absorption chiller's COP(T_wb) model.
+    relief = vcc_wet_bulb_relief(
+        ts.wet_bulb_C.to_numpy(),
+        vcc.cop_design_wet_bulb_C,
+        vcc.cop_wet_bulb_relief_per_K,
+        vcc.cop_wet_bulb_relief_cap,
+    )
+    cop_load = vcc_cop_at_load(Q_cool / Q_capacity, vcc.cop_houston) * relief
     P_VCC = Q_cool / pd.Series(cop_load, index=Q_cool.index)
     P_NGCC = P_IT + P_VCC
     if P_NGCC.max() > NGCC_capacity + 1e-6:

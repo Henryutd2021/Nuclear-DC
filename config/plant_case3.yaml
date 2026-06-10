@@ -31,10 +31,14 @@ capacities:
   electric_chiller_capacity_MWth: 160.0   # identical to Case 0 (>= 158.3 MWth)
   ngcc_capacity_MWe:              200.0   # covers max IT (142.4) + max VCC draw (49.5) = 191.9 MWe + buffer
 
-# Vapor-compression chiller — identical to Case 0 baseline
+# Vapor-compression chiller — identical to Case 0 baseline (incl. the hourly
+# wet-bulb relief on the design-point COP; see plant_case0.yaml)
 vcc:
   cop_baseline:    3.5
   cop_houston:     3.2
+  cop_design_wet_bulb_C:      26.0
+  cop_wet_bulb_relief_per_K:  0.01364
+  cop_wet_bulb_relief_cap:    1.182
   fixed_om_usd_per_kWth_year: 8
   variable_om_usd_per_mwh_th: 0.5
   capex_usd_per_kWth: 250

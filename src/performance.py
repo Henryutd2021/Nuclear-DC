@@ -22,17 +22,50 @@ _VCC_REL_COP = np.array([0.0, 0.70, 0.95, 1.10, 1.18, 1.18, 1.14, 1.08, 1.04, 1.
 
 # --- NGCC: relative heat rate vs electrical-load fraction -------------------
 # Representative F-class combined-cycle part-load characteristic: heat rate
-# rises (efficiency falls) as load drops below the design point. Values are a
-# typical CCGT shape; confirm against a preferred plant-specific source before
-# publication. Relative heat-rate multiplier, 1.0 at full load.
-_NGCC_LOAD_FRAC = np.array([0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00])
-_NGCC_REL_HR = np.array([1.170, 1.100, 1.065, 1.040, 1.022, 1.008, 1.000])
+# rises (efficiency falls) as load drops below the design point. The 0.40-1.00
+# segment is the typical CCGT shape; below the ~40% gas-turbine stable-load
+# point the curve steepens sharply (inlet-bleed heating, falling firing
+# temperature, bottoming-cycle starvation — see Kehlhofer et al.,
+# Combined-Cycle Gas & Steam Turbine Power Plants, 3rd ed., part-load
+# characteristics), so the low-load branch is extended rather than
+# flat-extrapolated. Relative heat-rate multiplier, 1.0 at full load.
+_NGCC_LOAD_FRAC = np.array(
+    [0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00]
+)
+_NGCC_REL_HR = np.array(
+    [1.850, 1.650, 1.500, 1.380, 1.300, 1.170, 1.100, 1.065, 1.040, 1.022, 1.008, 1.000]
+)
 
 
 def vcc_cop_at_load(load_fraction, cop_full_load: float):
     """VCC COP at a given cooling-load fraction (scalar or array)."""
     rel = np.interp(load_fraction, _VCC_LOAD_FRAC, _VCC_REL_COP)
     return rel * cop_full_load
+
+
+def vcc_wet_bulb_relief(
+    T_wb_C,
+    design_wet_bulb_C: float,
+    relief_per_K: float,
+    relief_cap: float,
+):
+    """Wet-bulb multiplier on the VCC design-point COP (scalar or array).
+
+    Cooler condenser water lowers the compressor lift, so the chiller COP
+    improves linearly below the design wet bulb and degrades symmetrically
+    above it, capped at ``relief_cap`` — the same relative response the
+    absorption chiller's COP(T_wb) model carries, so the technology
+    comparison stays even-handed:
+
+        relief(T_wb) = min(1 + relief_per_K * (T_design - T_wb), cap)
+
+    A floor of 0.5 guards numerically against unphysical extrapolation.
+    """
+    relief = 1.0 + relief_per_K * (design_wet_bulb_C - np.asarray(T_wb_C, dtype=float))
+    relief = np.clip(relief, 0.5, relief_cap)
+    if np.ndim(T_wb_C) == 0:
+        return float(relief)
+    return relief
 
 
 def vcc_pwl_points(cop_full_load: float, q_max: float):

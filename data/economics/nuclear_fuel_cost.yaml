@@ -1,45 +1,41 @@
 # Nuclear Fuel Costs — BWRX-300 / Light Water Reactor (LWR) Generic
-# Used in TAC: Fuel_annual = fuel_cost_$/MWh_th × thermal_energy_consumed_MWh_th
+# Basis: $/MWh_e of net electric generation (the basis fleet statistics and
+# the companion Nature Communications study use). The model converts to a
+# thermal-basis rate via the plant net efficiency and charges it on thermal
+# power, so fuel spend stays proportional to the energy actually consumed:
+#   Fuel_annual = fuel_cost_$/MWh_e × (P_e_net / P_th) × thermal_energy_MWh_th
 
 fuel_cost:
-  baseline_usd_per_mwh_thermal: 6.0
-  range_usd_per_mwh_thermal: [5.0, 7.0]
-  baseline_usd_per_mwh_electric: 17.4   # = 6.0 / 0.345 (BWRX-300 thermal efficiency)
-
-  components_usd_per_mwh_thermal:
-    uranium_concentrate_u3o8: 1.95
-    conversion_to_uf6: 0.35
-    enrichment_swu: 2.45
-    fabrication: 0.85
-    spent_fuel_disposal_levy: 0.40        # US: 1 mil/kWh @ 0.345 efficiency
-    total: 6.00
+  baseline_usd_per_mwh_electric: 10.0
+  # = 10.0 × (270 / 870) at the BWRX-300 net efficiency (31.0%)
+  baseline_usd_per_mwh_thermal_equiv: 3.10
 
   context: |
-    Reflects 2024 spot-market uranium prices ~$90/lb U3O8 and SWU prices ~$170.
-    Range covers normal market variation; long-term contracts further dampen
-    volatility. Nuclear fuel cost is ~5-10% of total nuclear LCOE — small
-    compared to CAPEX-driven cost components.
+    $10/MWh_e covers the full front-end fuel cycle (uranium, conversion,
+    enrichment, fabrication) plus the US spent-fuel disposal levy, at the
+    upper end of published LWR fleet averages (~$5-6/MWh_e) to reflect the
+    SMR first-core and smaller-batch fabrication premium. Same value used in
+    the companion nuclear-hydrogen study (Li et al. 2026, Nature
+    Communications). Fuel is a second-order cost lever: ~5-10% of nuclear
+    LCOE versus the capital charge that dominates it.
 
 # ==============================================================================
 # SOURCES
 # ==============================================================================
 sources:
-  - id: "EIA-Form-923-2024"
-    title: "EIA Form 923 — Nuclear Fuel Costs"
-    publisher: "U.S. Energy Information Administration"
-    year: 2024
-    url: "https://www.eia.gov/electricity/data/eia923/"
-    used_for: ["fuel_cost.baseline_usd_per_mwh_thermal", "fuel_cost.range_usd_per_mwh_thermal"]
-    notes: "US nuclear fleet operating cost data; 2024 fleet avg fuel cost reported as $6.05/MWh_th."
+  - id: "Li-2026-NatCommun"
+    title: "Rethinking the economics and flexibility of U.S. nuclear power through hydrogen integration and policy support"
+    authors: "Honglin Li, Jianqiao Huang, Bikash Poudel, Mucun Sun, Tyler Westover, Daniel Wendt, Jie Zhang"
+    publisher: "Nature Communications"
+    year: 2026
+    doi: "10.1038/s41467-026-73630-y"
+    used_for: ["fuel_cost.baseline_usd_per_mwh_electric"]
+    notes: "Companion study; nuclear fuel cost parameterized at $10/MWh_e."
 
   - id: "WNA-Fuel-Cycle-2024"
     title: "The Economics of Nuclear Power — Fuel Cycle Breakdown"
     publisher: "World Nuclear Association"
     year: 2024
     url: "https://world-nuclear.org/information-library/economic-aspects/economics-of-nuclear-power.aspx"
-    used_for: ["fuel_cost.components_usd_per_mwh_thermal"]
-
-  - id: "UxC-2024-Spot"
-    title: "UxC Nuclear Fuel Price Indicators (2024)"
-    publisher: "UxC, LLC (industry data provider)"
-    notes: "Spot price benchmark, not a direct source; used for cross-check of EIA fleet costs."
+    used_for: ["fuel_cost.context"]
+    notes: "Front-end component shares (U3O8, conversion, enrichment, fabrication); cross-check that $10/MWh_e sits above the large-LWR fleet average, consistent with an SMR premium."

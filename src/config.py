@@ -60,6 +60,13 @@ class VccConfig(BaseModel):
     variable_om_usd_per_mwh_th: float = Field(ge=0.0)
     capex_usd_per_kWth: float = Field(ge=0.0)
     lifetime_years: int = Field(gt=0)
+    # Wet-bulb relief on the design-point system COP, mirroring the relative
+    # linear response the absorption chiller already carries (0.015/1.10 ≈
+    # 1.36% per K) so neither cooling technology is asymmetrically favored.
+    # relief(t) = clip(1 + relief_per_K * (T_design - T_wb(t)), ..., cap)
+    cop_design_wet_bulb_C: float = Field(26.0)
+    cop_wet_bulb_relief_per_K: float = Field(0.0, ge=0.0)
+    cop_wet_bulb_relief_cap: float = Field(1.0, ge=1.0)
 
 
 class NgccConfig(BaseModel):
@@ -83,7 +90,11 @@ class ReactorConfig(BaseModel):
     capex_usd_per_kWe: float = Field(gt=0.0)        # v2.5 S4: FOAK/ATB-Mid/NOAK
     fixed_om_usd_per_kWe_year: float = Field(ge=0.0)
     variable_om_usd_per_mwh_e: float = Field(ge=0.0)
-    fuel_cost_usd_per_mwh_th: float = Field(ge=0.0)
+    # Fuel is priced on the net-electric basis the fleet statistics use
+    # ($/MWh_e of net generation); the builder converts to a thermal-basis
+    # rate via the plant's net efficiency so fuel spend stays proportional
+    # to thermal energy actually consumed (extraction does not burn less).
+    fuel_cost_usd_per_mwh_e: float = Field(ge=0.0)
     co2_lifecycle_g_per_kwh_e: float = Field(ge=0.0)
     # P1-B BWRX MILP locks (v2.5 §A A-block)
     min_load_fraction: float = Field(gt=0.0, lt=1.0)
@@ -95,19 +106,18 @@ class ReactorConfig(BaseModel):
 class TurbineConfig(BaseModel):
     """Main HP+LP steam turbine fed by reactor (Cases 1-2, v2.6).
 
-    v2.6 cascaded extraction: a mid-pressure tap (5-7 barg, ~160 °C) between
-    HP and LP stages can divert steam to the double-effect absorption
-    chiller. Diverted steam doesn't expand through the LP turbine, so it
-    costs electricity. The Willans-line linearization charges that loss
-    per MWth of extracted heat:
+    Gross output follows a Willans line in reactor thermal input (fitted to
+    data/perf/turbine_hr.csv part-load heat rates), and the v2.6 cascaded
+    extraction at the HP/LP crossover (7 bar abs, ~165 °C) charges the lost
+    LP expansion work per MWth of steam diverted to the double-effect
+    absorption chiller:
 
-        P_turb_net = rated_efficiency * P_rx
-                   - extraction_willans_slope_MWe_per_MWth * Q_to_absorption
+        P_turb_gross = main_willans_slope * P_rx - main_willans_intercept
+                     - extraction_willans_slope_MWe_per_MWth * Q_to_absorption
 
-    Plan §A7 + §F.1: each kg/s extraction ≈ 2.0 MWth in and ~0.165 MWe out,
-    so 0.165 / 2.0 ≈ 0.083 MWe/MWth on the conservative side; matches the
-    expected HP/LP split for a BWRX-300 main turbine where extraction
-    occurs after HP work has already been captured.
+    The extraction slope comes from the steam-table heat balance documented
+    in config/plant_case2.yaml (lost LP work net of the hot-condensate-return
+    credit, ~0.20 MWe/MWth for the 7-bar tap).
     """
 
     rated_efficiency: float = Field(gt=0.0, lt=1.0)   # at full main-steam load, zero extraction
@@ -115,6 +125,15 @@ class TurbineConfig(BaseModel):
     fixed_om_usd_per_kWe_year: float = Field(ge=0.0)
     variable_om_usd_per_mwh_e: float = Field(ge=0.0)
     aux_load_fraction: float = Field(ge=0.0, lt=1.0)  # parasitic loads as fraction of gross
+    # Main-turbine Willans line (gross output vs reactor thermal input),
+    # fitted to data/perf/turbine_hr.csv and constrained through the design
+    # point (870 MWth -> 300 MWe gross). The no-load intercept captures the
+    # part-load efficiency droop a constant rated_efficiency misses (~7.6%
+    # output overstatement at the 50% minimum load). When the intercept is 0
+    # the line reduces to the constant-efficiency model with slope
+    # rated_efficiency.
+    main_willans_slope_MWe_per_MWth: float = Field(gt=0.0, lt=1.0)
+    main_willans_intercept_MWe: float = Field(0.0, ge=0.0)
     # v2.6 cascaded extraction: electricity penalty per unit of heat diverted
     # to absorption at the mid-pressure tap. 0 means "no extraction allowed"
     # (Case 1) and the absorption block must be disabled.
@@ -153,10 +172,14 @@ class AbsorptionConfig(BaseModel):
 
 
 class BessConfig(BaseModel):
-    """Lithium-ion BESS for v2.5 S3 binary sensitivity."""
+    """Lithium-ion BESS for v2.5 S3 binary sensitivity.
+
+    Capital is a single all-in $/kWh at the system's own duration (NLR ATB
+    2-hour utility-scale battery), so the energy rating alone carries the
+    capital charge — no separate $/kW power-block term to double-count.
+    """
 
     capex_usd_per_kwh: float = Field(gt=0.0)
-    capex_usd_per_kw: float = Field(gt=0.0)
     fixed_om_usd_per_kw_year: float = Field(ge=0.0)
     variable_om_usd_per_mwh: float = Field(ge=0.0)
     round_trip_efficiency: float = Field(gt=0.0, le=1.0)
@@ -246,18 +269,15 @@ class FinancialParams(BaseModel):
     capital_recovery_factor: float = Field(gt=0.0, lt=1.0)
     capital_recovery_factor_formula: str
     reactor_physical_life_years: int = Field(gt=0)
-    reactor_lcoe_amortization_years: int = Field(gt=0)
-    reactor_crf_40yr_at_67: float
-    itc_rate_assumed: float
-    # Section 45U nuclear PTC. ptc_usd_per_mwh_assumed is the full prevailing-wage
-    # credit (1.5 cents/kWh = $15/MWh); it phases out linearly between the two
-    # breakpoints below per 26 U.S.C. 45U(b) (full below $25/MWh = 2.5 cents/kWh,
-    # zero at $43.75/MWh = 4.375 cents/kWh). Default-on for Cases 1-2.
+    # Section 45Y clean-electricity PTC (26 U.S.C. 45Y; technology-neutral,
+    # zero-GHG facilities placed in service after 2024). Flat per-MWh credit
+    # at the prevailing-wage rate, no gross-receipts phaseout, paid for the
+    # first ptc_credit_duration_years (statutorily 10) and levelized over the
+    # TAC window in builder.py via finance.levelized_ptc_usd_per_mwh.
+    # Default-on for Cases 1-2.
     ptc_usd_per_mwh_assumed: float
-    ptc_phaseout_year: int
+    ptc_credit_duration_years: int = Field(10, gt=0)
     nuclear_ptc_enabled: bool = True
-    ptc_45u_phaseout_start_usd_per_mwh: float = Field(25.0, ge=0.0)
-    ptc_45u_phaseout_end_usd_per_mwh: float = Field(43.75, gt=0.0)
 
 
 class RunConfig(BaseModel):
@@ -356,12 +376,13 @@ def with_carbon_price(cfg: RunConfig, price_usd_per_tco2: float) -> RunConfig:
 
 
 def with_nuclear_ptc(cfg: RunConfig, enabled: bool) -> RunConfig:
-    """Return a copy of ``cfg`` with the Section 45U nuclear PTC turned on/off.
+    """Return a copy of ``cfg`` with the Section 45Y clean-electricity PTC on/off.
 
     The credit is default-on in the baseline (Cases 1-2). This toggle lets a
     sensitivity run the policy-off counterfactual without editing yamls; the
-    credit enters the TAC objective in builder.py as a price-dependent per-MWh
-    reduction on net nuclear generation (see ``section_45u_credit_usd_per_mwh``).
+    credit enters the TAC objective in builder.py as a flat per-MWh reduction
+    on net nuclear generation, levelized over the TAC window (see
+    ``finance.levelized_ptc_usd_per_mwh``).
     """
     new_financial = cfg.financial.model_copy(
         update={"nuclear_ptc_enabled": bool(enabled)}

@@ -41,8 +41,8 @@ class NuclearCaseResult:
     fuel_annual_usd: float
     grid_annual_usd: float
     carbon_annual_usd: float
-    # Section 45U nuclear PTC, negative (a credit). Zero when the credit is
-    # disabled. Already included in tac_usd_per_yr via the objective.
+    # Section 45Y clean-electricity PTC, negative (a credit). Zero when the
+    # credit is disabled. Already included in tac_usd_per_yr via the objective.
     ptc_annual_usd: float
     tac_usd_per_yr: float
     co2_annual_tonnes: float

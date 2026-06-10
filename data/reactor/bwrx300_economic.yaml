@@ -12,23 +12,24 @@
 scenarios:
 
   FOAK:
-    label: "First-of-a-Kind — Ontario Power Generation Darlington empirical budget"
+    label: "First-of-a-Kind — Ontario Power Generation Darlington empirical budget (SMR unit only)"
     overnight_capital_cost_usd_per_kWe: 14700
     lcoe_usd_per_mwh: 194              # MIT ANP-201 FOAK estimate (with ITC + LPO loan)
     description: |
       OPG Darlington Unit 1 CAPEX as approved by the Ontario provincial government
-      in 2024-09. Total project budget is CAD 6.1B for the SMR + CAD 1.6B for site
-      infrastructure = CAD 7.7B total for one 300-MWe-net unit. At 300 MWe net and
-      USD/CAD ≈ 0.73 (2024-Q3 avg), this implies USD 14,700 /kWe overnight cost.
+      in 2024-09. The SMR-unit budget is CAD 6.1B for one 300-MWe-net unit; the
+      separate CAD 1.6B site-infrastructure budget covers common works shared
+      across the four planned Darlington units and is excluded from this
+      unit-level anchor. At 300 MWe net and USD/CAD ≈ 0.73 (2024-Q3 avg),
+      CAD 6.1B implies USD ~14,800 /kWe overnight cost, rounded to 14,700.
       This is the only real-world budgeted cost figure for the BWRX-300 design.
     capex_breakdown:
-      smr_unit_CAD: 6100000000        # 6.1 B CAD, OPG announcement 2024-09
-      site_infrastructure_CAD: 1600000000  # 1.6 B CAD
-      total_CAD: 7700000000
+      smr_unit_CAD: 6100000000        # 6.1 B CAD, OPG announcement 2024-09 (anchor basis)
+      site_infrastructure_CAD: 1600000000  # 1.6 B CAD — shared 4-unit common works, excluded
       exchange_rate_usd_per_cad_2024Q3: 0.73
-      total_USD: 5621000000
+      smr_unit_USD: 4453000000        # = 6.1e9 × 0.73
       net_capacity_MW: 300
-      occ_usd_per_kWe: 14700
+      occ_usd_per_kWe: 14700          # ≈ 4.453e9 / 300,000 = 14,843, rounded
     primary_source: "OPG-CNSC-2024"
     secondary_source: "WNN-2024-09"
 
@@ -75,16 +76,17 @@ sanity_check:
 # ------------------------------------------------------------------------------
 fixed_om_usd_per_kWe_year: 121          # NLR ATB 2024 SMR Moderate
 variable_om_usd_per_mwh: 3.50           # NLR ATB 2024 SMR Moderate (incl. minor consumables)
-fuel_cost_usd_per_mwh_thermal: 6.0      # baseline (EIA 2024 nuclear fleet avg); paper sensitivity range [5, 7]
-fuel_cost_range_usd_per_mwh_thermal: [5.0, 7.0]
+fuel_cost_usd_per_mwh_electric: 10.0    # $/MWh_e net basis (Li et al. 2026 Nat. Commun.);
+                                        # ≈ 3.10 $/MWh_th at 270/870 net efficiency —
+                                        # see data/economics/nuclear_fuel_cost.yaml
 
 # ------------------------------------------------------------------------------
 # Financial parameters (apply across all 3 scenarios)
 # ------------------------------------------------------------------------------
 financial:
   WACC_nominal: 0.067                   # 6.7% — NLR ATB 2024 default (private financing, US, nuclear)
-  project_lifetime_years: 20            # for amortization in TAC; reactor physical life is 60 years
-  capital_recovery_factor: 0.0907       # CRF = i(1+i)^n / [(1+i)^n - 1] @ i=6.7%, n=20
+  reactor_amortization_years: 40        # NLR ATB 2024 SMR convention; CRF 0.0724 @ 6.7%
+  project_lifetime_years: 20            # TAC window for non-reactor assets; CRF 0.0922
   source: "NLR-ATB-2024"
 
 # ==============================================================================
@@ -130,8 +132,9 @@ sources:
     year: 2024
     url: "https://inldigitallibrary.inl.gov/sites/sti/sti/Sort_107010.pdf"
 
-  - id: "EIA-Nuclear-2024"
-    title: "Nuclear Fuel & Operating Cost — EIA Form 923 / Form 860"
-    publisher: "U.S. Energy Information Administration"
-    year: 2024
-    url: "https://www.eia.gov/electricity/data/eia923/"
+  - id: "Li-2026-NatCommun"
+    title: "Rethinking the economics and flexibility of U.S. nuclear power through hydrogen integration and policy support"
+    publisher: "Nature Communications"
+    year: 2026
+    doi: "10.1038/s41467-026-73630-y"
+    notes: "Nuclear fuel cost $10/MWh_e (net electric basis); see data/economics/nuclear_fuel_cost.yaml"

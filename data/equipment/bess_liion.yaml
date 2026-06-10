@@ -4,15 +4,21 @@
 
 bess_liion:
   technology: "Lithium-Ion (LFP-dominated for grid-scale 2024)"
-  configuration_paper: "100 MWh / 25 MW (4-hour duration)"
+  configuration_paper: "100 MWh / 50 MW (2-hour duration)"
 
   economics:
-    capex_total_2024_usd_per_kwh: 405          # NLR ATB 2024 Battery Storage, Moderate
-    capex_total_2024_usd_per_kw: 1620          # 4-hour total ($/kW)
-    capex_battery_pack_usd_per_kwh: 156        # cell + module + pack
-    capex_balance_of_system_usd_per_kwh: 249   # PCS, EPC, interconnect
-    capex_range_usd_per_kwh: [325, 485]
-    fixed_om_usd_per_kw_year: 25
+    # NLR ATB 2024 utility-scale battery storage, Moderate, 2024 COD, 2-hour
+    # duration (matches the modeled 100 MWh / 50 MW system). Overnight
+    # capital basis in 2022$ — construction financing is carried by the
+    # model's WACC/CRF annualization, not embedded in the unit cost.
+    capex_total_2024_usd_per_kwh: 529          # 2-hr OCC ($529.18/kWh)
+    capex_total_2024_usd_per_kw: 1058          # = 2 h × 529
+    # ATB duration decomposition (linear across the 2/4/6/8/10-h entries):
+    # OCC $/kW = 355.75 $/kWh × duration + 346.86 $/kW (energy + power blocks);
+    # the 4-h point is $442/kWh on the same basis.
+    capex_energy_block_usd_per_kwh: 356
+    capex_power_block_usd_per_kw: 347
+    fixed_om_usd_per_kw_year: 26.5             # ATB 2024 2-hr Moderate
     variable_om_usd_per_mwh: 0.5
     replacement_cycle_years: 10                # warranty cycle; refurb at year 10
     end_of_life_credit_pct: 5                  # salvage value of cells/casing
@@ -23,8 +29,8 @@ bess_liion:
     depth_of_discharge_max: 0.95
     cycle_life_at_dod90: 6000                  # cycles before 20% capacity fade (LFP)
     calendar_life_years: 15
-    c_rate_max_charge: 0.25                    # 4-hour
-    c_rate_max_discharge: 0.25
+    c_rate_max_charge: 0.5                     # 2-hour
+    c_rate_max_discharge: 0.5
     response_time_seconds: 0.2
 
   operational_paper_assumptions:
@@ -38,26 +44,18 @@ bess_liion:
 # ==============================================================================
 sources:
   - id: "NLR-ATB-2024-Storage"
-    title: "NLR ATB 2024 — Battery Storage (4-hour duration, Utility-Scale)"
+    title: "NLR ATB 2024 — Utility-Scale Battery Storage (2-hour duration, Moderate, 2024 COD)"
     publisher: "NLR"
     year: 2024
     url: "https://atb.nlr.gov/electricity/2024/utility-scale_battery_storage"
     used_for: ["economics.capex_*", "economics.fixed_om_usd_per_kw_year",
                "economics.variable_om_usd_per_mwh"]
-
-  - id: "Cole-Karmakar-NREL-2024"
-    title: "Cost Projections for Utility-Scale Battery Storage: 2024 Update"
-    authors: "Wesley Cole, Akash Karmakar"
-    publisher: "NREL Technical Report"
-    year: 2024
-    url: "https://www.nrel.gov/docs/fy24osti/89625.pdf"
-    used_for: ["economics.capex_battery_pack_usd_per_kwh",
-               "economics.capex_balance_of_system_usd_per_kwh"]
+    notes: "Values from the ATB 2024 v3.0.0 dataset (ATBe.csv, OEDI data lake); 2-hr OCC $529.18/kWh, FOM $26.46/kW-yr. Duration decomposition from the ATB battery cost equation: Total $/kW = pack $/kWh × duration + BOS $/kW."
 
   - id: "Lazard-LCOS-2024"
     title: "Lazard's Levelized Cost of Storage Analysis — Version 9.0"
     publisher: "Lazard"
     year: 2024
     url: "https://www.lazard.com/research-insights/levelized-cost-of-energy-2024/"
-    used_for: ["economics.capex_range_usd_per_kwh"]
-    notes: "Industry-side dual source for CAPEX cross-check."
+    used_for: ["economics.capex_total_2024_usd_per_kwh"]
+    notes: "Industry-side cross-check on the 2-hr all-in capital range."

@@ -62,7 +62,7 @@ class ValueDecompositionRow:
     absorption_capex_fom_usd_per_yr: float
     extra_water_cost_usd_per_yr: float
     crystal_cutoff_backup_usd_per_yr: float            # legacy name: all Case 2 VCC backup/top-up
-    ptc_forgone_usd_per_yr: float                        # less 45U credit (Case 2 generates less)
+    ptc_forgone_usd_per_yr: float                        # less 45Y credit (Case 2 generates less)
     sum_of_components_usd_per_yr: float
     residual_usd_per_yr: float                          # net - sum_components
 
@@ -247,7 +247,7 @@ def compute_value_decomposition(
                 annual_scale=annual_scale,
             )
 
-            # Section 45U credit forgone by adding absorption: diverting steam to
+            # Section 45Y credit forgone by adding absorption: diverting steam to
             # the absorber lowers turbine output, so Case 2 earns slightly less
             # production credit than Case 1. Both ptc values are negative (a
             # credit), so ptc_1 - ptc_2 < 0 and the term subtracts value.

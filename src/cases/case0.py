@@ -27,7 +27,7 @@ import pandas as pd
 from src.config import RunConfig
 from src.data import TimeSeries
 from src.finance import annualized_capex
-from src.performance import vcc_cop_at_load
+from src.performance import vcc_cop_at_load, vcc_wet_bulb_relief
 
 
 @dataclass(frozen=True)
@@ -102,8 +102,16 @@ def solve_case0(
 
     # Part-load: the chiller COP varies with the cooling-load fraction (the IPLV
     # hump peaks near 40-50% load), so electricity follows the load-dependent COP
-    # rather than a single full-load value.
-    cop_load = vcc_cop_at_load(Q_cool / Q_capacity, vcc.cop_houston)
+    # rather than a single full-load value. The hourly wet-bulb relief scales the
+    # design-point COP with condenser-water temperature, mirroring the relief the
+    # absorption chiller carries in Cases 2-3 so the comparison stays symmetric.
+    relief = vcc_wet_bulb_relief(
+        ts.wet_bulb_C.to_numpy(),
+        vcc.cop_design_wet_bulb_C,
+        vcc.cop_wet_bulb_relief_per_K,
+        vcc.cop_wet_bulb_relief_cap,
+    )
+    cop_load = vcc_cop_at_load(Q_cool / Q_capacity, vcc.cop_houston) * relief
     P_VCC = Q_cool / pd.Series(cop_load, index=Q_cool.index)
     P_grid_buy = P_IT + P_VCC
 

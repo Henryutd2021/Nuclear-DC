@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Union
 
+import numpy as np
 import pandas as pd
 import yaml
 
@@ -33,6 +35,29 @@ class TimeSeries:
     carbon_intensity_g_per_kwh: pd.Series
     henry_hub_usd_per_mmbtu: float
     henry_hub_usd_per_mmbtu_hourly: pd.Series
+
+
+_IT_TRACE_YEAR: int = 2018  # measurement year of the NLR colocation trace
+
+
+def _align_weekday_phase(load: pd.Series, year: int) -> pd.Series:
+    """Shift the 2018 IT-load trace so weekdays line up with the market year.
+
+    The workload trace was measured in calendar 2018 (Jan 1 = Monday) while
+    prices/weather/carbon belong to 2022-2024. Joining them positionally puts
+    weekend troughs against weekday peaks in two of the three years, which
+    moves annual grid cost by more than the Case2-Case1 gap. A circular
+    day-shift aligns day-of-week and hour-of-day while preserving the trace's
+    seasonal position: hour i of the market year takes the 2018 hour with the
+    same weekday, ``(i + 24*offset) mod 8760`` where ``offset`` is the
+    market year's Jan-1 weekday (Monday = 0).
+    """
+    offset_days = date(year, 1, 1).weekday() - date(_IT_TRACE_YEAR, 1, 1).weekday()
+    offset_days %= 7
+    if offset_days == 0:
+        return load
+    rolled = np.roll(load.to_numpy(), -24 * offset_days)
+    return pd.Series(rolled, index=load.index)
 
 
 def _read_column(path: Path, col: str, start: int, n: int) -> pd.Series:
@@ -98,10 +123,17 @@ def load_time_series(
         / f"ercot_carbon_intensity_hourly_{year}.csv"
     )
 
+    it_full = _read_column(it_path, "IT_load_MW", 0, _HOURS_PER_YEAR)
+    it_aligned = (
+        _align_weekday_phase(it_full, year)
+        .iloc[start_hour : start_hour + num_hours]
+        .reset_index(drop=True)
+    )
+
     return TimeSeries(
         year=year,
         num_hours=num_hours,
-        it_load_MW=_read_column(it_path, "IT_load_MW", start_hour, num_hours),
+        it_load_MW=it_aligned,
         wet_bulb_C=_read_column(wb_path, "wet_bulb_C", start_hour, num_hours),
         price_import_usd_per_mwh=_read_column(
             price_path, "price_usd_per_mwh", start_hour, num_hours

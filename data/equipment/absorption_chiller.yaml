@@ -42,10 +42,13 @@ double_effect:
     chw_supply_range_C: [5, 9]
 
     # Cooling-water (rejection) side
-    cooling_water_inlet_C_houston: 32   # cooling-tower outlet @ Houston summer wet-bulb 26 °C
+    cooling_water_inlet_C_houston: 31   # cooling-tower outlet @ Houston summer wet-bulb 26 °C + 5 K approach
     cooling_water_inlet_range_C: [29, 35]
+    # Shutdown threshold applies the safety margin to the Houston design
+    # point: 31 C design + 3 K margin = 34 C, inside the 34-35 C vendor
+    # envelope for double-effect machines.
     libr_crystallization_safety_margin_C: 3
-    libr_crystallization_critical_inlet_C: 32
+    libr_crystallization_critical_inlet_C: 34
 
   parasitics:
     pump_electric_kWe_per_kW_cooling: 0.020   # ~2 % of cooling output as electrical parasitic
@@ -88,9 +91,10 @@ houston_correction:
     Manufacturer COP_nameplate (1.30 for double-effect) assumes ASHRAE-standard
     cooling-water inlet temperature 29 °C. Houston summer wet-bulb temperature
     averages ~26 °C (NSRDB Houston Intercontinental Airport TMY3), giving
-    cooling-tower outlet 32-35 °C. This raises absorber and condenser temperatures,
-    lowering COP by ~12-18 % and bringing the system close to the LiBr crystallization
-    boundary (~32 °C cooling-water inlet for stable operation).
+    cooling-tower outlet 31-35 °C. This raises absorber and condenser temperatures,
+    lowering COP by ~12-18 % and pushing the system toward the LiBr crystallization
+    boundary (shutdown at 34 °C cooling-water inlet = 31 °C Houston design point
+    plus the 3 K safety margin; vendor envelopes run to 34-35 °C).
   wet_bulb_summer_avg_C: 26
   wet_bulb_summer_p95_C: 28
   cooling_tower_approach_K: 5         # tower outlet = wb + approach

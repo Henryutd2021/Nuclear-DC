@@ -1,24 +1,26 @@
-"""Headline KPIs for Nuclear-DC (v2.7 — all 8 KPIs from plan §D delivered).
+"""Headline KPIs for Nuclear-DC (v2.7 KPI set, plan §D).
 
   1. TAC (passthrough)
-  2. LCOE ($/MWh_e delivered to IT)
+  2. Net levelized cost of IT supply ($/MWh_e delivered to IT; net TAC over
+     IT energy — includes cooling capital, carbon cost, PTC and export
+     netting, so it is NOT a generation LCOE)
   3. LCOC ($/MWh_c delivered as chilled water)
   4. Heat-Recovery Premium (free function — needs two TACs)
   5. Annual CO2 (passthrough)
-  6. Carbon abatement cost ($/tCO2 avoided vs Case 0)
-  7. EPBT (years, energy payback time — Lenzen 2008 / IAEA 2018 method)
-  8. Water footprint, three-tier (v2.7 upgrade):
-        8a. Direct site water (L/MWh_e_IT) — cooling-tower makeup at the DC
+  6. EPBT (years, energy payback time — Lenzen 2008 / IAEA 2018 method)
+  7. Water footprint, three-tier (v2.7 upgrade):
+        7a. Direct site water (L/MWh_e_IT) — cooling-tower makeup at the DC
             (VCC + absorption-chiller Q_reject side)
-        8b. Indirect generation water (L/MWh_e_IT) — Macknick 2012 weighted
+        7b. Indirect generation water (L/MWh_e_IT) — Macknick 2012 weighted
             by the power-source mix
-        8c. Scarcity-weighted total (m3 world-eq/MWh_e_IT) — multiplied by
+        7c. Scarcity-weighted total (m3 world-eq/MWh_e_IT) — multiplied by
             the AWARE / Aqueduct scarcity factor for the host basin (ERCOT
             South Hub baseline 0.65; world-mean reference = 1.0)
 
-KPIs 6-8 were marked "Deferred to Phase 2" through v2.6; v2.7 closes that
-gap so the 8-KPI promise in the §0.5 D table is mechanically backed and
-splits #8 into three policy-readable layers.
+The static carbon-abatement-cost KPI was retired: with merchant exports
+credited at the grid AEF its denominator is dominated by off-site
+displacement rather than load decarbonization, and it is algebraically the
+same quantity as the carbon-price crossover the paper already reports.
 """
 
 from __future__ import annotations
@@ -133,33 +135,6 @@ def heat_recovery_premium(tac_baseline: float, tac_case: float) -> float:
             f"tac_baseline must be positive, got {tac_baseline!r}"
         )
     return (tac_baseline - tac_case) / tac_baseline
-
-
-def carbon_abatement_cost_usd_per_tco2(
-    tac_baseline_usd_per_yr: float,
-    tac_case_usd_per_yr: float,
-    co2_baseline_tonnes: float,
-    co2_case_tonnes: float,
-) -> Optional[float]:
-    """KPI #6 — cost per tonne CO2 avoided relative to Case 0.
-
-        $/tCO2_avoided = (TAC_case - TAC_baseline) / (CO2_baseline - CO2_case)
-
-    Sign convention:
-      - Numerator > 0  → case is more expensive (typical for nuclear/cogen)
-      - Denominator > 0 → case avoids CO2 vs grid-only baseline
-      - Positive result → "you pay $X to avoid 1 tCO2" (the policy-readable number)
-      - Negative result → case both saves money AND emits more (or both costs more
-        AND emits more) — the cost-per-avoided metric is undefined in those
-        quadrants, so we return None to flag it rather than print a misleading
-        negative dollar figure.
-
-    Returns None if denominator ≤ 0 (no abatement → metric undefined).
-    """
-    abatement_t = co2_baseline_tonnes - co2_case_tonnes
-    if abatement_t <= 0:
-        return None
-    return (tac_case_usd_per_yr - tac_baseline_usd_per_yr) / abatement_t
 
 
 def epbt_years(

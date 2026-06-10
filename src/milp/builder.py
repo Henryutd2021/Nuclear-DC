@@ -10,17 +10,21 @@ v2.6 heat routing (cascaded, NOT parallel):
                               ├─ part diverted to double-effect absorption
                               └─ part continues to LP turbine + condenser
 
-    P_turb_gross_full(t) = rated_efficiency * P_rx(t)            # zero-extraction baseline
-    P_turb_gross(t)      = P_turb_gross_full(t)
-                           - willans_slope * Q_to_abs(t)         # Willans penalty
-    P_turb_net(t)        = (1 - aux_fraction) * P_turb_gross(t)
-    Q_abs_cool(t)        = COP_abs(T_wb(t)) * available(t) * Q_to_abs(t)
+    P_turb_gross(t) = a_w * P_rx(t) - b_w                        # main-turbine Willans line
+                      - willans_slope * Q_to_abs(t)              # extraction penalty
+    P_turb_net(t)   = (1 - aux_fraction) * P_turb_gross(t)
+    Q_abs_cool(t)   = COP_abs(T_wb(t)) * available(t) * Q_to_abs(t)
 
 Versus v2.5: the parallel topology ``eta × (P_rx − Q_to_orc − Q_to_abs)``
-is gone. Diverted steam at the HP-LP tap costs ~0.083 MWe per MWth (Plan
-§A7 + §F.1), an order of magnitude less than charging the full turbine
-efficiency against extracted heat. The ORC bottoming cycle is removed
-entirely.
+is gone. Diverted steam at the HP-LP crossover (7 bar / 165 °C) costs the
+lost LP expansion work net of the hot-condensate-return credit, ~0.20 MWe
+per MWth from the steam-table heat balance documented in
+config/plant_case2.yaml. The ORC bottoming cycle is removed entirely.
+
+The reactor capacity factor is realized through a scheduled refueling
+outage window (P_rx = 0) rather than an annual generation floor, so the
+data center is exposed to grid-priced backup during the outage and the
+absorption chiller's own maintenance coincides with it.
 """
 
 from __future__ import annotations
@@ -31,10 +35,25 @@ import pyomo.environ as pyo
 
 from src.config import RunConfig
 from src.data import TimeSeries
-from src.finance import annualized_capex, section_45u_credit_usd_per_mwh
-from src.performance import vcc_pwl_points
+from src.finance import annualized_capex, levelized_ptc_usd_per_mwh
+from src.performance import vcc_pwl_points, vcc_wet_bulb_relief
 
 _MMBTU_PER_MWh: float = 3.412
+
+# Scheduled refueling/maintenance outage (full-year runs only). The window
+# starts March 15 (hour 1752), in the mild-load ERCOT shoulder season where
+# US plants schedule refueling; its length is derived from the configured
+# capacity factor so that a plant at full power in every online hour
+# realizes exactly that CF: len = round((1 - CF) * 8760).
+_OUTAGE_START_HOUR: int = 1752  # March 15, 00:00 local
+
+
+def _outage_hours(capacity_factor: float, num_hours: int) -> frozenset[int]:
+    """Hour indices of the scheduled refueling outage (empty for sub-year runs)."""
+    if num_hours != 8760:
+        return frozenset()
+    n_out = round((1.0 - capacity_factor) * 8760.0)
+    return frozenset(range(_OUTAGE_START_HOUR, _OUTAGE_START_HOUR + n_out))
 
 
 def _absorption_cop(
@@ -127,6 +146,16 @@ def build_model(
         m.T, initialize=Q_cool_demand, within=pyo.NonNegativeReals
     )
 
+    # Scheduled refueling outage window (shared by reactor bounds, absorption
+    # availability and the turbine equation below). The absorption chiller's
+    # own annual maintenance is scheduled inside the reactor outage — it has
+    # no steam source then anyway — so no separate continuous availability
+    # derate is applied to its hourly yield.
+    rx = cfg.case.reactor
+    if rx is None:
+        raise ValueError("Cases 1-2 require a reactor block in plant_caseN.yaml")
+    outage = _outage_hours(rx.capacity_factor, ts.num_hours)
+
     # Absorption COP and availability (P1-A) ---------------------------------
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
         ab = cfg.case.absorption
@@ -141,7 +170,8 @@ def build_model(
         }
         avail_t = {
             t: ab.availability
-            if _absorption_available(
+            if t not in outage
+            and _absorption_available(
                 float(ts.wet_bulb_C.iloc[t]),
                 ab.cooling_water_approach_K,
                 ab.crystallization_cw_inlet_C,
@@ -155,49 +185,63 @@ def build_model(
         )
 
     # ---- Reactor (always required for Cases 1-2) ---------------------------
-    rx = cfg.case.reactor
-    if rx is None:
-        raise ValueError("Cases 1-2 require a reactor block in plant_caseN.yaml")
     P_rx_cap = cap.reactor_thermal_capacity_MWth or rx.thermal_power_MWth
     P_rx_min = rx.min_load_fraction * P_rx_cap
     ramp_max_per_hour = rx.ramp_rate_pct_per_min / 100.0 * 60.0 * P_rx_cap
 
-    m.P_rx = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=(P_rx_min, P_rx_cap))
+    # Scheduled refueling outage realizes the capacity factor: P_rx = 0 for
+    # round((1-CF)*8760) contiguous hours starting March 15, instead of the
+    # former annual generation floor (which let the model run at ~97-100% CF
+    # with no outage exposure). During the outage the data center buys grid
+    # power at the prevailing LMP, pricing the backup risk.
+    def p_rx_bounds(mdl, t):
+        if t in outage:
+            return (0.0, 0.0)
+        return (P_rx_min, P_rx_cap)
+
+    m.P_rx = pyo.Var(m.T, domain=pyo.NonNegativeReals, bounds=p_rx_bounds)
 
     # A8 ramp limits (no on/off binary — natural-circulation BWR stays online
     # above min_load_fraction, so explicit uptime/downtime binaries would
-    # never bind; reactor_cf below enforces the 12 h-class behavior in aggregate)
+    # never bind). Shutdown/startup at the outage boundaries are managed
+    # procedures outside normal load-following, so ramp constraints are
+    # skipped when either hour is inside the outage window.
     def ramp_up(mdl, t):
-        if t == mdl.T.first():
+        if t == mdl.T.first() or t in outage or (t - 1) in outage:
             return pyo.Constraint.Skip
         return mdl.P_rx[t] - mdl.P_rx[t - 1] <= ramp_max_per_hour
 
     def ramp_down(mdl, t):
-        if t == mdl.T.first():
+        if t == mdl.T.first() or t in outage or (t - 1) in outage:
             return pyo.Constraint.Skip
         return mdl.P_rx[t - 1] - mdl.P_rx[t] <= ramp_max_per_hour
 
     m.ramp_up = pyo.Constraint(m.T, rule=ramp_up)
     m.ramp_down = pyo.Constraint(m.T, rule=ramp_down)
 
-    # v2.6 §A: enforce capacity factor on full-year runs.
-    # Soft annual-mean lower bound rather than forced outages — the model is
-    # too coarse for explicit outage scheduling.
-    if ts.num_hours == 8760:
-        m.reactor_cf = pyo.Constraint(
-            expr=sum(m.P_rx[t] for t in m.T)
-            >= rx.capacity_factor * P_rx_cap * ts.num_hours
-        )
-
     # ---- Absorption steam tap (Case 2 only) --------------------------------
+    # Two explicit physical limits: (i) the steam generator is sized to
+    # deliver nameplate cooling at the design-point (Houston-baseline) COP,
+    # so its heat-input capacity is nameplate / COP_design; (ii) delivered
+    # cooling can never exceed the installed nameplate, even in cool hours
+    # when the COP rises above the design point.
     if eq.absorption_chiller_enabled and cfg.case.absorption is not None:
         Q_abs_cool_max = cap.absorption_capacity_MWth or 100.0
-        # Steam-side cap derived from worst case ratio
-        Q_to_abs_max = Q_abs_cool_max / max(0.5, cfg.case.absorption.cop_nameplate)
-        m.Q_to_abs = pyo.Var(
-            m.T, domain=pyo.NonNegativeReals, bounds=(0, Q_to_abs_max)
+        Q_to_abs_max = Q_abs_cool_max / max(
+            0.5, cfg.case.absorption.cop_houston_baseline
         )
-        m.Q_abs_cool = pyo.Var(m.T, domain=pyo.NonNegativeReals)
+
+        def q_to_abs_bounds(mdl, t):
+            if t in outage:
+                return (0.0, 0.0)
+            return (0.0, Q_to_abs_max)
+
+        m.Q_to_abs = pyo.Var(
+            m.T, domain=pyo.NonNegativeReals, bounds=q_to_abs_bounds
+        )
+        m.Q_abs_cool = pyo.Var(
+            m.T, domain=pyo.NonNegativeReals, bounds=(0, Q_abs_cool_max)
+        )
         m.abs_yield = pyo.Constraint(
             m.T,
             rule=lambda mdl, t: mdl.Q_abs_cool[t]
@@ -212,13 +256,25 @@ def build_model(
     if tb is None:
         raise ValueError("Cases 1-2 require a turbine block in plant_caseN.yaml")
     willans = tb.extraction_willans_slope_MWe_per_MWth
+    # Main-turbine Willans line P_gross = a*P_rx - b fitted to the part-load
+    # heat-rate data (data/perf/turbine_hr.csv) and passing through the
+    # design point; the no-load intercept makes the part-load efficiency
+    # droop explicit. The line is valid on [min_load, full_load]; during the
+    # outage window P_rx = 0 and gross output is fixed at zero instead.
+    will_a = tb.main_willans_slope_MWe_per_MWth
+    will_b = tb.main_willans_intercept_MWe
 
     m.P_turb_gross = pyo.Var(m.T, domain=pyo.NonNegativeReals)
-    m.turb_eq = pyo.Constraint(
-        m.T,
-        rule=lambda mdl, t: mdl.P_turb_gross[t]
-        == tb.rated_efficiency * mdl.P_rx[t] - willans * mdl.Q_to_abs[t],
-    )
+
+    def turb_eq(mdl, t):
+        if t in outage:
+            return mdl.P_turb_gross[t] == 0.0
+        return (
+            mdl.P_turb_gross[t]
+            == will_a * mdl.P_rx[t] - will_b - willans * mdl.Q_to_abs[t]
+        )
+
+    m.turb_eq = pyo.Constraint(m.T, rule=turb_eq)
 
     # Net = gross less auxiliaries
     m.P_turb_net = pyo.Var(m.T, domain=pyo.NonNegativeReals)
@@ -236,9 +292,28 @@ def build_model(
     # Part-load: VCC electricity follows the non-convex IPLV COP curve, so the
     # chiller is an SOS2 piecewise map P_vcc = f(Q_vcc_cool) rather than a single
     # constant-COP line. This makes the model a MILP.
+    # Hourly wet-bulb relief: the condenser-water benefit of cool hours is
+    # applied symmetrically to the VCC (the absorption COP already carries
+    # the same linear wet-bulb response), as a multiplier on the design-point
+    # COP that scales the whole part-load curve.
+    vcc_relief_t = {
+        t: vcc_wet_bulb_relief(
+            float(ts.wet_bulb_C.iloc[t]),
+            vcc.cop_design_wet_bulb_C,
+            vcc.cop_wet_bulb_relief_per_K,
+            vcc.cop_wet_bulb_relief_cap,
+        )
+        for t in m.T
+    }
     vcc_q_pts, vcc_p_pts = vcc_pwl_points(vcc.cop_houston, Q_vcc_max)
+    # The piecewise P(q) is divided by the hourly relief, so in hot hours
+    # (relief < 1) full-load chiller power exceeds the design-point value;
+    # size the variable bound for the worst hour.
+    vcc_relief_min = min(vcc_relief_t.values()) if vcc_relief_t else 1.0
     m.P_vcc = pyo.Var(
-        m.T, domain=pyo.NonNegativeReals, bounds=(0, max(vcc_p_pts))
+        m.T,
+        domain=pyo.NonNegativeReals,
+        bounds=(0, max(vcc_p_pts) / vcc_relief_min),
     )
     m.Q_vcc_cool = pyo.Var(
         m.T, domain=pyo.NonNegativeReals, bounds=(0, Q_vcc_max)
@@ -251,7 +326,7 @@ def build_model(
             m.Q_vcc_cool,
             pw_pts=vcc_q_pts,
             pw_constr_type="EQ",
-            f_rule=lambda mdl, t, x: _vcc_p_of_q[x],
+            f_rule=lambda mdl, t, x: _vcc_p_of_q[x] / vcc_relief_t[t],
             pw_repn="SOS2",
         )
     else:
@@ -271,6 +346,20 @@ def build_model(
         )
     else:
         m.P_grid_sell = pyo.Param(m.T, initialize=0.0)
+    # Import/export interlock: simultaneous buying and selling is exactly
+    # cost-neutral at a single LMP, so without the interlock the gross trade
+    # volumes are a degenerate ray of the LP and any reported gross-flow
+    # number is solver-arbitrary. One binary per hour removes the ray.
+    if eq.grid_import_enabled and eq.grid_export_enabled:
+        m.y_grid_buy = pyo.Var(m.T, domain=pyo.Binary)
+        m.grid_buy_interlock = pyo.Constraint(
+            m.T, rule=lambda mdl, t: mdl.P_grid_buy[t] <= pcc_cap * mdl.y_grid_buy[t]
+        )
+        m.grid_sell_interlock = pyo.Constraint(
+            m.T,
+            rule=lambda mdl, t: mdl.P_grid_sell[t]
+            <= pcc_cap * (1 - mdl.y_grid_buy[t]),
+        )
 
     # ---- BESS (S3 binary sensitivity) --------------------------------------
     # LP formulation: round-trip loss in the objective makes simultaneous
@@ -401,8 +490,16 @@ def build_model(
             for t in m.T
         ) * dt * annual_scale
 
+    # Fuel: priced on the net-electric basis the fleet statistics use
+    # ($/MWh_e of net generation, Li et al. 2026 Nat. Commun.), converted to
+    # a thermal-basis rate via the plant net efficiency and charged on
+    # thermal power so fuel spend tracks the energy actually consumed
+    # (steam extraction does not reduce fuel burn).
+    fuel_th_rate = rx.fuel_cost_usd_per_mwh_e * (
+        rx.electric_power_net_MWe / rx.thermal_power_MWth
+    )
     fuel_annual_expr = (
-        sum(rx.fuel_cost_usd_per_mwh_th * m.P_rx[t] for t in m.T) * dt * annual_scale
+        sum(fuel_th_rate * m.P_rx[t] for t in m.T) * dt * annual_scale
     )
 
     grid_annual_expr = (
@@ -426,27 +523,22 @@ def build_model(
     ) * dt * annual_scale
     carbon_annual_expr = carbon_price * co2_net_kg_expr / 1000.0  # → $/yr
 
-    # Section 45U nuclear production tax credit (IRA 2022 Sec. 13105;
-    # 26 U.S.C. 45U(b)). A per-MWh credit on net nuclear generation whose rate
-    # falls with the hourly market price per the statutory gross-receipts
-    # phaseout (full $15/MWh below $25/MWh, zero at $43.75/MWh). LMP is a known
-    # parameter, so the per-hour rate is a constant and the credit stays linear
-    # in P_turb_net. Default-on for Cases 1-2; entered as a negative cost.
+    # Section 45Y clean-electricity production tax credit (26 U.S.C. 45Y;
+    # technology-neutral, zero-GHG facilities placed in service after 2024).
+    # Flat per-MWh credit on net nuclear generation at the prevailing-wage
+    # rate, no gross-receipts phaseout; paid for the statutory 10-year
+    # duration and levelized over the TAC window via the annuity-factor
+    # ratio. Default-on for Cases 1-2; entered as a negative cost.
     fin = cfg.financial
     if fin.nuclear_ptc_enabled:
-        ptc_rate_t = {
-            t: float(
-                section_45u_credit_usd_per_mwh(
-                    float(ts.price_import_usd_per_mwh.iloc[t]),
-                    fin.ptc_usd_per_mwh_assumed,
-                    fin.ptc_45u_phaseout_start_usd_per_mwh,
-                    fin.ptc_45u_phaseout_end_usd_per_mwh,
-                )
-            )
-            for t in m.T
-        }
+        ptc_rate = levelized_ptc_usd_per_mwh(
+            fin.ptc_usd_per_mwh_assumed,
+            wacc,
+            fin.ptc_credit_duration_years,
+            fin.project_lifetime_years,
+        )
         ptc_annual_expr = (
-            -sum(ptc_rate_t[t] * m.P_turb_net[t] for t in m.T) * dt * annual_scale
+            -sum(ptc_rate * m.P_turb_net[t] for t in m.T) * dt * annual_scale
         )
     else:
         ptc_annual_expr = 0.0
