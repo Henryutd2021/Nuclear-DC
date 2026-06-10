@@ -13,7 +13,7 @@ import shutil
 from pathlib import Path
 
 
-PROJECT_ROOT = Path("/home/honglin/Nuclear-DC")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 NB = PROJECT_ROOT / "notebooks" / "paper_figures.ipynb"
 OUT_FIGS = PROJECT_ROOT / "outputs" / "figures"
 NATURE_FIGS = PROJECT_ROOT / "MANUSCRIPT" / "Nature Energy" / "figures"
@@ -103,6 +103,10 @@ def main() -> None:
     nb = json.loads(NB.read_text())
     env: dict[str, object] = {}
 
+    setup3 = "".join(nb["cells"][3]["source"])
+    assert "Shared setup for all figure cells" in setup3, (
+        "paper_figures.ipynb was restructured; positional cell indices are stale"
+    )
     for idx in (2, 3, 4):
         src = "".join(nb["cells"][idx]["source"])
         exec(compile(src, f"paper_figures.ipynb:cell{idx}", "exec"), env)
@@ -120,6 +124,9 @@ def main() -> None:
 
     for idx, name in FIGURE_CELLS.items():
         src = normalize_units("".join(nb["cells"][idx]["source"]))
+        assert f'"{name}"' in src, (
+            f"cell {idx} does not produce {name}; notebook cells moved"
+        )
         exec(compile(src, f"paper_figures.ipynb:cell{idx}", "exec"), env)
         for ext in ("pdf", "svg", "png"):
             src_path = OUT_FIGS / f"{name}.{ext}"

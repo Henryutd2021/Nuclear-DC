@@ -1,5 +1,5 @@
 # Absorption Chiller (LiBr-H2O) — Equipment Parameters
-# Use: Cases 2 and 3 (cooling delivery to AI data center via heat-driven cycle)
+# Use: Case 2 only (v2.6 renumbering: Case 3 is the NGCC comparator, no absorption)
 #
 # Two variants: single-effect (low-T drive) and double-effect (medium-T drive).
 # Paper baseline = DOUBLE-EFFECT because BWRX-300's IP-extraction at ~165 °C
@@ -14,8 +14,11 @@ double_effect:
   economics:
     capex_baseline_usd_per_kW_cooling: 750
     capex_range_usd_per_kW_cooling: [450, 1000]
-    capex_S5_sensitivity_low:  450   # = baseline × 0.6 (paper S5 robustness check)
-    capex_S5_sensitivity_high: 1050  # = baseline × 1.4 (paper S5 robustness check)
+    # The S5 sweep is the 2-D SMR × absorption CAPEX grid driven by
+    # config/capex_grid_s5.yaml (absorption axis $450-1,200/kWth); the legacy
+    # ±40% scalar bounds below are retained for audit history only.
+    capex_S5_sensitivity_low:  450
+    capex_S5_sensitivity_high: 1050
     fixed_om_usd_per_kW_cooling_year: 20    # ~2.5% of CAPEX, Shahzad 2021
     variable_om_usd_per_mwh_cooling: 0.4    # mostly water treatment + LiBr makeup
     lifetime_years: 25

@@ -43,14 +43,16 @@ EMBODIED_ENERGY_MWH_PER_KWE: dict[str, float] = {
     "ngcc": 1.0,          # NREL ATB 2024 LCI screening value
 }
 
-# Water-consumption factors (L per kWh_e or kWh_c), NREL Macknick 2012.
+# Water-consumption factors (all entries L per kWh of the named basis).
+# Generation factors are NLR Macknick 2012; the data-center cooling-duty
+# factors are authors' estimates (Macknick covers power generation only).
 # "Consumption" not "withdrawal" — once-through cooling withdraws much more
 # but returns most of it; cooling-tower consumption is the true footprint.
 WATER_L_PER_KWH: dict[str, float] = {
-    "nuclear_cooling_tower": 2.54,   # Macknick 2012 median nuclear w/ tower
-    "ngcc_cooling_tower":    0.78,   # Macknick 2012 median NGCC w/ tower
-    "ercot_grid_blend":      1.42,   # Macknick 2012 ERCOT generation mix
-    "vcc_hybrid_cooling":    0.10,   # per MWh_c — VCC tower water for DC duty
+    "nuclear_cooling_tower": 2.54,   # L/kWh_e — Macknick 2012 median nuclear w/ tower
+    "ngcc_cooling_tower":    0.78,   # L/kWh_e — Macknick 2012 median NGCC w/ tower
+    "ercot_grid_blend":      1.42,   # L/kWh_e — Macknick 2012 ERCOT generation mix
+    "vcc_hybrid_cooling":    0.10,   # L/kWh_c — VCC tower water for DC duty (authors' estimate)
     # v2.7: per MWh_c of cooling produced by the absorption chiller, the
     # cooling tower must reject Q_cool + Q_input ≈ Q_cool * (1 + 1/COP_abs).
     # With double-effect COP_abs ≈ 1.2 (Houston annual mean), that's ~1.83×

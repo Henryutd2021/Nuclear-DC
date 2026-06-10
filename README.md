@@ -1,6 +1,6 @@
 # Nuclear-Powered Data Center Optimization
 
-A modular Pyomo + Gurobi framework for co-optimizing electricity and chilled-water provision to a data center using nuclear heat. Plan v2.8 covers four operating cases on a single common accounting basis, with a 100-run baseline + sensitivity grid (PUE, ERCOT year, BESS, SMR CAPEX 1D, SMR×absorption CAPEX 2D, carbon-price policy lever, WACC, and data-center size matching) for techno-economic boundary analysis. All eight KPIs from plan §0.5 D are now populated: TAC, LCOE, LCOC, Heat-Recovery Premium, annual CO₂, carbon abatement cost, EPBT, water footprint.
+A modular Pyomo + Gurobi framework for co-optimizing electricity and chilled-water provision to a data center using nuclear heat. Plan v2.8 covers four operating cases on a single common accounting basis, with a 100-run baseline + sensitivity grid (PUE, ERCOT year, BESS, SMR CAPEX 1D, SMR×absorption CAPEX 2D, carbon-price policy lever, WACC, and data-center size matching) for techno-economic boundary analysis. Reported KPIs: TAC, net levelized cost of IT supply (NLCS), LCOC, Heat-Recovery Premium, annual CO₂, EPBT, water footprint.
 
 ## Overview
 
@@ -47,6 +47,12 @@ pip install -r requirements.txt
 PYTHONPATH=. python scripts/run_all_analyses.py
 ```
 
+All eleven 8760-h model-input CSVs (day-ahead LMP, ambient, carbon intensity,
+the 60u workload aggregate, Henry Hub daily) are tracked in git, so this runs
+on a fresh clone with no data step. `make data` is only needed to regenerate
+them from the raw sources, and rebuilding the workload aggregate additionally
+requires the manual ~1 GB NLR download described in `data/MANUAL_COLLECTION.md`.
+
 The grid driver writes per-run `summary.json` + compressed dispatch CSVs to `outputs/<group>/<run_id>/`, plus a flat `outputs/master_kpi_table.csv` and `outputs/manifest.json`.
 
 ```python
@@ -76,19 +82,19 @@ All parameters are specified in YAML files in the `config/` directory:
 
 ### Input Data
 
-Time-series data in CSV format in the `data/` directory:
+Hourly time series read by `src/data.py:load_time_series` (all tracked in git):
 
-- **`it_load.csv`** - IT electric demand [MW] (required)
-- **`cooling_load.csv`** - Cooling demand [MWth] (optional; derived from PUE if absent)
-- **`grid_price_import.csv`** - Electricity import price [$/MWh] (optional)
-- **`grid_price_export.csv`** - Electricity export price [$/MWh] (optional)
+- **`data/workload/dc_200mw_real_60u_2018.csv`** - IT electric demand [MW]
+- **`data/weather/houston_ambient_{year}.csv`** - Houston ambient / wet-bulb [°C]
+- **`data/ercot/{year}_dam_lmp_houston.csv`** - ERCOT Houston day-ahead LMP [$/MWh]
+- **`data/environmental/ercot_carbon_intensity_hourly_{year}.csv`** - hourly grid AEF [g/kWh]
+- **`data/economics/henry_hub_daily_2022_2024.csv`** - Henry Hub daily spot [$/MMBtu]
 
 Performance curves in `data/perf/`:
 
-- **`turbine_hr.csv`** - Turbine heat rate vs. power output
-- **`orc_eta.csv`** - ORC efficiency vs. heat input
+- **`turbine_hr.csv`** - Turbine heat rate vs. power output (Willans-line fit source)
 - **`ab_cop.csv`** - Absorption chiller COP vs. generator temperature
-- **`ec_cop.csv`** - Electric chiller COP vs. ambient conditions
+- **`ec_cop.csv`** - Electric chiller COP part-load shape
 
 ## Repository Structure
 
@@ -129,11 +135,11 @@ Nuclear-DC/
 │       └── result.py          # NuclearCaseResult dataclass + extractor
 ├── scripts/                   # Run drivers
 │   └── run_all_analyses.py    # 100-run baseline + S1..S8 sensitivity grid (plan-v2.8)
-├── tests/                     # Unit & integration tests (pytest, 85 fast + ~8 integration)
+├── tests/                     # Unit & integration tests (pytest, ~140 tests)
 ├── notebooks/                 # Single Jupyter figure pipeline (paper_figures.ipynb)
-├── AE_SMR_DC/                 # Applied Energy manuscript scaffold (cas-sc.cls)
-├── docs/                      # Plan, model diagram, gap analysis, changelog
-└── outputs/                   # Solver outputs (git-ignored)
+├── MANUSCRIPT/                # Nature Energy + Applied Energy manuscript sources
+└── outputs/                   # Solver outputs (per-run artifacts git-ignored;
+    │                          #   master table, manifest + figure CSVs tracked)
     ├── <group>/<run_id>/summary.json
     ├── <group>/<run_id>/dispatch.csv.gz
     ├── master_kpi_table.csv
@@ -269,10 +275,10 @@ pytest
 pytest --cov=src --cov-report=html
 
 # Run specific test file
-pytest tests/test_io.py -v
+pytest tests/test_case2.py -v
 
 # Run tests matching pattern
-pytest tests/ -k "steam" -v
+pytest tests/ -k "absorption" -v
 ```
 
 ### Code Quality
@@ -293,10 +299,10 @@ black src/ tests/ && ruff check . && mypy src/
 
 ### Adding New Constraints
 
-1. Create new file in `src/constraints/`
-2. Implement function: `def add_XXX_constraints(model: pyo.ConcreteModel) -> None:`
-3. Import and call in `src/solve.py` → `build_full_model()`
-4. Add tests in `tests/test_constraints.py`
+1. Add the constraint inside `src/milp/builder.py:build_model` (grouped by block:
+   reactor, turbine, absorption, VCC, grid, BESS)
+2. Surface any new parameter through `src/config.py` and the `config/plant_case*.yaml` files
+3. Add tests in `tests/` (see `tests/test_case2.py` for the pattern)
 
 ## System Requirements
 

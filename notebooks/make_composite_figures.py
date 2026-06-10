@@ -15,13 +15,18 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 
-PROJECT_ROOT = Path("/home/honglin/Nuclear-DC")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 NB = PROJECT_ROOT / "notebooks" / "paper_figures.ipynb"
+# Single canonical figure set: the Applied Energy version will be content-
+# synchronized from Nature Energy later, so figures live only under the
+# Nature Energy folder for now.
 NAT_FIGS = PROJECT_ROOT / "MANUSCRIPT" / "Nature Energy" / "figures"
-APPLIED_FIGS = PROJECT_ROOT / "MANUSCRIPT" / "Applied Energy" / "figures"
 
 # --- load notebook setup cells (palette, helpers, df) into this namespace ----
 nb = json.load(open(NB))
+assert "Shared setup for all figure cells" in "".join(nb["cells"][3]["source"]), (
+    "paper_figures.ipynb was restructured; positional cell indices are stale"
+)
 _g = {}
 for i in (2, 3, 4):
     exec(compile("".join(nb["cells"][i]["source"]), f"cell{i}", "exec"), _g)
@@ -290,7 +295,6 @@ def panel_value_decomp(ax):
         ("Absorber\ncapital", base_row.absorption_capex_fom_usd_per_yr / 1e6),
         ("VCC\nbackup", base_row.crystal_cutoff_backup_usd_per_yr / 1e6),
         ("PTC\nforgone", base_row.ptc_forgone_usd_per_yr / 1e6),
-        ("Water\ncost", base_row.extra_water_cost_usd_per_yr / 1e6),
     ]
     net = base_row.net_value_of_absorption_usd_per_yr / 1e6
     residual = base_row.residual_usd_per_yr / 1e6
@@ -414,9 +418,9 @@ def build_baseline_economics(dirs):
 
 import traceback
 try:
-    build_operation_value([NAT_FIGS, APPLIED_FIGS])
+    build_operation_value([NAT_FIGS])
     build_baseline_economics([NAT_FIGS])
-    print("OK: wrote fig_operation_value (Nature Energy, Applied Energy) and fig_baseline_economics (Nature Energy)")
+    print("OK: wrote fig_operation_value and fig_baseline_economics (Nature Energy)")
 except Exception:
     traceback.print_exc()
     raise

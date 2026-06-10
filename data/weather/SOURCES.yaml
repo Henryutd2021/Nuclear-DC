@@ -1,25 +1,28 @@
 # Weather Data Provenance — data/weather/*
 
-houston_wet_bulb_synth_2024.csv:
-  type: "SYNTHETIC archetype — placeholder until NSRDB API access acquired"
-  basis:
-    - "NOAA NCEI 1991-2020 climate normals, Houston Intercontinental Airport (KIAH)"
-    - "Monthly avg wet-bulb derived from dry-bulb + relative-humidity normals"
-  algorithm: |
-    month_mean[m] + 2.5 * sin(2π(h-9)/24) + smoothed_noise(σ=1.8)
-    Where month_mean is the monthly average wet-bulb °C, and smoothed_noise is
-    a 24-h centered rolling mean of N(0,1.8) — represents synoptic variability.
-    Bounded to [-3, +30] °C.  RNG seed = 7.
-  intended_use: "Houston wet-bulb input to cooling-tower model and absorption
-                 chiller COP derating.  Mean summer wb ≈ 25 °C, p95 ≈ 28 °C."
-  replace_with: |
-    NREL NSRDB hourly observations for Houston, 2022-2024 (3 actual years).
-    See data/MANUAL_COLLECTION.md §3.
+houston_ambient_{2022,2023,2024}.csv:
+  type: "REAL — Open-Meteo ERA5 historical-weather reanalysis, hourly"
+  generated_by: "data/_raw/fetch_open_meteo_houston.py"
+  location: "Houston, TX (29.76 N, -95.36 W)"
+  variables:
+    - "temperature_2m (dry-bulb, °C)"
+    - "relative_humidity_2m (%)"
+    - "wet_bulb_C — derived via the Stull (2011) empirical formula"
+  horizon: "8760 hourly rows per calendar year (2024 trimmed from 8784)"
+  used_by: "src/data.py:load_time_series (wet_bulb_C column)"
+  notes: |
+    These three files are the only weather inputs the model reads. They are
+    tracked in git (Tier 1); the fetch script regenerates them byte-equivalent
+    from the public Open-Meteo archive API.
 
 sources:
-  - id: "NCEI-1991-2020-Normals-Houston"
-    title: "NOAA NCEI 1991-2020 Climate Normals — Houston Intercontinental Airport"
-    publisher: "National Centers for Environmental Information / NOAA"
-    url: "https://www.ncei.noaa.gov/access/us-climate-normals/"
-    station_id: "USW00012960 (KIAH)"
-    used_for: "Monthly wet-bulb seasonal anchors"
+  - id: "Open-Meteo-ERA5"
+    title: "Open-Meteo Historical Weather API (ERA5 reanalysis)"
+    publisher: "Open-Meteo / Copernicus ERA5"
+    url: "https://open-meteo.com/en/docs/historical-weather-api"
+    used_for: "Hourly dry-bulb, relative humidity 2022-2024"
+  - id: "Stull-2011"
+    title: "Wet-bulb temperature from relative humidity and air temperature"
+    publisher: "Journal of Applied Meteorology and Climatology 50(11)"
+    url: "https://doi.org/10.1175/JAMC-D-11-0143.1"
+    used_for: "Wet-bulb derivation from dry-bulb + RH"

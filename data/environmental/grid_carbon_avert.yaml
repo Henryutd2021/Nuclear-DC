@@ -48,8 +48,10 @@ hour_of_day_shape:
     description: |
       Real hour-of-day average emission factor multiplier for ERCOT 2022-2024.
       Multiplier × annual_mean_g_per_kwh = expected emission factor at that hour.
-      Pattern: peak overnight (0-4 AM, ~1.10×) due to coal/NG-dominated mix;
-      trough afternoon (14-17, ~0.93×) due to solar penetration.
+      Hour indices are UTC (the EIA-930 timestamps the builder groups by).
+      Pattern in local Central time: the ~1.13x peak at UTC 1-2 is the
+      19:00-20:00 CST evening net-load ramp (gas/coal-heavy mix); the ~0.93x
+      trough at UTC 14-17 is 08:00-11:00 CST as solar output ramps up.
     annual_mean_g_per_kwh: 334.2
     # 0..23 multiplier vs annual mean
     multiplier_by_hour: [1.0732, 1.1326, 1.1338, 1.0967, 1.0551, 1.0173,

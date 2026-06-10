@@ -827,6 +827,38 @@ def write_master_table(rows: list[dict[str, Any]]) -> pd.DataFrame:
     return df
 
 
+def _environment_stamp() -> dict[str, Any]:
+    """Code/config provenance so an archived outputs/ tree is traceable."""
+    import platform
+    import subprocess
+
+    try:
+        sha = subprocess.run(
+            ["git", "rev-parse", "HEAD"],  # noqa: S607
+            cwd=PROJECT_ROOT, capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        dirty = bool(subprocess.run(
+            ["git", "status", "--porcelain"],  # noqa: S607
+            cwd=PROJECT_ROOT, capture_output=True, text=True, check=True,
+        ).stdout.strip())
+    except (OSError, subprocess.CalledProcessError):
+        sha, dirty = None, None
+
+    versions: dict[str, Any] = {"python": platform.python_version()}
+    for mod in ("pyomo", "pandas", "numpy", "pydantic"):
+        try:
+            versions[mod] = __import__(mod).__version__
+        except ImportError:
+            versions[mod] = None
+    try:
+        import gurobipy
+
+        versions["gurobi"] = ".".join(str(v) for v in gurobipy.gurobi.version())
+    except ImportError:
+        versions["gurobi"] = None
+    return {"git_sha": sha, "git_dirty": dirty, "package_versions": versions}
+
+
 def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
     by_group: dict[str, list[str]] = {}
     for s in specs:
@@ -835,6 +867,7 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
     manifest = {
         "plan_version": "v2.8",
         "executed_at_utc": pd.Timestamp.utcnow().isoformat(),
+        "environment": _environment_stamp(),
         "num_runs": len(specs),
         "total_solve_seconds": round(total_seconds, 1),
         "groups": {
@@ -857,9 +890,9 @@ def write_manifest(specs: list[RunSpec], rows: list[dict[str, Any]]) -> None:
             ],
         },
         "notes": [
-            "Cases 0 and 3 are deterministic LP/closed-form; Cases 1-2 are "
-            "Pyomo MILP solved with Gurobi (LP relaxation in practice — no "
-            "binaries are introduced by S3 BESS).",
+            "Cases 0 and 3 are deterministic closed-form; Cases 1-2 are "
+            "Pyomo MILPs solved with Gurobi (SOS2 VCC part-load curve plus "
+            "the hourly grid buy/sell binary interlock).",
             "S3 BESS rows for Cases 0/3 carry bess_applied=False because "
             "those cases have no BESS block; rows preserved for table shape.",
             "S5 fixes year=2023 / full-load PUE=1.35 / ATB-Mid-equivalent baseline; "

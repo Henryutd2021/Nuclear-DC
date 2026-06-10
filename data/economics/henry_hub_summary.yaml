@@ -1,5 +1,5 @@
 # Henry Hub Natural Gas Spot Prices — Annual Summary 2022-2024
-# Used for: Case 4 (NGCC on-site) fuel cost driver across the 3 price regimes.
+# Used for: Case 3 (NGCC on-site; was Case 4 in v2.5) fuel cost driver across the 3 price regimes.
 # Raw daily data: data/economics/henry_hub_daily_2022_2024.csv
 # Monthly stats:  data/economics/henry_hub_monthly_summary.csv
 
@@ -28,7 +28,7 @@ ercot_houston_ship_channel_basis:
   range_usd_per_mmbtu: [-0.20, 0.40]
   source_note: "Houston Ship Channel basis to Henry Hub; ERCOT delivered gas pricing"
 
-paper_paper_baseline_for_ngcc_case4:
+paper_baseline_for_ngcc_case3:
   delivered_fuel_usd_per_mmbtu: 2.60
   delivered_fuel_range_2022_2024: [1.60, 9.00]
   notes: "Range matches monthly extremes 2022-2024; baseline = 2024 mean + basis"

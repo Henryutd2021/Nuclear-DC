@@ -334,8 +334,9 @@ Stull (2011) empirical formula `Tw = f(T_dry, RH)`.
 - 2022: 350 (annual mean), range 117-527
 - 2023: 333
 - 2024: 320 (declining trend with renewables growth)
-- Hour-of-day shape: peak overnight (1-3 AM, ~1.13×), trough afternoon
-  (14-17, ~0.93×) due to solar penetration during daylight
+- Hour-of-day shape (UTC indices): ~1.13× peak at UTC 1-3 = 19:00-21:00
+  Central (evening net-load ramp); ~0.93× trough at UTC 14-17 = 08:00-11:00
+  Central (morning solar ramp)
 
 **Citation:**
 > U.S. EPA. (2024). AVERT Emission Factors, 2023 Reference Year.
@@ -393,9 +394,11 @@ Files providing the schema expected by existing `src/io_data.py`:
 | `ambient.csv` | **REAL** (Open-Meteo) | Copy of `weather/houston_ambient_2024.csv` wet-bulb column |
 | `price_grid.csv` | **REAL** (ERCOT) | Bridge from `ercot/2024_dam_lmp_houston.csv` |
 
-**Convention:** `price_import = price_export = HB_HOUSTON DAM SPP`. Imports
-clipped at 0 (paper convention: can't be paid to import); exports preserve
-negatives (negative-price events happen in ERCOT 2023/2024 real data).
+**Convention:** `price_import = price_export = HB_HOUSTON DAM SPP`. The
+bridge script clips BOTH columns at 0 (its schema validator requires ≥ 0), so
+negative-price events present in the raw 2023/2024 data are sanitized here.
+The optimizer does NOT read this bridge file: src/data.py loads the unclipped
+`ercot/{year}_dam_lmp_houston.csv` directly, so model results keep negatives.
 
 **Reproduce:** `python3 data/_raw/build_ambient_and_price_bridge.py --year 2024`
 

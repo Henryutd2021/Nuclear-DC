@@ -85,9 +85,10 @@ Power Profiles** dataset (Vercellino et al. 2026, DOI 10.7799/3025227). Its
 - The full 1 GB zip is downloaded from https://data.nlr.gov/submissions/312
 - Our `data/workload/raw_nlr_colocation/*.csv` directory holds only the
   subset we transformed (8 CSVs total, ~226 MB), with original NLR README
-- We DO redistribute the **8760-hour aggregates** we derive
-  (`data/workload/dc_200mw_real_*u_2018.csv`) which are a small transformation
-  of the public dataset — this is permitted per the NLR Data Catalog license
+- We DO redistribute the paper-baseline **8760-hour aggregate**
+  (`data/workload/dc_200mw_real_60u_2018.csv`, tracked in git) — a small
+  transformation of the public dataset, permitted per the NLR Data Catalog
+  license; the 20u/40u/80u variants are regenerable but not shipped
 - Users must re-download the raw NLR data themselves to fully re-derive the
   aggregates from scratch (see `data/MANUAL_COLLECTION.md`)
 

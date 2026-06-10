@@ -294,14 +294,14 @@ def load_config(case_id: int, project_root: Union[Path, str]) -> RunConfig:
     """Load and validate the configuration for a specific case.
 
     Args:
-        case_id: One of {0, 1, 2, 3, 4}.
+        case_id: One of {0, 1, 2, 3}.
         project_root: Path to the Nuclear-DC repo root.
 
     Returns:
         A validated ``RunConfig`` bundling case, base, and financial parameters.
 
     Raises:
-        ValueError: if ``case_id`` is not in {0, 1, 2, 3, 4} or the yaml's
+        ValueError: if ``case_id`` is not in {0, 1, 2, 3} or the yaml's
             internal ``case_id`` does not match the caller's.
         FileNotFoundError: if the per-case yaml does not exist on disk.
     """

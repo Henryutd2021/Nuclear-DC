@@ -26,16 +26,17 @@ make data
 # Optional — instructions for the NLR AI workload dataset (Tier 3)
 make data-tier3
 
-# Run a smoke test
-python3 -c "from src.io_data import load_time_series; \
-            load_time_series('data', num_hours=8760).validate(); \
-            print('OK')"
+# Run a smoke test (from the repo root)
+python3 -c "from pathlib import Path; from src.data import load_time_series; \
+            ts = load_time_series(Path('.'), year=2023, num_hours=8760); \
+            print('OK', ts.num_hours)"
 ```
 
-**Without `make data`:** the main-case optimization still runs (because
-`data/it_load.csv`, `data/ambient.csv`, `data/price_grid.csv`, and all YAMLs
-are tracked in git). Only S2 ERCOT-year switching and full sensitivity scans
-need the Tier 2 historical files.
+**Without `make data`:** everything runs. The eleven 8760-h CSVs that
+`src/data.py` reads (workload 60u aggregate, per-year DAM LMP / ambient /
+carbon intensity, Henry Hub daily) are tracked in git alongside all YAMLs;
+`make data` only regenerates them from the raw sources, and the workload
+aggregate additionally needs the Tier 3 NLR download.
 
 ## Folder layout
 
@@ -107,7 +108,7 @@ specified year's Tier-2 data.
 | **S2** | ERCOT regime {2022/2023/2024} | `ercot/{year}_dam_lmp_houston.csv` (Tier 2) + `build_ambient_and_price_bridge.py --year` |
 | **S3** | BESS on/off | `equipment/bess_liion.yaml` + flag in `config/plant_case*.yaml` |
 | **S4** | CAPEX {FOAK/Mid/NOAK} | `reactor/bwrx300_economic.yaml.scenarios.*` |
-| **S5** | ORC + absorption CAPEX ±40% | `equipment/orc.yaml.capex_S5_*` + `absorption_chiller.yaml.capex_S5_*` |
+| **S5** | SMR × absorption CAPEX 5×5 grid | `config/capex_grid_s5.yaml` (SMR $2,250–14,700/kWe × absorption $450–1,200/kWth) |
 
 ## Disk usage by tier
 

@@ -55,8 +55,15 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
-# Outputs
-outputs/
+# Outputs (run-level artifacts regenerable via scripts/run_all_analyses.py;
+# the master table, manifest and figure source CSVs are tracked so the
+# repository matches the manuscript Data Availability statement)
+outputs/*
+!outputs/master_kpi_table.csv
+!outputs/manifest.json
+!outputs/figures/
+outputs/figures/*
+!outputs/figures/*.csv
 *.log
 *.lp
 *.mps
@@ -89,17 +96,16 @@ figures/**/main.pdf
 *.synctex(busy)
 
 # =============================================================================
-# AE_SMR_DC manuscript (Applied Energy, cas-sc.cls)
-# Tracked in this repo as a regular subfolder (no nested .git).
-# Source (.tex / .bib / .cls / .sty / .bst) IS tracked; compiled PDFs and
-# tooling caches are NOT — recompile from source. Globals above cover most
-# LaTeX intermediates; below adds the per-folder outputs and tool caches.
+# MANUSCRIPT/ (Nature Energy + Applied Energy versions)
+# Source (.tex / .bib / .cls / .sty / .bst) and figure assets ARE tracked;
+# compiled PDFs and tooling caches are NOT — recompile from source. Globals
+# above cover most LaTeX intermediates; below adds per-folder tool caches.
 # =============================================================================
-AE_SMR_DC/**/main.pdf
-AE_SMR_DC/**/_minted-*/
-AE_SMR_DC/**/svg-inkscape/
-AE_SMR_DC/**/.texpadtmp/
-AE_SMR_DC/**/.latexmk/
+MANUSCRIPT/**/main.pdf
+MANUSCRIPT/**/_minted-*/
+MANUSCRIPT/**/svg-inkscape/
+MANUSCRIPT/**/.texpadtmp/
+MANUSCRIPT/**/.latexmk/
 
 # Gurobi
 gurobi.log
@@ -111,12 +117,14 @@ docs/
 # Data tiering (see data/README.md "How to get the data")
 # =============================================================================
 # Tier 1 (TRACKED in git): YAMLs + scripts + perf curves + small bridge CSVs +
-#   docs + tiny summary CSVs. Total ~400 KB. Lets a fresh clone run the main
-#   case after `make data` regenerates Tier 2.
+#   docs + tiny summary CSVs + the eleven 8760-h model-input CSVs that
+#   src/data.py reads (DAM LMP, ambient, carbon intensity, the 60u workload
+#   aggregate, Henry Hub daily; ~6 MB). A fresh clone runs every case and the
+#   test suite with no data step.
 #
-# Tier 2 (IGNORED — regen via `make data`, ~10 min): full ERCOT 2022-2024
-#   prices/load, full Open-Meteo Houston weather, hourly carbon intensity,
-#   workload aggregates, Henry Hub daily series.
+# Tier 2 (IGNORED — regen via `make data`, ~10 min): the remaining bulk ERCOT
+#   downloads, full Open-Meteo exports, non-baseline workload variants and
+#   intermediate raw files.
 #
 # Tier 3 (IGNORED — manual download per data/MANUAL_COLLECTION.md): NLR 1 GB
 #   raw 1-minute AI workload profiles (third-party data, not redistributable).
@@ -124,7 +132,6 @@ docs/
 
 # Tier 2 — ERCOT historical (regen: data/_raw/fetch_ercot_dam.py + _rtm.py + _eia930_erco.py)
 data/ercot/*_dam_spp_all.csv.gz
-data/ercot/*_dam_lmp_houston.csv
 data/ercot/*_rtm_spp_all.csv.gz
 data/ercot/*_rtm_lmp_houston_hourly.csv
 data/ercot/*_eia930_erco_full.csv
@@ -132,19 +139,17 @@ data/ercot/*_genmix_erco.csv
 data/ercot/*_load_system_actual.csv
 
 # Tier 2 — Weather (regen: data/_raw/fetch_open_meteo_houston.py)
-data/weather/houston_ambient_*.csv
 data/weather/houston_hourly_*.csv
 data/weather/houston_wet_bulb_combined.csv
 
 # Tier 2 — Hourly carbon intensity (regen: data/_raw/build_real_carbon_intensity.py)
-data/environmental/ercot_carbon_intensity_hourly_*.csv
 
 # Tier 2 — Workload aggregates (regen: data/_raw/build_real_ai_workload.py, requires Tier 3 input)
 data/workload/dc_200mw_real_*u_*.csv
+!data/workload/dc_200mw_real_60u_2018.csv
 data/workload/cooling_load_pue*.csv
 
 # Tier 2 — Henry Hub daily (regen: data/_raw/fetch_henry_hub.py)
-data/economics/henry_hub_daily_*.csv
 data/economics/henry_hub_monthly_summary.csv
 
 # Tier 2 — Intermediate raw downloads (regenerable, large)

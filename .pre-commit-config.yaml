@@ -3,7 +3,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-added-large-files
-        args: ['--maxkb=600']
+        args: ['--maxkb=1500']  # carbon-intensity CSVs ~1.1 MB, schematic PNG ~1.2 MB
       - id: check-yaml
         exclude: ^\.github/.*
       - id: check-toml
@@ -12,9 +12,9 @@ repos:
       - id: check-symlinks
       - id: detect-private-key
       - id: end-of-file-fixer
-        exclude: ^(src|tests|config|pyproject\.toml|data/.*\.(csv|gz|xls)|AE_SMR_DC/.*\.(cls|sty|bst|bib))
+        exclude: ^(src|tests|config|pyproject\.toml|data/.*\.(csv|gz|xls)|MANUSCRIPT/.*\.(cls|sty|bst|bib))
       - id: trailing-whitespace
-        exclude: ^(src|tests|config|pyproject\.toml|data/.*\.csv|AE_SMR_DC/.*\.(cls|sty|bst|bib))
+        exclude: ^(src|tests|config|pyproject\.toml|data/.*\.csv|MANUSCRIPT/.*\.(cls|sty|bst|bib))
       - id: mixed-line-ending
         args: ['--fix=lf']
 

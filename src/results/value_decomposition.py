@@ -7,13 +7,18 @@ come from / go to?":
     + Gross VCC electricity saved    (positive, absorption displaces Case 1 VCC kWh)
     - Turbine power lost             (negative, extraction reduces P_turb_net)
     - Absorption CAPEX + FOM         (negative, equipment overhead)
-    - Extra cooling-tower water cost (negative, Q_reject grows by 1+1/COP)
     - Case 2 VCC backup/top-up (negative, steam-limited or hot-day fallback)
+    - 45Y credit forgone             (negative, diverted steam reduces creditable output)
     = Net contribution to Premium   (= TAC_Case1 - TAC_Case2)
+
+The extra cooling-tower water cost (Q_reject grows by 1+1/COP) is reported as
+a MEMO externality column only: water carries no price in the MILP objective,
+so it is excluded from the component sum and the residual — otherwise the
+residual would absorb a non-TAC term by construction.
 
 The "matching pair" semantics: each row pairs a Case 2 run with the Case 1
 run sharing the same (year, pue, reactor_scenario, bess, carbon_price). The
-script also computes the residual (= sum of components − measured ΔTAC) so
+script also computes the residual (= measured ΔTAC − sum of TAC components) so
 any modeling gap surfaces explicitly rather than being hidden.
 
 Outputs: ``outputs/figures/value_decomp_case2.csv`` (one row per matched
@@ -60,6 +65,7 @@ class ValueDecompositionRow:
     net_vcc_elec_saved_usd_per_yr: float                 # gross saved less Case 2 VCC backup/top-up
     turbine_gen_lost_usd_per_yr: float
     absorption_capex_fom_usd_per_yr: float
+    # Memo externality (not priced in the MILP TAC; excluded from the sum)
     extra_water_cost_usd_per_yr: float
     crystal_cutoff_backup_usd_per_yr: float            # legacy name: all Case 2 VCC backup/top-up
     ptc_forgone_usd_per_yr: float                        # less 45Y credit (Case 2 generates less)
@@ -94,7 +100,6 @@ def _component_value_usd(
     price_export: pd.Series,
     absorption_capex_annual_usd: float,
     absorption_fom_annual_usd: float,
-    extra_water_usd: float,
     crystal_backup_usd: float,
     extraction_slope_MWe_per_MWth: float,
     dt: float,
@@ -128,7 +133,6 @@ def _component_value_usd(
         "absorption_capex_fom_usd_per_yr": -(
             absorption_capex_annual_usd + absorption_fom_annual_usd
         ),
-        "extra_water_cost_usd_per_yr": -extra_water_usd,
         "crystal_cutoff_backup_usd_per_yr": -crystal_backup_usd,
     }
 
@@ -251,7 +255,6 @@ def compute_value_decomposition(
                 price_export=price_export,
                 absorption_capex_annual_usd=abs_capex,
                 absorption_fom_annual_usd=abs_fom,
-                extra_water_usd=extra_water,
                 crystal_backup_usd=crystal_backup_usd,
                 extraction_slope_MWe_per_MWth=extraction_slope_MWe_per_MWth,
                 dt=dt,
@@ -290,6 +293,7 @@ def compute_value_decomposition(
                     ),
                     sum_of_components_usd_per_yr=sum_components,
                     residual_usd_per_yr=net - sum_components,
+                    extra_water_cost_usd_per_yr=-extra_water,
                     **comp,
                 )
             )
