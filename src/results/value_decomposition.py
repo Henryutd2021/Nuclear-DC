@@ -183,14 +183,25 @@ def _extra_water_cost(
 def compute_value_decomposition(
     outputs_dir: Path,
     project_root: Path,
-    extraction_slope_MWe_per_MWth: float = 0.083,
+    extraction_slope_MWe_per_MWth: Optional[float] = None,
 ) -> pd.DataFrame:
     """Build the absorption-chiller waterfall across every matched Case 1/2 pair.
 
-    The default ``extraction_slope`` matches plant_case2.yaml (Plan §A7 +
-    §F.1 derivation: each kg/s extraction ≈ 2.0 MW_th driving 0.165 MW_e of
-    turbine power → 0.083 MW_e per MW_th). Override only for sensitivity.
+    The extraction slope defaults to the live plant_case2.yaml value (0.20,
+    the 7-bar crossover heat-balance derivation), net of the turbine
+    auxiliary-load fraction so the lost-generation component is valued at
+    the salable (net) output the diverted steam would have produced.
+    Override only for sensitivity.
     """
+    import yaml as _yaml
+
+    if extraction_slope_MWe_per_MWth is None:
+        with (project_root / "config" / "plant_case2.yaml").open() as f:
+            _tb = _yaml.safe_load(f)["turbine"]
+        extraction_slope_MWe_per_MWth = float(
+            _tb["extraction_willans_slope_MWe_per_MWth"]
+        ) * (1.0 - float(_tb["aux_load_fraction"]))
+
     rows: list[ValueDecompositionRow] = []
 
     # Iterate over every group that contains both case1 and case2 runs.

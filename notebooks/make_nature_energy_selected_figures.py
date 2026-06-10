@@ -60,7 +60,7 @@ def normalize_units(source: str) -> str:
         'f"{gap_25_myr:.0f} M\\\\$/yr\\ngap at 2.5x"': 'f"{gap_25_myr:.0f}\\ngap at 2.5x"',
         'f"{gap_25_myr:.0f} M\\\\$ yr$^{-1}$\\ngap at 2.5x"': 'f"{gap_25_myr:.0f}\\ngap at 2.5x"',
         r"USD per MWh IT gap": r"cost gap",
-        r"LiBr gate: $T_{wb}\geq27\,^\circ$C": r"LiBr gate: $T_{\mathrm{wb}}\geq 27\,^\circ$C",
+        r"LiBr gate: $T_{wb}\geq29\,^\circ$C": r"LiBr gate: $T_{\mathrm{wb}}\geq 29\,^\circ$C",
         r"Design: $T_{wb}=26\,^\circ$C": r"Design: $T_{\mathrm{wb}}=26\,^\circ$C",
         r"Wet-bulb $T_{wb}$ ($^\circ$C)": r"Wet-bulb $T_{\mathrm{wb}}$ ($^\circ$C)",
         r"design anchor\n(26 $^\\circ$C, COP 1.10)": r"design anchor\n(26 $^\\circ$C, COP 1.10)",

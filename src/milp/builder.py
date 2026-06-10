@@ -236,11 +236,20 @@ def build_model(
                 return (0.0, 0.0)
             return (0.0, Q_to_abs_max)
 
+        # initialize=0.0 keeps outage-hour variables readable after the
+        # solve: with bounds (0,0) and a zero yield coefficient they drop
+        # out of the model entirely, so the solver never assigns them.
         m.Q_to_abs = pyo.Var(
-            m.T, domain=pyo.NonNegativeReals, bounds=q_to_abs_bounds
+            m.T,
+            domain=pyo.NonNegativeReals,
+            bounds=q_to_abs_bounds,
+            initialize=0.0,
         )
         m.Q_abs_cool = pyo.Var(
-            m.T, domain=pyo.NonNegativeReals, bounds=(0, Q_abs_cool_max)
+            m.T,
+            domain=pyo.NonNegativeReals,
+            bounds=(0, Q_abs_cool_max),
+            initialize=0.0,
         )
         m.abs_yield = pyo.Constraint(
             m.T,
