@@ -188,9 +188,9 @@ def panel_cc_scatter(ax):
               frameon=True, facecolor="white", edgecolor="none", framealpha=0.88,
               fontsize=TEXT_SIZE, handlelength=0.8, handletextpad=0.35, borderpad=0.28,
               labelspacing=0.30, columnspacing=0.75, borderaxespad=0.0)
-    ax.annotate("", xy=(0.135, 0.105), xytext=(0.235, 0.155), xycoords="axes fraction",
+    ax.annotate("", xy=(0.055, 0.070), xytext=(0.185, 0.235), xycoords="axes fraction",
                 arrowprops=dict(arrowstyle="->", color=PALETTE["stroke_teal"], lw=0.9, alpha=0.72))
-    ax.text(0.245, 0.165, "preferred", transform=ax.transAxes, fontsize=TEXT_SIZE,
+    ax.text(0.190, 0.245, "preferred", transform=ax.transAxes, fontsize=TEXT_SIZE,
             color=PALETTE["stroke_teal"], ha="left", va="center")
 
 
@@ -230,12 +230,15 @@ def panel_cc_accounting(ax):
     ax.scatter(x_pos, net_co2, marker="_", s=170, color="#222222", linewidth=1.0, zorder=5)
     for xi, top, net in zip(x_pos, positive_total, net_co2):
         annotate_vertical_value(ax, xi, top, f"+{top:.0f}", color="#111111")
-        annotate_vertical_value(ax, xi, net, f"{net:.0f}", color="#111111", offset_pt=POINT_LABEL_OFFSET_PT)
+        annotate_vertical_value(
+            ax, xi, net, f"{net:.0f}", color="#111111",
+            force_positive_side=True,
+        )
     ax.axhline(0, **ZERO_LINE_KW)
     ax.set_xticks(x_pos)
     ax.set_xticklabels(x_labels)
     ax.set_ylabel(r"Nuclear CO$_2$ accounting (kt CO$_2$ yr$^{-1}$)")
-    ax.set_ylim(-835, 560)
+    ax.set_ylim(-520, 170)
     _finish_local_axes(ax)
     handles = [
         Patch(facecolor=PALETTE["fill_blue"], edgecolor=BLOCK_EDGE, label="Grid import"),
@@ -326,7 +329,10 @@ def panel_value_decomp(ax):
         y = b + h
         if abs(h) >= 0.5:
             if x == "Residual":
-                ax.text(i, b + h / 2, f"{h:+.1f}", ha="center", va="center", fontsize=vfs, color="#000000")
+                annotate_vertical_value(
+                    ax, i, y, f"{h:+.1f}", fontsize=vfs,
+                    force_positive_side=False,
+                )
             else:
                 fps = h >= 0
                 if x == "Absorber\ncapital" and y > 0:
@@ -344,7 +350,7 @@ def panel_value_decomp(ax):
     ax.set_axisbelow(True)
     ax.grid(**GRID_KW)
     plt.setp(ax.get_xticklabels(), fontsize=8)
-    ax.set_ylim(min(min(bottoms), -6.0), max(heights) + 1.2)
+    ax.set_ylim(min(min(bottoms), net, -12.0), max(heights) + 1.2)
 
 
 def _dispatch_legend(ax_leg, specs):
