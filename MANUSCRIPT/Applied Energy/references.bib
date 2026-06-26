@@ -1,11 +1,10 @@
-% references.bib for the AE_SMR_DC manuscript.
-% Style: cas-model2-names.bst (Elsevier author-year, longnamesfirst).
+% references.bib for the Applied Energy manuscript.
+% Style: unsrtnat (natbib numeric); Elsevier reformats to house style at proof.
 % Active entries verified against publisher or institutional records on 2026-05-26.
 % Expanded entries verified against DOI, publisher, or institutional records on 2026-06-01.
+% Author list of vercellino2026aiworkload re-verified against arXiv:2604.07345 on 2026-06-10.
+% doe2017chpAbsorption added and verified against energy.gov on 2026-06-10; atb2024nuclear generalized to the 2024 ATB root entry and re-verified on 2026-06-11.
 % Report-style sources use techreport; news / institutional pages use misc.
-% Commented-out entries at end are real papers whose full author lists could not
-% be confirmed via WebSearch and must be filled from the published PDF before
-% submission.
 
 % ---------------------------------------------------------------------------
 % Data-center load growth and firm-power demand
@@ -21,6 +20,17 @@
   url         = {https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report_1.pdf},
   urldate     = {2026-05-23},
   note        = {Report to Congress under the Energy Act of 2020}
+}
+
+@techreport{vercellino2026aiworkload,
+  author      = {Vercellino, Roberto and Willard, Jared and Campos, Gustavo and da Silva Pereira, Weslley and Hull, Olivia and Selensky, Matthew and Mueller, Juliane},
+  title       = {Measurement of Generative {AI} Workload Power Profiles for Whole-Facility Data Center Infrastructure Planning},
+  institution = {National Laboratory of the Rockies Data Catalog},
+  address     = {Golden, CO},
+  number      = {DOI: 10.7799/3025227; arXiv:2604.07345},
+  year        = {2026},
+  url         = {https://arxiv.org/abs/2604.07345},
+  note        = {Dataset and technical report}
 }
 
 @article{masanet2020datacenter,
@@ -112,13 +122,14 @@
 }
 
 @techreport{atb2024nuclear,
-  author      = {{National Renewable Energy Laboratory}},
-  title       = {{2024 Annual Technology Baseline}: Nuclear},
-  institution = {National Renewable Energy Laboratory},
+  author      = {{National Laboratory of the Rockies}},
+  title       = {2024 {Annual Technology Baseline}},
+  institution = {National Laboratory of the Rockies},
   address     = {Golden, CO},
   year        = {2024},
-  url         = {https://atb.nlr.gov/electricity/2024/nuclear},
-  urldate     = {2026-05-23}
+  url         = {https://atb.nlr.gov/electricity/2024/},
+  urldate     = {2026-05-23},
+  note        = {Nuclear, natural-gas, utility-scale battery storage and financial-assumptions chapters}
 }
 
 @techreport{inl2024metaanalysis,
@@ -170,15 +181,6 @@
   pages   = {120669},
   year    = {2023},
   doi     = {10.1016/j.apenergy.2023.120669}
-}
-
-@misc{eia2024nuclearDC,
-  author       = {{U.S. Energy Information Administration}},
-  title        = {Data center owners turn to nuclear as potential electricity source},
-  howpublished = {Today in Energy},
-  year         = {2024},
-  url          = {https://www.eia.gov/todayinenergy/detail.php?id=63304},
-  urldate      = {2026-05-23}
 }
 
 @misc{eia2025capacityfactors,
@@ -247,26 +249,6 @@
   doi     = {10.1016/j.rser.2013.12.007}
 }
 
-@article{haywood2012thermodynamic,
-  author  = {Haywood, Anna and Sherbeck, Jon and Phelan, Patrick and Varsamopoulos, Georgios and Gupta, Sandeep K. S.},
-  title   = {Thermodynamic feasibility of harvesting data center waste heat to drive an absorption chiller},
-  journal = {Energy Conversion and Management},
-  volume  = {58},
-  pages   = {26--34},
-  year    = {2012},
-  doi     = {10.1016/j.enconman.2011.12.017}
-}
-
-@article{ebrahimi2015thermoeconomic,
-  author  = {Ebrahimi, Khosrow and Jones, Gerard F. and Fleischer, Amy S.},
-  title   = {Thermo-economic analysis of steady state waste heat recovery in data centers using absorption refrigeration},
-  journal = {Applied Energy},
-  volume  = {139},
-  pages   = {384--397},
-  year    = {2015},
-  doi     = {10.1016/j.apenergy.2014.10.067}
-}
-
 @article{yuan2023wasteHeatReview,
   author  = {Yuan, Xiaolei and Liang, Yumin and Hu, Xinyi and Xu, Yizhe and Chen, Yongbao and Kosonen, Risto},
   title   = {Waste heat recoveries in data centers: A review},
@@ -319,6 +301,16 @@
   doi       = {10.1201/b19625}
 }
 
+@techreport{doe2017chpAbsorption,
+  author      = {{U.S. Department of Energy}},
+  title       = {Combined Heat and Power Technology Fact Sheet Series: Absorption Chillers},
+  institution = {U.S. Department of Energy, Office of Energy Efficiency and Renewable Energy},
+  address     = {Washington, DC},
+  year        = {2017},
+  url         = {https://www.energy.gov/eere/amo/articles/absorption-chillers-chp-systems-doe-chp-technology-fact-sheet-series},
+  urldate     = {2026-06-10}
+}
+
 % ---------------------------------------------------------------------------
 % Marginal-emissions accounting and adjacent colocated-energy studies
 % ---------------------------------------------------------------------------
@@ -345,37 +337,6 @@
   doi     = {10.1073/pnas.1221978110}
 }
 
-@article{li2024windHydrogen,
-  author  = {Li, Honglin and Zhang, Jie},
-  title   = {Towards Sustainable Integration: Techno-Economic Analysis and Future Perspectives of Co-Located Wind and Hydrogen Energy Systems},
-  journal = {Journal of Mechanical Design},
-  volume  = {146},
-  number  = {2},
-  pages   = {020903},
-  year    = {2024},
-  doi     = {10.1115/1.4063971}
-}
-
-@article{li2023microgridLocation,
-  author  = {Li, Honglin and Jin, Tongdan and Novoa, Clara},
-  title   = {Facility and microgrid location-allocation for integrated supply chain and transactive energy operations},
-  journal = {Applied Mathematical Modelling},
-  volume  = {119},
-  pages   = {119--136},
-  year    = {2023},
-  doi     = {10.1016/j.apm.2023.02.014}
-}
-
-@article{li2025hydrogenTexas,
-  author  = {Li, Honglin and Zhang, Jie},
-  title   = {Hydrogen's role in expanding renewable energy and reducing carbon emissions in Texas},
-  journal = {International Journal of Hydrogen Energy},
-  volume  = {113},
-  pages   = {77--89},
-  year    = {2025},
-  doi     = {10.1016/j.ijhydene.2025.02.303}
-}
-
 @article{li2025ghgDemand,
   author  = {Li, Honglin and Shen, Gulai and Senemmar, Soroush and Mehmani, Ali and Zhang, Jie},
   title   = {Real-time greenhouse gas emission intensity informed demand-side load regulation for power grid decarbonization},
@@ -387,20 +348,37 @@
   doi     = {10.1016/j.crsus.2025.100367}
 }
 
-@misc{usc26_45u,
+@misc{usc26_45y,
   author       = {{U.S. Code}},
-  title        = {26 {U.S.C.} {\S}~45U: Zero-emission nuclear power production credit},
-  howpublished = {Office of the Law Revision Counsel; Inflation Reduction Act of 2022, Pub. L. 117--169, {\S}~13105},
+  title        = {26 {U.S.C.} {\S}~45Y: Clean electricity production credit},
+  howpublished = {Office of the Law Revision Counsel; Inflation Reduction Act of 2022, Pub. L. 117--169, {\S}~13701},
   year         = {2022},
-  url          = {https://uscode.house.gov/view.xhtml?req=(title:26+section:45U+edition:prelim)}
+  url          = {https://uscode.house.gov/view.xhtml?req=(title:26+section:45Y+edition:prelim)}
 }
 
-@misc{irs45u,
+@misc{irs45y,
   author       = {{Internal Revenue Service}},
-  title        = {Zero-Emission Nuclear Power Production Credit (Section 45{U}), Form 7213},
+  title        = {Clean Electricity Production Credit (Section 45{Y})},
   howpublished = {U.S. Department of the Treasury},
-  year         = {2024},
-  url          = {https://www.irs.gov/credits-deductions/zero-emission-nuclear-power-production-credit}
+  year         = {2025},
+  url          = {https://www.irs.gov/credits-deductions/clean-electricity-production-credit}
+}
+
+@misc{fr2025_45y,
+  author       = {{Internal Revenue Service}},
+  title        = {Publication of Inflation Adjustment Factor and Applicable Amounts for Clean Electricity Production Credit for Calendar Year 2025},
+  howpublished = {Federal Register, Vol. 90, Doc. 2025-16249},
+  year         = {2025},
+  url          = {https://www.federalregister.gov/documents/2025/08/25/2025-16249/publication-of-inflation-adjustment-factor-and-applicable-amounts-for-clean-electricity-production}
+}
+
+@article{li2026nuclearH2,
+  author  = {Li, Honglin and Huang, Jianqiao and Poudel, Bikash and Sun, Mucun and Westover, Tyler and Wendt, Daniel and Zhang, Jie},
+  title   = {Rethinking the economics and flexibility of {U.S.} nuclear power through hydrogen integration and policy support},
+  journal = {Nature Communications},
+  volume  = {17},
+  year    = {2026},
+  doi     = {10.1038/s41467-026-73630-y}
 }
 
 @techreport{ahri2020standard550,
