@@ -1,0 +1,641 @@
+{
+  "meta": {
+    "generated_for": "NUCLEAR-DC run-and-backfill brief (submission audit)",
+    "date": "2026-07-26",
+    "git_head": "485a072",
+    "git_head_subject": "Rework the Applied Energy figures and make every caption self-contained",
+    "model_code_last_changed": "2026-06-10 (5b37dd5); worktree clean in src/ config/ data/ scripts/",
+    "solver": "Gurobi 13.0.2 academic (expires 2026-12-16), Pyomo 6.9, Method=2 barrier, Seed=42, MIPGap=1e-4, Threads=4/solve x 16 workers (identical to the archived production grid)",
+    "new_solves": {
+      "gate": {
+        "runs": 4,
+        "wall_s": 40.0,
+        "solve_s_sum": 22.9
+      },
+      "b1": {
+        "runs": 9,
+        "wall_s": 15.3,
+        "solve_s_sum": 102.5
+      },
+      "b2_g9": {
+        "runs": 72,
+        "wall_s": 70.0,
+        "solve_s_sum": 972.4,
+        "max_mip_gap": 4.348e-05
+      }
+    },
+    "manuscript_note": "main_applied_energy_v5.tex is NOT on this machine (searched repo + home). Local candidates (MANUSCRIPT/'Applied Energy'/main.tex at HEAD and the untracked Overleaf_upload_package_2026-06-26 snapshot) both lack the three v5-only anchor sentences from the brief, so v5 is a later evolution on the editing side. Per brief \u00a70.1 the deliverable is therefore numbers-only; \u00a711 backfill was not performed."
+  },
+  "gate": {
+    "gate_passed": false,
+    "worst_rel_dev_pct": 0.7735849056603773,
+    "checks": [
+      {
+        "check": "Case 0 TAC (M$/yr)",
+        "manuscript_value": 75.9,
+        "solved_value": 75.86905000119022,
+        "rel_dev_pct": 0.04077733703529423,
+        "pass_0p5pct": true
+      },
+      {
+        "check": "Case 1 TAC (M$/yr)",
+        "manuscript_value": 113.4,
+        "solved_value": 113.37015947922154,
+        "rel_dev_pct": 0.026314392220867722,
+        "pass_0p5pct": true
+      },
+      {
+        "check": "Case 2 TAC (M$/yr)",
+        "manuscript_value": 122.6,
+        "solved_value": 122.59419572701054,
+        "rel_dev_pct": 0.004734317283402093,
+        "pass_0p5pct": true
+      },
+      {
+        "check": "Case 3 TAC (M$/yr)",
+        "manuscript_value": 55.6,
+        "solved_value": 55.57682208038327,
+        "rel_dev_pct": 0.0416869057854822,
+        "pass_0p5pct": true
+      },
+      {
+        "check": "Case 1 45Y credit (M$/yr)",
+        "manuscript_value": 42.9,
+        "solved_value": 42.865664274076536,
+        "rel_dev_pct": 0.08003665716424764,
+        "pass_0p5pct": true
+      },
+      {
+        "check": "Case 2 45Y credit (M$/yr)",
+        "manuscript_value": 41.8,
+        "solved_value": 41.79096570119229,
+        "rel_dev_pct": 0.021613155042357547,
+        "pass_0p5pct": true
+      },
+      {
+        "check": "Absorption supply (GWh_c/yr)",
+        "manuscript_value": 352.0,
+        "solved_value": 351.54406310093714,
+        "rel_dev_pct": 0.12952752814285873,
+        "pass_0p5pct": true
+      },
+      {
+        "check": "Absorption share of cooling (%)",
+        "manuscript_value": 38.0,
+        "solved_value": 38.134513454817274,
+        "rel_dev_pct": 0.3539827758349308,
+        "pass_0p5pct": true
+      },
+      {
+        "check": "Absorption operating hours (h)",
+        "manuscript_value": 5300.0,
+        "solved_value": 5341.0,
+        "rel_dev_pct": 0.7735849056603773,
+        "pass_0p5pct": false
+      }
+    ],
+    "drift_vs_archived_grid": [
+      {
+        "case_id": 0,
+        "tac_new_usd": 75869050.00119022,
+        "tac_2026_06_10_usd": 75869050.00119022,
+        "rel_diff": 0.0
+      },
+      {
+        "case_id": 3,
+        "tac_new_usd": 55576822.08038327,
+        "tac_2026_06_10_usd": 55576822.08038327,
+        "rel_diff": 0.0
+      },
+      {
+        "case_id": 1,
+        "tac_new_usd": 113370159.47922154,
+        "tac_2026_06_10_usd": 113370159.47922154,
+        "rel_diff": 0.0
+      },
+      {
+        "case_id": 2,
+        "tac_new_usd": 122594195.72701055,
+        "tac_2026_06_10_usd": 122594195.72701056,
+        "rel_diff": 1.2154866798938147e-16
+      }
+    ],
+    "solver": {
+      "gurobi_threads_per_solve": 4,
+      "mip_gap_target": 0.0001,
+      "mip_gap_achieved": {
+        "1": 1.0383611875661335e-14,
+        "2": 5.109906002273728e-13
+      }
+    },
+    "unrounded": {
+      "case0_tac_usd": 75869050.00119022,
+      "case1_tac_usd": 113370159.47922154,
+      "case2_tac_usd": 122594195.72701055,
+      "case3_tac_usd": 55576822.08038327,
+      "case1_ptc_usd": -42865664.27407654,
+      "case2_ptc_usd": -41790965.70119229,
+      "case2_q_abs_mwh": 351544.0631009371,
+      "case2_cooling_mwh": 921852.7555555556,
+      "case2_abs_hours": 5341,
+      "case1_margin": -0.49428732108077034,
+      "case2_margin": -0.6158657018255445
+    }
+  },
+  "B1": {
+    "runs": [
+      {
+        "case": 1,
+        "year": 2022,
+        "capital_usd_per_kwe": 2250.0,
+        "tac_musd_yr": -7.939213739174277,
+        "case0_tac_musd_yr": 85.12548837185383,
+        "margin_pct": 109.32648245669192,
+        "net_export_twh_yr": 1.0945887931018536,
+        "ptc_musd_yr": 42.865664274076536,
+        "output_file": "submission_audit/runs_b1/b1_capital_year/case1_NOAK_2022/summary.json"
+      },
+      {
+        "case": 1,
+        "year": 2022,
+        "capital_usd_per_kwe": 5000.0,
+        "tac_musd_yr": 45.82545622868046,
+        "case0_tac_musd_yr": 85.12548837185383,
+        "margin_pct": 46.16717377467366,
+        "net_export_twh_yr": 1.0945887931018536,
+        "ptc_musd_yr": 42.865664274076536,
+        "output_file": "submission_audit/runs_b1/b1_capital_year/case1_USD5000_2022/summary.json"
+      },
+      {
+        "case": 1,
+        "year": 2024,
+        "capital_usd_per_kwe": 2250.0,
+        "tac_musd_yr": 36.622859675672906,
+        "case0_tac_musd_yr": 36.45567463481261,
+        "margin_pct": -0.45859812645092646,
+        "net_export_twh_yr": 1.0927379758348388,
+        "ptc_musd_yr": 42.865664274076536,
+        "output_file": "submission_audit/runs_b1/b1_capital_year/case1_NOAK_2024/summary.json"
+      },
+      {
+        "case": 1,
+        "year": 2024,
+        "capital_usd_per_kwe": 5000.0,
+        "tac_musd_yr": 90.38752964352764,
+        "case0_tac_musd_yr": 36.45567463481261,
+        "margin_pct": -147.93816202543647,
+        "net_export_twh_yr": 1.0927379758348388,
+        "ptc_musd_yr": 42.865664274076536,
+        "output_file": "submission_audit/runs_b1/b1_capital_year/case1_USD5000_2024/summary.json"
+      },
+      {
+        "case": 2,
+        "year": 2022,
+        "capital_usd_per_kwe": 2250.0,
+        "tac_musd_yr": 1.2953589123534262,
+        "case0_tac_musd_yr": 85.12548837185383,
+        "margin_pct": 98.47829488308494,
+        "net_export_twh_yr": 1.1596224381480948,
+        "ptc_musd_yr": 40.82262002918486,
+        "output_file": "submission_audit/runs_b1/b1_capital_year/case2_NOAK_2022/summary.json"
+      },
+      {
+        "case": 2,
+        "year": 2022,
+        "capital_usd_per_kwe": 5000.0,
+        "tac_musd_yr": 55.06002888020819,
+        "case0_tac_musd_yr": 85.12548837185383,
+        "margin_pct": 35.31898620106663,
+        "net_export_twh_yr": 1.1596224381480948,
+        "ptc_musd_yr": 40.82262002918486,
+        "output_file": "submission_audit/runs_b1/b1_capital_year/case2_USD5000_2022/summary.json"
+      },
+      {
+        "case": 2,
+        "year": 2024,
+        "capital_usd_per_kwe": 2250.0,
+        "tac_musd_yr": 48.993316895654075,
+        "case0_tac_musd_yr": 36.45567463481261,
+        "margin_pct": -34.39146960366193,
+        "net_export_twh_yr": 1.1277218233914368,
+        "ptc_musd_yr": 42.02437826593315,
+        "output_file": "submission_audit/runs_b1/b1_capital_year/case2_NOAK_2024/summary.json"
+      },
+      {
+        "case": 2,
+        "year": 2024,
+        "capital_usd_per_kwe": 5000.0,
+        "tac_musd_yr": 102.75798686350885,
+        "case0_tac_musd_yr": 36.45567463481261,
+        "margin_pct": -181.8710335026476,
+        "net_export_twh_yr": 1.1277218233914368,
+        "ptc_musd_yr": 42.02437826593315,
+        "output_file": "submission_audit/runs_b1/b1_capital_year/case2_USD5000_2024/summary.json"
+      }
+    ],
+    "atb_mid_year_deltas": {
+      "case1_2023_to_2024_musd_yr": 28.14268360646616,
+      "case2_2023_to_2024_musd_yr": 31.289104578658296,
+      "case1_2023_to_2022_musd_yr": -16.41938980838105,
+      "case2_2023_to_2022_musd_yr": -16.408853404642343
+    },
+    "separability_check": {
+      "note": "TAC(capital, year) additivity: predicted = TAC(capital, 2023) + [TAC(ATB-Mid, year) - TAC(ATB-Mid, 2023)] from the unchanged archived ledger (plus the case1@$5,000 2023 anchor solved here); solved = the fresh B1 run. Exact separability is expected because reactor capital enters TAC only as a dispatch-neutral constant.",
+      "predicted_noak_2024_case1_tac": 36.62285967567292,
+      "solved_noak_2024_case1_tac": 36.622859675672906,
+      "max_abs_deviation_musd_yr": 1.4901161193847656e-14,
+      "all_cells": [
+        {
+          "cell": "case1_NOAK_2022",
+          "predicted_musd_yr": -7.939213739174291,
+          "solved_musd_yr": -7.939213739174277,
+          "abs_dev_musd_yr": 1.4901161193847656e-14,
+          "anchor_2023_source": "outputs/s4_capex/case1_NOAK/summary.json"
+        },
+        {
+          "cell": "case1_USD5000_2022",
+          "predicted_musd_yr": 45.825456228680444,
+          "solved_musd_yr": 45.82545622868046,
+          "abs_dev_musd_yr": 1.4901161193847656e-14,
+          "anchor_2023_source": "submission_audit/runs_b1/b1_capital_year/case1_USD5000_2023/summary.json"
+        },
+        {
+          "cell": "case1_NOAK_2024",
+          "predicted_musd_yr": 36.62285967567292,
+          "solved_musd_yr": 36.622859675672906,
+          "abs_dev_musd_yr": 1.4901161193847656e-14,
+          "anchor_2023_source": "outputs/s4_capex/case1_NOAK/summary.json"
+        },
+        {
+          "cell": "case1_USD5000_2024",
+          "predicted_musd_yr": 90.38752964352766,
+          "solved_musd_yr": 90.38752964352764,
+          "abs_dev_musd_yr": 1.4901161193847656e-14,
+          "anchor_2023_source": "submission_audit/runs_b1/b1_capital_year/case1_USD5000_2023/summary.json"
+        },
+        {
+          "cell": "case2_NOAK_2022",
+          "predicted_musd_yr": 1.2953589123534337,
+          "solved_musd_yr": 1.2953589123534262,
+          "abs_dev_musd_yr": 7.450580596923828e-15,
+          "anchor_2023_source": "outputs/s4_capex/case2_NOAK/summary.json"
+        },
+        {
+          "cell": "case2_USD5000_2022",
+          "predicted_musd_yr": 55.06002888020819,
+          "solved_musd_yr": 55.06002888020819,
+          "abs_dev_musd_yr": 0.0,
+          "anchor_2023_source": "outputs/s5_feasibility_2d/case2_smr_Low_Mid_abs_Baseline/summary.json"
+        },
+        {
+          "cell": "case2_NOAK_2024",
+          "predicted_musd_yr": 48.993316895654075,
+          "solved_musd_yr": 48.993316895654075,
+          "abs_dev_musd_yr": 0.0,
+          "anchor_2023_source": "outputs/s4_capex/case2_NOAK/summary.json"
+        },
+        {
+          "cell": "case2_USD5000_2024",
+          "predicted_musd_yr": 102.75798686350883,
+          "solved_musd_yr": 102.75798686350885,
+          "abs_dev_musd_yr": 1.4901161193847656e-14,
+          "anchor_2023_source": "outputs/s5_feasibility_2d/case2_smr_Low_Mid_abs_Baseline/summary.json"
+        }
+      ]
+    },
+    "anchor_run_case1_usd5000_2023": {
+      "tac_musd_yr": 62.2448460370615,
+      "margin_pct": 17.957525451966227,
+      "output_file": "submission_audit/runs_b1/b1_capital_year/case1_USD5000_2023/summary.json"
+    }
+  },
+  "B2": {
+    "c45y_alt_usd_per_mwh": 15.4712,
+    "c45y_alt_exact": 15.471244605626914,
+    "c45y_realized_from_dispatch_usd_per_mwh": 15.47124460562554,
+    "scope": "all 70 nuclear runs of the production grid re-solved under G9 + 2 extra Case-2 capital points (3500, 4500)",
+    "baseline_margins": {
+      "case1_pct": -61.557322629889775,
+      "case2_pct": -73.364557711675,
+      "case1_delta_pp": -12.12859052181274,
+      "case2_delta_pp": -11.777987529120537,
+      "case1_tac_musd_yr": 122.57200588665528,
+      "case2_tac_musd_yr": 131.53004297461297
+    },
+    "parity_threshold_usd_per_kwe": 4768.00529570013,
+    "parity_threshold_case1_usd_per_kwe": 5226.198417811966,
+    "carbon_crossovers_usd_per_tco2": {
+      "case1": 66.13124569973655,
+      "case2": 76.15771400377075
+    },
+    "capital_scan": [
+      {
+        "capital_usd_per_kwe": 2250.0,
+        "case2_tac_musd_yr": 26.640059564598204,
+        "case2_margin_pct": 64.88678906065084,
+        "output_file": "submission_audit/runs_b2/g9_s4_capex/case2_NOAK/summary.json"
+      },
+      {
+        "capital_usd_per_kwe": 3500.0,
+        "case2_tac_musd_yr": 51.0785459136231,
+        "case2_margin_pct": 32.675384873249634,
+        "output_file": "submission_audit/runs_b2/g9_capital_extra/case2_USD3500/summary.json"
+      },
+      {
+        "capital_usd_per_kwe": 4500.0,
+        "case2_tac_musd_yr": 70.629334992843,
+        "case2_margin_pct": 6.9062615233287055,
+        "output_file": "submission_audit/runs_b2/g9_capital_extra/case2_USD4500/summary.json"
+      },
+      {
+        "capital_usd_per_kwe": 5000.0,
+        "case2_tac_musd_yr": 80.40472953245298,
+        "case2_margin_pct": -5.978300151631788,
+        "output_file": "submission_audit/runs_b2/g9_s5_feasibility_2d/case2_smr_Low_Mid_abs_Baseline/summary.json"
+      },
+      {
+        "capital_usd_per_kwe": 7615.0,
+        "case2_tac_musd_yr": 131.53004297461297,
+        "case2_margin_pct": -73.364557711675,
+        "output_file": "submission_audit/runs_b2/g9_s4_capex/case2_ATB_Mid/summary.json"
+      },
+      {
+        "capital_usd_per_kwe": 11000.0,
+        "case2_tac_musd_yr": 197.70946400777234,
+        "case2_margin_pct": -160.59304025115736,
+        "output_file": "submission_audit/runs_b2/g9_s5_feasibility_2d/case2_smr_High_Mid_abs_Baseline/summary.json"
+      },
+      {
+        "capital_usd_per_kwe": 14700.0,
+        "case2_tac_musd_yr": 270.04738360088595,
+        "case2_margin_pct": -255.93879664586478,
+        "output_file": "submission_audit/runs_b2/g9_s4_capex/case2_FOAK/summary.json"
+      }
+    ],
+    "output_dir": "submission_audit/runs_b2/"
+  },
+  "B3": {
+    "axes": [
+      {
+        "axis": "Reactor capital",
+        "case2_tac_low_musd_yr": 17.704212316995775,
+        "case2_tac_high_musd_yr": 261.11153635328355,
+        "delta_tac_musd_yr": 243.40732403628778,
+        "margin_span_pp": 320.8255857065157,
+        "margin_low_pct": -244.1608091167443,
+        "margin_high_pct": 76.6647765897714,
+        "endpoint_runs": [
+          "case2_FOAK",
+          "case2_NOAK"
+        ]
+      },
+      {
+        "axis": "Market year",
+        "case2_tac_low_musd_yr": 106.18534232236821,
+        "case2_tac_high_musd_yr": 153.88330030566885,
+        "delta_tac_musd_yr": 47.69795798330064,
+        "margin_span_pp": 297.37091693730304,
+        "margin_low_pct": -322.110691537501,
+        "margin_high_pct": -24.73977460019799,
+        "endpoint_runs": [
+          "case2_year2024",
+          "case2_year2022"
+        ]
+      },
+      {
+        "axis": "WACC",
+        "case2_tac_low_musd_yr": 93.88599314901363,
+        "case2_tac_high_musd_yr": 184.0845440658383,
+        "delta_tac_musd_yr": 90.19855091682466,
+        "margin_span_pp": 118.88714952330315,
+        "margin_low_pct": -142.63457109710797,
+        "margin_high_pct": -23.74742157380481,
+        "endpoint_runs": [
+          "case2_wacc_100",
+          "case2_wacc_50"
+        ]
+      },
+      {
+        "axis": "Carbon price",
+        "case2_tac_low_musd_yr": 85.98012782571122,
+        "case2_tac_high_musd_yr": 122.59419572701056,
+        "delta_tac_musd_yr": 36.614067901299336,
+        "margin_span_pp": 84.9059035661337,
+        "margin_low_pct": -61.586570182554446,
+        "margin_high_pct": 23.31933338357925,
+        "endpoint_runs": [
+          "case2_co2_0",
+          "case2_co2_100"
+        ]
+      },
+      {
+        "axis": "Data-center size",
+        "case2_tac_low_musd_yr": 80.0432514736195,
+        "case2_tac_high_musd_yr": 292.7979727405676,
+        "delta_tac_musd_yr": 212.7547212669481,
+        "margin_span_pp": 82.36188366587275,
+        "margin_low_pct": -111.00370038207623,
+        "margin_high_pct": -28.64181671620348,
+        "endpoint_runs": [
+          "case2_load_x050",
+          "case2_load_x300"
+        ]
+      },
+      {
+        "axis": "Absorber capital",
+        "case2_tac_low_musd_yr": 118.58598649672678,
+        "case2_tac_high_musd_yr": 128.60650957243624,
+        "delta_tac_musd_yr": 10.020523075709463,
+        "margin_span_pp": 13.207655922345488,
+        "margin_low_pct": -69.51116373596176,
+        "margin_high_pct": -56.30350781361627,
+        "endpoint_runs": [
+          "case2_smr_ATB_Mid_abs_Turnkey_High",
+          "case2_smr_ATB_Mid_abs_Bare_Low"
+        ]
+      },
+      {
+        "axis": "PUE",
+        "case2_tac_low_musd_yr": 114.36166570372762,
+        "case2_tac_high_musd_yr": 123.28068645836032,
+        "delta_tac_musd_yr": 8.919020754632697,
+        "margin_span_pp": 11.75580919293543,
+        "margin_low_pct": -62.49140651744858,
+        "margin_high_pct": -50.73559732451315,
+        "endpoint_runs": [
+          "case2_pue150",
+          "case2_pue110"
+        ]
+      },
+      {
+        "axis": "BESS on/off",
+        "case2_tac_low_musd_yr": 122.59419572701056,
+        "case2_tac_high_musd_yr": 123.35597389947351,
+        "delta_tac_musd_yr": 0.7617781724629538,
+        "margin_span_pp": 1.004069739176927,
+        "margin_low_pct": -62.59063992173137,
+        "margin_high_pct": -61.586570182554446,
+        "endpoint_runs": [
+          "case2_bess_on",
+          "case2_bess_off"
+        ]
+      }
+    ],
+    "figure_path": "submission_audit/figures/fig_policy_sensitivity_summary_rev.pdf",
+    "size_axis_caveat": "The data-center-size axis scales the IT load, cooling and comparator capacities together (0.5-3.0x), so both the numerator and the matched Case-0 denominator grow with it; its absolute TAC span (212.8 M$/yr) measures system size, not boundary sensitivity, and is hatch/dagger-flagged in the redrawn panel rather than ranked against the fixed-system axes.",
+    "panel_a_note": "Panel (a) follows the shipped figure (solid lines inside the solved $0-100/tCO2 range, dashed extrapolation beyond, solved-range rule); the checked-in make_figures.ipynb cell 15 predates that revision.",
+    "source_table": "outputs/master_kpi_table.csv (archived, unchanged values)"
+  },
+  "C5": {
+    "weather_pairing": "per-year",
+    "evidence_file_and_lines": "src/data.py:116-148 (load_time_series builds per-year paths houston_ambient_{year}.csv / {year}_dam_lmp_houston.csv / ercot_carbon_intensity_hourly_{year}.csv); scripts/run_all_analyses.py:468 passes spec.year for every run; data/weather holds houston_ambient_2022/2023/2024.csv (all present and loaded).",
+    "carbon_intensity_pairing": "per-year",
+    "gate_hours": {
+      "2022": 0,
+      "2023": 0,
+      "2024": 0
+    },
+    "gate_hours_outside_outage": {
+      "2022": 0,
+      "2023": 0,
+      "2024": 0
+    },
+    "wetbulb_peak_c": {
+      "2022": 27.09621836102369,
+      "2023": 28.05692321983859,
+      "2024": 28.120145790889897
+    },
+    "gate_hours_by_month": {
+      "2022": {},
+      "2023": {},
+      "2024": {}
+    },
+    "it_load_alignment_note": "The IT trace is a calendar-2018 measurement; src/data.py:43-60 circularly shifts it by whole days per market year so weekday phase matches that year's calendar. Prices/weather/carbon are therefore co-sampled per year while the workload is a phase-aligned proxy."
+  },
+  "C6": {
+    "deliverables": [
+      "submission_audit/C6_supplementary_note.tex",
+      "submission_audit/C6_sources.md"
+    ],
+    "new_bibtex_keys": [
+      "lenzen2008nuclear",
+      "macknick2012water",
+      "boulay2018aware",
+      "wri2023aqueduct"
+    ],
+    "reused_bibtex_keys": [
+      "atb2024nuclear",
+      "li2026nuclearH2"
+    ],
+    "compile_check": "note inserted into a scratch copy of the repo manuscript and compiled (pdflatex+bibtex+pdflatex x2): 0 errors, 0 undefined citations/references; factor table auto-numbers after S5"
+  },
+  "M5": {
+    "figure_label_shown": "-7.5",
+    "unrounded_value_musd_yr": -7.545347124037054,
+    "figure_regenerated": false,
+    "verdict": "The unrounded Willans extraction opportunity cost is -7,545,347.12 $/yr = -7.5453 M$/yr. At one decimal this rounds to -7.5, so the shipped fig_operation_value.pdf panel (c) label (-7.5) is already the correct unrounded-derived print and no regeneration is needed. Table S4's -7.55 is the correct two-decimal print of the same number. v5's change of the \u00a73.2 prose from $7.5M to $7.6M is a double-rounding error (7.5453 -> 7.55 -> 7.6) and should be reverted to $7.5M.",
+    "source": "outputs/figures/value_decomp_case2.csv (turbine_gen_lost_usd_per_yr, main_baseline/base row)"
+  },
+  "F": {
+    "total_checks": 189,
+    "passed": 182,
+    "failed": 6,
+    "not_checkable": 1,
+    "resolved": [
+      {
+        "location": "\u00a73.2 Willans opportunity cost (v5 prints 7.6)",
+        "manuscript_value": "7.6",
+        "true_value": 7.545347124037054,
+        "true_rounded_at_printed_precision": 7.5,
+        "correct_print": false,
+        "recommended_printed_value": "7.5",
+        "source": "value_decomp_case2.csv"
+      },
+      {
+        "location": "S4 PUE1.50 component sum (true) vs printed net -2.35",
+        "manuscript_value": "-2.35",
+        "true_value": -2.3532693556391755,
+        "true_rounded_at_printed_precision": -2.35,
+        "correct_print": true,
+        "recommended_printed_value": "-2.35 (keep; add independent-rounding note: rounded components sum to -2.36)",
+        "source": "value_decomp_case2.csv"
+      },
+      {
+        "location": "S5 NGCC margin 2024 (true from unrounded totals)",
+        "manuscript_value": "-46.8",
+        "true_value": -46.75284432883664,
+        "true_rounded_at_printed_precision": -46.8,
+        "correct_print": true,
+        "recommended_printed_value": "-46.8 (keep; note margins computed from unrounded totals; rounded quotient 1-53.5/36.5 gives -46.6)",
+        "source": "audit/ledger_full.csv"
+      },
+      {
+        "location": "S1 gap x250",
+        "manuscript_value": "60.6",
+        "true_value": 60.57440348420244,
+        "true_rounded_at_printed_precision": 60.6,
+        "correct_print": true,
+        "recommended_printed_value": "60.6",
+        "source": "audit/ledger_full.csv"
+      }
+    ],
+    "new_discrepancies": [
+      {
+        "location": "\u00a72.1 mean-to-peak",
+        "manuscript_value": "0.67",
+        "true_value": 0.6649178569459352,
+        "true_rounded_at_printed_precision": 0.66,
+        "correct_print": false,
+        "recommended_printed_value": "0.66",
+        "source": "data/workload"
+      },
+      {
+        "location": "\u00a72.1 realized PUE VCC cases ('near 1.31')",
+        "manuscript_value": "1.31",
+        "true_value": 1.3048328177188107,
+        "true_rounded_at_printed_precision": 1.3,
+        "correct_print": false,
+        "recommended_printed_value": "1.30",
+        "source": "case0 dispatch"
+      }
+    ],
+    "definition_dependent_notes": [
+      {
+        "location": "\u00a73.1 hours below NGCC running cost (%)",
+        "manuscript_value": "42",
+        "true_value": 40.46803652968037,
+        "true_rounded_at_printed_precision": 40.0,
+        "correct_print": false,
+        "recommended_printed_value": "40",
+        "source": "LMP vs hourly running cost"
+      },
+      {
+        "location": "\u00a73.2 July-week absorption share ('just under two thirds')",
+        "manuscript_value": "65",
+        "true_value": 63.30831630495102,
+        "true_rounded_at_printed_precision": 63.0,
+        "correct_print": false,
+        "recommended_printed_value": "just under two thirds (true 63%)",
+        "source": "case2 dispatch"
+      },
+      {
+        "location": "S3-note alpha_w sweep (-3.0 to -11.1 M$, 92%->16%)",
+        "manuscript_value": "alpha sweep 0.08-0.25",
+        "true_value": null,
+        "true_rounded_at_printed_precision": null,
+        "correct_print": null,
+        "recommended_printed_value": "not audited: alpha_w sweep runs are not in the 100-run ledger (solved ad hoc for the SI); re-solve if verification needed",
+        "source": "n/a"
+      },
+      {
+        "location": "\u00a72.2 MILP runs within 1e-4 gap (max achieved, fresh audit solves)",
+        "manuscript_value": "0.0001",
+        "true_value": 4.3475221750968777e-05,
+        "true_rounded_at_printed_precision": 0.0,
+        "correct_print": false,
+        "recommended_printed_value": "claim holds: max achieved gap 4.35e-05 across 83 fresh MILP solves; archived summaries predate gap recording but reproduce bit-for-bit under the same settings",
+        "source": "submission_audit/runs_*/**/summary.json"
+      }
+    ]
+  }
+}

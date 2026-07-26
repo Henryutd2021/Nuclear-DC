@@ -1,0 +1,102 @@
+{
+  "total_checks": 189,
+  "passed": 182,
+  "failed": 6,
+  "not_checkable": 1,
+  "resolved": [
+    {
+      "location": "\u00a73.2 Willans opportunity cost (v5 prints 7.6)",
+      "manuscript_value": "7.6",
+      "true_value": 7.545347124037054,
+      "true_rounded_at_printed_precision": 7.5,
+      "correct_print": false,
+      "recommended_printed_value": "7.5",
+      "source": "value_decomp_case2.csv"
+    },
+    {
+      "location": "S4 PUE1.50 component sum (true) vs printed net -2.35",
+      "manuscript_value": "-2.35",
+      "true_value": -2.3532693556391755,
+      "true_rounded_at_printed_precision": -2.35,
+      "correct_print": true,
+      "recommended_printed_value": "-2.35 (keep; add independent-rounding note: rounded components sum to -2.36)",
+      "source": "value_decomp_case2.csv"
+    },
+    {
+      "location": "S5 NGCC margin 2024 (true from unrounded totals)",
+      "manuscript_value": "-46.8",
+      "true_value": -46.75284432883664,
+      "true_rounded_at_printed_precision": -46.8,
+      "correct_print": true,
+      "recommended_printed_value": "-46.8 (keep; note margins computed from unrounded totals; rounded quotient 1-53.5/36.5 gives -46.6)",
+      "source": "audit/ledger_full.csv"
+    },
+    {
+      "location": "S1 gap x250",
+      "manuscript_value": "60.6",
+      "true_value": 60.57440348420244,
+      "true_rounded_at_printed_precision": 60.6,
+      "correct_print": true,
+      "recommended_printed_value": "60.6",
+      "source": "audit/ledger_full.csv"
+    }
+  ],
+  "new_discrepancies": [
+    {
+      "location": "\u00a72.1 mean-to-peak",
+      "manuscript_value": "0.67",
+      "true_value": 0.6649178569459352,
+      "true_rounded_at_printed_precision": 0.66,
+      "correct_print": false,
+      "recommended_printed_value": "0.66",
+      "source": "data/workload"
+    },
+    {
+      "location": "\u00a72.1 realized PUE VCC cases ('near 1.31')",
+      "manuscript_value": "1.31",
+      "true_value": 1.3048328177188107,
+      "true_rounded_at_printed_precision": 1.3,
+      "correct_print": false,
+      "recommended_printed_value": "1.30",
+      "source": "case0 dispatch"
+    }
+  ],
+  "definition_dependent_notes": [
+    {
+      "location": "\u00a73.1 hours below NGCC running cost (%)",
+      "manuscript_value": "42",
+      "true_value": 40.46803652968037,
+      "true_rounded_at_printed_precision": 40.0,
+      "correct_print": false,
+      "recommended_printed_value": "40",
+      "source": "LMP vs hourly running cost"
+    },
+    {
+      "location": "\u00a73.2 July-week absorption share ('just under two thirds')",
+      "manuscript_value": "65",
+      "true_value": 63.30831630495102,
+      "true_rounded_at_printed_precision": 63.0,
+      "correct_print": false,
+      "recommended_printed_value": "just under two thirds (true 63%)",
+      "source": "case2 dispatch"
+    },
+    {
+      "location": "S3-note alpha_w sweep (-3.0 to -11.1 M$, 92%->16%)",
+      "manuscript_value": "alpha sweep 0.08-0.25",
+      "true_value": null,
+      "true_rounded_at_printed_precision": null,
+      "correct_print": null,
+      "recommended_printed_value": "not audited: alpha_w sweep runs are not in the 100-run ledger (solved ad hoc for the SI); re-solve if verification needed",
+      "source": "n/a"
+    },
+    {
+      "location": "\u00a72.2 MILP runs within 1e-4 gap (max achieved, fresh audit solves)",
+      "manuscript_value": "0.0001",
+      "true_value": 4.3475221750968777e-05,
+      "true_rounded_at_printed_precision": 0.0,
+      "correct_print": false,
+      "recommended_printed_value": "claim holds: max achieved gap 4.35e-05 across 83 fresh MILP solves; archived summaries predate gap recording but reproduce bit-for-bit under the same settings",
+      "source": "submission_audit/runs_*/**/summary.json"
+    }
+  ]
+}

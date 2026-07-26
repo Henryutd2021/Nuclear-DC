@@ -1,0 +1,190 @@
+location,manuscript_value,true_value,true_rounded_at_printed_precision,correct_print,recommended_printed_value,source
+Abs/§3.1 Case0 TAC,75.9,75.86905000119022,75.9,True,75.9,audit/ledger_full.csv
+Abs/§3.1 Case1 TAC,113.4,113.37015947922154,113.4,True,113.4,audit/ledger_full.csv
+Abs/§3.1 Case2 TAC,122.6,122.59419572701056,122.6,True,122.6,audit/ledger_full.csv
+Abs/§3.1 Case3 TAC,55.6,55.57682208038327,55.6,True,55.6,audit/ledger_full.csv
+§3.1 Case1 45Y credit,42.9,42.865664274076536,42.9,True,42.9,audit/ledger_full.csv
+§3.1 Case2 45Y credit,41.8,41.79096570119229,41.8,True,41.8,audit/ledger_full.csv
+§3.1 Case1 margin,-49,-49.428732108077035,-49.0,True,-49,audit/ledger_full.csv
+§3.1 Case2 margin,-62,-61.58657018255447,-62.0,True,-62,audit/ledger_full.csv
+§3.1 Case3 margin,+27,26.74638461993212,27.0,True,+27,audit/ledger_full.csv
+§3.1 Case0 electricity share of TAC,93,93.30280168755522,93.0,True,93,audit/ledger_full.csv
+§3.1/§3.2 absorption penalty,9.2,9.224036247789025,9.2,True,9.2,audit/ledger_full.csv
+§3.1 Case2 net exports (TWh),1.14,1.1354323273074645,1.14,True,1.14,audit/ledger_full.csv
+§3.1 Case2 gross sales (TWh),1.22,1.2202472747023683,1.22,True,1.22,audit/ledger_full.csv
+§3.1 Case2 imports (TWh),0.08,0.08481494739490368,0.08,True,0.08,audit/ledger_full.csv
+§3.2 absorption supply (GWh_c),352,351.54406310093714,352.0,True,352,audit/ledger_full.csv
+§3.2 absorption share (%),38,38.13451345481727,38.0,True,38,audit/ledger_full.csv
+§3.2 VCC supply (GWh_c),570,570.3086924546184,570.0,True,570,audit/ledger_full.csv
+§3.2 gross avoided VCC elec,17.2,17.17558550793561,17.2,True,17.2,value_decomp_case2.csv
+S4 gross avoided VCC elec,+17.18,17.17558550793561,17.18,True,+17.18,value_decomp_case2.csv
+§3.2 absorption capital+FOM,13.2,13.22052307570947,13.2,True,13.2,value_decomp_case2.csv
+§3.2 Willans opportunity cost (v5 prints 7.6),7.6,7.545347124037054,7.5,False,7.5,value_decomp_case2.csv
+S4 Willans opportunity cost,-7.55,-7.545347124037054,-7.55,True,-7.55,value_decomp_case2.csv
+§3.2 VCC retained,3.1,3.1357020640479747,3.1,True,3.1,value_decomp_case2.csv
+§3.2 PTC forgone,1.1,1.0746985728842466,1.1,True,1.1,value_decomp_case2.csv
+§3.2 residual,-1.4,-1.4233509190458777,-1.4,True,-1.4,value_decomp_case2.csv
+§3.2/S4 net value,-9.22,-9.22403624778901,-9.22,True,-9.22,value_decomp_case2.csv
+§3.2 site-water memo,-0.01,-0.014589078618688876,-0.01,True,-0.01,value_decomp_case2.csv
+S4 net value PUE~1.10,-13.22,-13.220523109070092,-13.22,True,-13.22,value_decomp_case2.csv
+S4 net value PUE~1.30,-11.03,-11.034658735696212,-11.03,True,-11.03,value_decomp_case2.csv
+S4 net value PUE~1.50,-2.35,-2.3532693556391746,-2.35,True,-2.35,value_decomp_case2.csv
+S4 PUE1.50 component sum (true) vs printed net -2.35,-2.35,-2.3532693556391755,-2.35,True,-2.35 (keep; add independent-rounding note: rounded components sum to -2.36),value_decomp_case2.csv
+S4 PUE110 vcc_elec_saved_usd_per_yr,+4.95,4.9465686233814585,4.95,True,+4.95,value_decomp_case2.csv
+S4 PUE110 crystal_cutoff_backup_usd_per_yr,-4.95,-4.9465686567419835,-4.95,True,-4.95,value_decomp_case2.csv
+S4 PUE110 turbine_gen_lost_usd_per_yr,0.00,-0.0,-0.0,True,0.00,value_decomp_case2.csv
+S4 PUE110 ptc_forgone_usd_per_yr,0.00,0.0,0.0,True,0.00,value_decomp_case2.csv
+S4 PUE110 residual_usd_per_yr,0.00,-9.685754776000976e-14,-0.0,True,0.00,value_decomp_case2.csv
+S4 PUE130 vcc_elec_saved_usd_per_yr,+14.84,14.839705878864534,14.84,True,+14.84,value_decomp_case2.csv
+S4 PUE130 crystal_cutoff_backup_usd_per_yr,-4.08,-4.081377959928844,-4.08,True,-4.08,value_decomp_case2.csv
+S4 PUE130 turbine_gen_lost_usd_per_yr,-6.65,-6.653137309827191,-6.65,True,-6.65,value_decomp_case2.csv
+S4 PUE130 ptc_forgone_usd_per_yr,-0.60,-0.5978941651114374,-0.6,True,-0.60,value_decomp_case2.csv
+S4 PUE130 residual_usd_per_yr,-1.32,-1.3214321039838026,-1.32,True,-1.32,value_decomp_case2.csv
+S4 PUE150 vcc_elec_saved_usd_per_yr,+24.73,24.732843131440887,24.73,True,+24.73,value_decomp_case2.csv
+S4 PUE150 crystal_cutoff_backup_usd_per_yr,-0.93,-0.9260353398141442,-0.93,True,-0.93,value_decomp_case2.csv
+S4 PUE150 turbine_gen_lost_usd_per_yr,-9.05,-9.045669289813144,-9.05,True,-9.05,value_decomp_case2.csv
+S4 PUE150 ptc_forgone_usd_per_yr,-2.40,-2.4023727173243685,-2.4,True,-2.40,value_decomp_case2.csv
+S4 PUE150 residual_usd_per_yr,-1.49,-1.4915120644189352,-1.49,True,-1.49,value_decomp_case2.csv
+§3.3 absorption supply PUE1.30 (GWh_c),193,193.17790633383356,193.0,True,193,audit/ledger_full.csv
+§3.3 absorption supply PUE1.50 (GWh_c),801,800.5879537249772,801.0,True,801,audit/ledger_full.csv
+§3.3 abs supply PUE1.10 (GWh),0,0.0,0.0,True,0,audit/ledger_full.csv
+§3.3 net cooling-elec saving PUE1.30,10.8,10.75832791893569,10.8,True,10.8,value_decomp_case2.csv
+§3.3 net cooling-elec saving PUE1.50,23.8,23.806807791626746,23.8,True,23.8,value_decomp_case2.csv
+§3.4/S5 NGCC margin 2022,-2.2,-2.177667155982377,-2.2,True,-2.2,audit/ledger_full.csv
+§3.4 C1 2022 'within 14% of parity',-14,-13.891587026590969,-14.0,True,-14,audit/ledger_full.csv
+§3.4 C1 margin 2024,-288,-288.17782006029006,-288.0,True,-288,audit/ledger_full.csv
+§3.4 C2 margin 2024,-322,-322.110691537501,-322.0,True,-322,audit/ledger_full.csv
+S5 NGCC margin 2023,+26.7,26.74638461993212,26.7,True,+26.7,audit/ledger_full.csv
+S5 NGCC margin 2024 (true from unrounded totals),-46.8,-46.75284432883664,-46.8,True,-46.8 (keep; note margins computed from unrounded totals; rounded quotient 1-53.5/36.5 gives -46.6),audit/ledger_full.csv
+S5 Case0 TAC 2022,85.1,85.12548837185383,85.1,True,85.1,audit/ledger_full.csv
+S5 Case0 TAC 2024,36.5,36.45567463481261,36.5,True,36.5,audit/ledger_full.csv
+S5 Case3 TAC 2022,87.0,86.9792381734973,87.0,True,87.0,audit/ledger_full.csv
+S5 Case3 TAC 2024,53.5,53.499739445853734,53.5,True,53.5,audit/ledger_full.csv
+"§3.4 export swing C1 (pp, 'some 270-300')",274,274.2862330336991,274.0,True,274,audit/ledger_full.csv
+§3.4 export swing C2 (pp),297,297.370916937303,297.0,True,297,audit/ledger_full.csv
+§3.4 BESS TAC penalty C1,0.76,0.7554272900553644,0.76,True,0.76,audit/ledger_full.csv
+§3.4 BESS TAC penalty C2,0.76,0.7617781724629551,0.76,True,0.76,audit/ledger_full.csv
+§3.4 C1 FOAK margin,-232,-232.0029710422669,-232.0,True,-232,audit/ledger_full.csv
+§3.4 C1 NOAK margin,+89,88.82261466424883,89.0,True,+89,audit/ledger_full.csv
+§3.4 C2 FOAK margin,-244,-244.1608091167443,-244.0,True,-244,audit/ledger_full.csv
+§3.4 C2 NOAK margin,+77,76.6647765897714,77.0,True,+77,audit/ledger_full.csv
+§3.4 C1 NOAK pre-credit margin,+32,32.32307463652465,32.0,True,+32,audit/ledger_full.csv
+§3.4 C2 NOAK pre-credit margin,+22,21.581754328998816,22.0,True,+22,audit/ledger_full.csv
+§3.4 credit worth (pp of margin),56,56.49954002772418,56.0,True,56,audit/ledger_full.csv
+§3.4 C1 ATB-Mid pre-credit margin,-106,-105.92827213580121,-106.0,True,-106,audit/ledger_full.csv
+§3.4 WACC TAC low,94,93.88599314901363,94.0,True,94,audit/ledger_full.csv
+§3.4 WACC TAC high,184,184.0845440658383,184.0,True,184,audit/ledger_full.csv
+§3.4 WACC range,90,90.19855091682466,90.0,True,90,audit/ledger_full.csv
+§3.4 WACC margin 5%,-24,-23.747421573804807,-24.0,True,-24,audit/ledger_full.csv
+§3.4 WACC margin 10%,-143,-142.63457109710797,-143.0,True,-143,audit/ledger_full.csv
+§3.4 S5 NOAK x Bare_Low,+82,81.9478389587096,82.0,True,+82,audit/ledger_full.csv
+§3.4 S5 NOAK x Turnkey_High,+69,68.74018303636409,69.0,True,+69,audit/ledger_full.csv
+§3.4 S5 Low_Mid x Bare_Low,+11,11.08274974642699,11.0,True,+11,audit/ledger_full.csv
+§3.4 S5 Low_Mid x Turnkey_High,-2,-2.124906175918495,-2.0,True,-2,audit/ledger_full.csv
+§3.4 S5 FOAK x Turnkey_High,-252,-252.08540267015155,-252.0,True,-252,audit/ledger_full.csv
+§3.4 S5 ATB-Mid row low,-56,-56.303507813616264,-56.0,True,-56,audit/ledger_full.csv
+§3.4 S5 ATB-Mid row high,-70,-69.51116373596176,-70.0,True,-70,audit/ledger_full.csv
+"§3.4 absorption axis span (pp, 'at most 13')",13,13.207655922345495,13.0,True,13,audit/ledger_full.csv
+§3.5 Case0 slope ($M per $1),0.36,0.3625846742873657,0.36,True,0.36,audit/ledger_full.csv
+§3.5 NGCC slope,0.49,0.48585505842715576,0.49,True,0.49,audit/ledger_full.csv
+§3.5 C1 slope (abs),0.34,0.34363150826446387,0.34,True,0.34,audit/ledger_full.csv
+§3.5 C2 slope (abs),0.37,0.3661406790129934,0.37,True,0.37,audit/ledger_full.csv
+§3.5 C1 crossover ($/tCO2),53,53.10145873820878,53.0,True,53,audit/ledger_full.csv
+§3.5 C2 crossover ($/tCO2),64,64.26039921849143,64.0,True,64,audit/ledger_full.csv
+§3.5 NGCC crossover (extrapolated),165,164.6155973505795,165.0,True,165,audit/ledger_full.csv
+§3.5 C1 at $100 cheaper by,30,29.53825210466292,30.0,True,30,audit/ledger_full.csv
+§3.5 C2 at $100 cheaper by,23,23.319333383579256,23.0,True,23,audit/ledger_full.csv
+§3.5 net CO2 C0 (kt),+363,362.5846742873656,363.0,True,+363,audit/ledger_full.csv
+§3.5 net CO2 C1 (kt),-344,-343.6315082644636,-344.0,True,-344,audit/ledger_full.csv
+§3.5 net CO2 C2 (kt),-360,-359.6131867216097,-360.0,True,-360,audit/ledger_full.csv
+§3.5 net CO2 C3 (kt),+486,485.85505842715554,486.0,True,+486,audit/ledger_full.csv
+S1 Case2 TAC x050,80.0,80.0432514736195,80.0,True,80.0,audit/ledger_full.csv
+S1 Case0 TAC x050,37.9,37.93452500059511,37.9,True,37.9,audit/ledger_full.csv
+S1 gap x050,42.1,42.1087264730244,42.1,True,42.1,audit/ledger_full.csv
+S1 margin x050,-111,-111.00370038207626,-111.0,True,-111,audit/ledger_full.csv
+S1 Case2 TAC x100,122.6,122.59419572701056,122.6,True,122.6,audit/ledger_full.csv
+S1 Case0 TAC x100,75.9,75.86905000119022,75.9,True,75.9,audit/ledger_full.csv
+S1 gap x100,46.7,46.72514572582035,46.7,True,46.7,audit/ledger_full.csv
+S1 margin x100,-62,-61.58657018255447,-62.0,True,-62,audit/ledger_full.csv
+S1 Case2 TAC x150,165.1,165.14513998038214,165.1,True,165.1,audit/ledger_full.csv
+S1 Case0 TAC x150,113.8,113.80357500178532,113.8,True,113.8,audit/ledger_full.csv
+S1 gap x150,51.3,51.34156497859682,51.3,True,51.3,audit/ledger_full.csv
+S1 margin x150,-45,-45.11419344936343,-45.0,True,-45,audit/ledger_full.csv
+S1 Case2 TAC x200,207.7,207.6960842337886,207.7,True,207.7,audit/ledger_full.csv
+S1 Case0 TAC x200,151.7,151.73810000238043,151.7,True,151.7,audit/ledger_full.csv
+S1 gap x200,56.0,55.957984231408176,56.0,True,56.0,audit/ledger_full.csv
+S1 margin x200,-37,-36.878005082790885,-37.0,True,-37,audit/ledger_full.csv
+S1 Case2 TAC x250,250.2,250.24702848717797,250.2,True,250.2,audit/ledger_full.csv
+S1 Case0 TAC x250,189.7,189.67262500297554,189.7,True,189.7,audit/ledger_full.csv
+S1 gap x250,60.6,60.57440348420244,60.6,True,60.6,audit/ledger_full.csv
+S1 margin x250,-32,-31.93629206283837,-32.0,True,-32,audit/ledger_full.csv
+S1 Case2 TAC x300,292.8,292.7979727405676,292.8,True,292.8,audit/ledger_full.csv
+S1 Case0 TAC x300,227.6,227.60715000357064,227.6,True,227.6,audit/ledger_full.csv
+S1 gap x300,65.2,65.19082273699698,65.2,True,65.2,audit/ledger_full.csv
+S1 margin x300,-29,-28.64181671620345,-29.0,True,-29,audit/ledger_full.csv
+S1 net export x050 (TWh),+1.66,1.6556641188687222,1.66,True,+1.66,audit/ledger_full.csv
+S1 net export x100 (TWh),+1.14,1.1354323273074645,1.14,True,+1.14,audit/ledger_full.csv
+S1 net export x150 (TWh),+0.62,0.6152005357464478,0.62,True,+0.62,audit/ledger_full.csv
+S1 net export x200 (TWh),+0.09,0.09496874418511836,0.09,True,+0.09,audit/ledger_full.csv
+S1 net export x250 (TWh),-0.43,-0.42526304737611187,-0.43,True,-0.43,audit/ledger_full.csv
+S1 net export x300 (TWh),-0.95,-0.9454948389373019,-0.95,True,-0.95,audit/ledger_full.csv
+S1 cost intensity x050 ($/MWh_IT),193,192.95260668435384,193.0,True,193,audit/ledger_full.csv
+S1 cost intensity x100 ($/MWh_IT),148,147.76304806717332,148.0,True,148,audit/ledger_full.csv
+S1 cost intensity x150 ($/MWh_IT),133,132.69986186143083,133.0,True,133,audit/ledger_full.csv
+S1 cost intensity x200 ($/MWh_IT),125,125.16826875858061,125.0,True,125,audit/ledger_full.csv
+S1 cost intensity x250 ($/MWh_IT),121,120.64931289686223,121.0,True,121,audit/ledger_full.csv
+S1 cost intensity x300 ($/MWh_IT),118,117.63667565571677,118.0,True,118,audit/ledger_full.csv
+S1 excess over grid x050 ($/MWh_IT),102,101.50747736436385,102.0,True,102,audit/ledger_full.csv
+S1 excess over grid x100 ($/MWh_IT),56,56.31791874718333,56.0,True,56,audit/ledger_full.csv
+S1 excess over grid x150 ($/MWh_IT),41,41.25473254144084,41.0,True,41,audit/ledger_full.csv
+S1 excess over grid x200 ($/MWh_IT),34,33.723139438590614,34.0,True,34,audit/ledger_full.csv
+S1 excess over grid x250 ($/MWh_IT),29,29.20418357687224,29.0,True,29,audit/ledger_full.csv
+S1 excess over grid x300 ($/MWh_IT),26,26.191546335726766,26.0,True,26,audit/ledger_full.csv
+S2 NLCS C0,91.4,91.44512931999,91.4,True,91.4,audit/ledger_full.csv
+S2 NLCS C1,136.6,136.64529731745245,136.6,True,136.6,audit/ledger_full.csv
+S2 NLCS C2,147.8,147.76304806717332,147.8,True,147.8,audit/ledger_full.csv
+S2 NLCS C3,67.0,66.98686331587116,67.0,True,67.0,audit/ledger_full.csv
+S2 LCOC C0,24.1,24.13388022372672,24.1,True,24.1,audit/ledger_full.csv
+S2 EPBT C1,0.56,0.5583906813630124,0.56,True,0.56,audit/ledger_full.csv
+S2 EPBT C2,0.57,0.5727502841696037,0.57,True,0.57,audit/ledger_full.csv
+S2 EPBT C3,0.18,0.1847443039033792,0.18,True,0.18,audit/ledger_full.csv
+S3 direct water C0,111,111.11111111111111,111.0,True,111,audit/ledger_full.csv
+S3 indirect water C0,1853,1852.862601160711,1853.0,True,1853,audit/ledger_full.csv
+S3 total water C0,1964,1963.973712271822,1964.0,True,1964,audit/ledger_full.csv
+S3 scarcity water C0,1.28,1.2765829129766844,1.28,True,1.28,audit/ledger_full.csv
+S3 direct water C1,111,111.11111111111111,111.0,True,111,audit/ledger_full.csv
+S3 indirect water C1,6807,6806.597792398666,6807.0,True,6807,audit/ledger_full.csv
+S3 total water C1,6918,6917.708903509777,6918.0,True,6918,audit/ledger_full.csv
+S3 scarcity water C1,4.50,4.4965107872813554,4.5,True,4.50,audit/ledger_full.csv
+S3 direct water C2,146,146.2796068527759,146.0,True,146,audit/ledger_full.csv
+S3 indirect water C2,6640,6639.58686837412,6640.0,True,6640,audit/ledger_full.csv
+S3 total water C2,6786,6785.866475226896,6786.0,True,6786,audit/ledger_full.csv
+S3 scarcity water C2,4.41,4.4108132088974825,4.41,True,4.41,audit/ledger_full.csv
+S3 direct water C3,111,111.11111111111111,111.0,True,111,audit/ledger_full.csv
+S3 indirect water C3,1018,1017.7695978206724,1018.0,True,1018,audit/ledger_full.csv
+S3 total water C3,1129,1128.8807089317834,1129.0,True,1129,audit/ledger_full.csv
+S3 scarcity water C3,0.73,0.7337724608056593,0.73,True,0.73,audit/ledger_full.csv
+S5/Tab2 mean LMP 2022,70,69.92027968036528,70.0,True,70,data/ercot/2022_dam_lmp_houston.csv
+S5/Tab2 mean LMP 2023,57,57.29258675799087,57.0,True,57,data/ercot/2023_dam_lmp_houston.csv
+S5/Tab2 mean LMP 2024,28,28.29187100456621,28.0,True,28,data/ercot/2024_dam_lmp_houston.csv
+S5 delivered gas 2022,6.53,6.5255616438356165,6.53,True,6.53,audit/ledger_full.csv
+S5 delivered gas 2023,2.63,2.633095890410959,2.63,True,2.63,audit/ledger_full.csv
+S5 delivered gas 2024,2.35,2.346164383561644,2.35,True,2.35,audit/ledger_full.csv
+§2.1 IT peak (MW),142.4,142.44,142.4,True,142.4,data/workload
+§2.1 IT mean (MW),94.7,94.710899543379,94.7,True,94.7,data/workload
+§2.1 mean-to-peak,0.67,0.6649178569459352,0.66,False,0.66,data/workload
+§2.3 2023 wet-bulb peak (C),28,28.05692321983859,28.0,True,28,data/weather
+§2.3 summer hours wet-bulb > 26C (%),32,31.61231884057971,32.0,True,32,data/weather (Jun-Aug 2023)
+§3.1/S5-note NGCC running cost ($/MWh),21,20.799743794105435,21.0,True,21,henry hub daily + plant_case3 params
+§3.1 hours below NGCC running cost (%),42,40.46803652968037,40.0,False,40,LMP vs hourly running cost
+Nomencl./§2.2 outage length (h),701,701.0,701.0,True,701,builder.py
+S4-note outage mean import (MW),121,120.99136575592536,121.0,True,121,case2 dispatch
+S4-note outage VCC cooling (GWh_c),73,72.86984444444445,73.0,True,73,case2 dispatch
+"§3.2 turbine max turndown (MW, 'no more than about 26')",26,26.186048181818194,26.0,True,26,case2 dispatch
+§3.2 January-week absorption share ('about a quarter'),25,24.796494116180764,25.0,True,about a quarter (true 25%),case2 dispatch
+§3.2 July-week absorption share ('just under two thirds'),65,63.30831630495102,63.0,False,just under two thirds (true 63%),case2 dispatch
+§3.2 January-week mean LMP,22,21.640654761904763,22.0,True,22,LMP 2023
+§2.1 realized PUE VCC cases ('near 1.31'),1.31,1.3048328177188107,1.3,False,1.30,case0 dispatch
+§2.1 realized PUE Case2 ('about 1.19'),1.19,1.1883206646651419,1.19,True,1.19,case2 dispatch
+"S3-note alpha_w sweep (-3.0 to -11.1 M$, 92%->16%)",alpha sweep 0.08-0.25,,,,not audited: alpha_w sweep runs are not in the 100-run ledger (solved ad hoc for the SI); re-solve if verification needed,n/a
+"§2.2 MILP runs within 1e-4 gap (max achieved, fresh audit solves)",0.0001,4.3475221750968777e-05,0.0,False,claim holds: max achieved gap 4.35e-05 across 83 fresh MILP solves; archived summaries predate gap recording but reproduce bit-for-bit under the same settings,submission_audit/runs_*/**/summary.json

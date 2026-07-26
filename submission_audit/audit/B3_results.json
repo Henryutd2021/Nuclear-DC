@@ -1,0 +1,112 @@
+{
+  "axes": [
+    {
+      "axis": "Reactor capital",
+      "case2_tac_low_musd_yr": 17.704212316995775,
+      "case2_tac_high_musd_yr": 261.11153635328355,
+      "delta_tac_musd_yr": 243.40732403628778,
+      "margin_span_pp": 320.8255857065157,
+      "margin_low_pct": -244.1608091167443,
+      "margin_high_pct": 76.6647765897714,
+      "endpoint_runs": [
+        "case2_FOAK",
+        "case2_NOAK"
+      ]
+    },
+    {
+      "axis": "Market year",
+      "case2_tac_low_musd_yr": 106.18534232236821,
+      "case2_tac_high_musd_yr": 153.88330030566885,
+      "delta_tac_musd_yr": 47.69795798330064,
+      "margin_span_pp": 297.37091693730304,
+      "margin_low_pct": -322.110691537501,
+      "margin_high_pct": -24.73977460019799,
+      "endpoint_runs": [
+        "case2_year2024",
+        "case2_year2022"
+      ]
+    },
+    {
+      "axis": "WACC",
+      "case2_tac_low_musd_yr": 93.88599314901363,
+      "case2_tac_high_musd_yr": 184.0845440658383,
+      "delta_tac_musd_yr": 90.19855091682466,
+      "margin_span_pp": 118.88714952330315,
+      "margin_low_pct": -142.63457109710797,
+      "margin_high_pct": -23.74742157380481,
+      "endpoint_runs": [
+        "case2_wacc_100",
+        "case2_wacc_50"
+      ]
+    },
+    {
+      "axis": "Carbon price",
+      "case2_tac_low_musd_yr": 85.98012782571122,
+      "case2_tac_high_musd_yr": 122.59419572701056,
+      "delta_tac_musd_yr": 36.614067901299336,
+      "margin_span_pp": 84.9059035661337,
+      "margin_low_pct": -61.586570182554446,
+      "margin_high_pct": 23.31933338357925,
+      "endpoint_runs": [
+        "case2_co2_0",
+        "case2_co2_100"
+      ]
+    },
+    {
+      "axis": "Data-center size",
+      "case2_tac_low_musd_yr": 80.0432514736195,
+      "case2_tac_high_musd_yr": 292.7979727405676,
+      "delta_tac_musd_yr": 212.7547212669481,
+      "margin_span_pp": 82.36188366587275,
+      "margin_low_pct": -111.00370038207623,
+      "margin_high_pct": -28.64181671620348,
+      "endpoint_runs": [
+        "case2_load_x050",
+        "case2_load_x300"
+      ]
+    },
+    {
+      "axis": "Absorber capital",
+      "case2_tac_low_musd_yr": 118.58598649672678,
+      "case2_tac_high_musd_yr": 128.60650957243624,
+      "delta_tac_musd_yr": 10.020523075709463,
+      "margin_span_pp": 13.207655922345488,
+      "margin_low_pct": -69.51116373596176,
+      "margin_high_pct": -56.30350781361627,
+      "endpoint_runs": [
+        "case2_smr_ATB_Mid_abs_Turnkey_High",
+        "case2_smr_ATB_Mid_abs_Bare_Low"
+      ]
+    },
+    {
+      "axis": "PUE",
+      "case2_tac_low_musd_yr": 114.36166570372762,
+      "case2_tac_high_musd_yr": 123.28068645836032,
+      "delta_tac_musd_yr": 8.919020754632697,
+      "margin_span_pp": 11.75580919293543,
+      "margin_low_pct": -62.49140651744858,
+      "margin_high_pct": -50.73559732451315,
+      "endpoint_runs": [
+        "case2_pue150",
+        "case2_pue110"
+      ]
+    },
+    {
+      "axis": "BESS on/off",
+      "case2_tac_low_musd_yr": 122.59419572701056,
+      "case2_tac_high_musd_yr": 123.35597389947351,
+      "delta_tac_musd_yr": 0.7617781724629538,
+      "margin_span_pp": 1.004069739176927,
+      "margin_low_pct": -62.59063992173137,
+      "margin_high_pct": -61.586570182554446,
+      "endpoint_runs": [
+        "case2_bess_on",
+        "case2_bess_off"
+      ]
+    }
+  ],
+  "figure_path": "submission_audit/figures/fig_policy_sensitivity_summary_rev.pdf",
+  "size_axis_caveat": "The data-center-size axis scales the IT load, cooling and comparator capacities together (0.5-3.0x), so both the numerator and the matched Case-0 denominator grow with it; its absolute TAC span (212.8 M$/yr) measures system size, not boundary sensitivity, and is hatch/dagger-flagged in the redrawn panel rather than ranked against the fixed-system axes.",
+  "panel_a_note": "Panel (a) follows the shipped figure (solid lines inside the solved $0-100/tCO2 range, dashed extrapolation beyond, solved-range rule); the checked-in make_figures.ipynb cell 15 predates that revision.",
+  "source_table": "outputs/master_kpi_table.csv (archived, unchanged values)"
+}

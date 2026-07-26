@@ -1,0 +1,26 @@
+{
+  "weather_pairing": "per-year",
+  "evidence_file_and_lines": "src/data.py:116-148 (load_time_series builds per-year paths houston_ambient_{year}.csv / {year}_dam_lmp_houston.csv / ercot_carbon_intensity_hourly_{year}.csv); scripts/run_all_analyses.py:468 passes spec.year for every run; data/weather holds houston_ambient_2022/2023/2024.csv (all present and loaded).",
+  "carbon_intensity_pairing": "per-year",
+  "gate_hours": {
+    "2022": 0,
+    "2023": 0,
+    "2024": 0
+  },
+  "gate_hours_outside_outage": {
+    "2022": 0,
+    "2023": 0,
+    "2024": 0
+  },
+  "wetbulb_peak_c": {
+    "2022": 27.09621836102369,
+    "2023": 28.05692321983859,
+    "2024": 28.120145790889897
+  },
+  "gate_hours_by_month": {
+    "2022": {},
+    "2023": {},
+    "2024": {}
+  },
+  "it_load_alignment_note": "The IT trace is a calendar-2018 measurement; src/data.py:43-60 circularly shifts it by whole days per market year so weekday phase matches that year's calendar. Prices/weather/carbon are therefore co-sampled per year while the workload is a phase-aligned proxy."
+}

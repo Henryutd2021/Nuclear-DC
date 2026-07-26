@@ -1,0 +1,73 @@
+% ---------------------------------------------------------------------------
+% Supplementary Note 7: Secondary endpoint definitions  (Task C6 deliverable)
+%
+% Drop-in section for the Supplementary Information of the Applied Energy
+% manuscript. Style matches the existing SI notes (\subsection* + \phantomsection
+% label; S-prefixed equation/table counters are inherited from the SI preamble).
+% Add to the SI contents block:
+%   \sitocline{Supplementary Note 7: Secondary endpoint definitions}{note:endpoints}
+% and update the SI header sentence's note count accordingly.
+%
+% Citation keys used here that are NOT yet in references.bib (BibTeX supplied
+% in C6_sources.md): lenzen2008nuclear, macknick2012water, boulay2018aware,
+% wri2023aqueduct.  Already present: atb2024nuclear, li2026nuclearH2.
+% ---------------------------------------------------------------------------
+
+\subsection*{Supplementary Note 7: Secondary endpoint definitions}\phantomsection\label{note:endpoints}
+
+This note defines the secondary endpoints reported in Supplementary Tables~\ref{tab:secondary_kpis_cost_carbon} and~\ref{tab:secondary_kpis_water} and quoted in the main text, together with their system boundaries and data sources. All four endpoints are computed from the same solved dispatch and the same accounting basis as the total annualized cost (TAC) of Eq.~\eqref{eq:tac}; none introduces additional model assumptions. Throughout, $E_\mathrm{IT}=\sum_t P_\mathrm{IT}(t)\,\Delta t = 829.7$~GWh$_\mathrm{e}$~yr$^{-1}$ is the annual IT energy delivered, identical in every case and scenario, and $E_\mathrm{gen}$ denotes the annual net on-site generation (turbine net output $\sum_t P_\mathrm{tn}(t)\Delta t$ for the nuclear cases; NGCC output $\sum_t P_\mathrm{ng}(t)\Delta t$ for Case~3).
+
+\runinhead{Net levelized cost of IT supply (NLCS)}
+The NLCS divides the full TAC by the IT energy delivered,
+\begin{equation}
+\label{eq:nlcs}
+\mathrm{NLCS}_c \;=\; \frac{\mathrm{TAC}_c}{E_\mathrm{IT}},
+\end{equation}
+so its numerator inherits every term of Eq.~\eqref{eq:tac}: annualized capital of all installed blocks including the cooling plant, fixed and variable operations and maintenance, fuel, the net grid exchange $\Phi_\mathrm{grid}$ (merchant-export revenue enters with a negative sign), the carbon cost when priced, and the Section~45Y credit $-\Phi_\mathrm{ptc}$. The NLCS is therefore a cost of serving the IT load, not a levelized cost of electricity generation: for the export-heavy nuclear cases it nets roughly 1.2~TWh~yr$^{-1}$ of merchant sales against the cost of a 270~MW$_\mathrm{e}$ plant serving a 94.7~MW$_\mathrm{e}$ average load. Because $E_\mathrm{IT}$ is identical across cases, the NLCS ranking is by construction the TAC ranking rescaled ($\mathrm{NLCS}_c = \mathrm{TAC}_c/E_\mathrm{IT}$, so $M_c = 1-\mathrm{NLCS}_c/\mathrm{NLCS}_0$), and it is reported for interpretability rather than as an independent result.
+
+\runinhead{Levelized cost of cooling (LCOC)}
+For the grid-only Case~0 the cooling-attributable cost separates cleanly, and
+\begin{equation}
+\label{eq:lcoc}
+\mathrm{LCOC}_0 \;=\; \frac{\mathrm{CRF}_\mathrm{v}\,\mathrm{CAPEX}_\mathrm{v} S_\mathrm{v} + \mathrm{FOM}_\mathrm{v} S_\mathrm{v} + \sum_t \big[v_\mathrm{v}\, Q_\mathrm{v}(t) + \pi_\mathrm{g}(t)\, P_\mathrm{v}(t)\big]\Delta t}{\sum_t Q_\mathrm{v}(t)\,\Delta t},
+\end{equation}
+i.e., the vapor-compression chiller's annualized capital, fixed and variable O\&M, plus the grid cost of the chiller's own electricity, divided by the chilled water delivered ($\sum_t Q_\mathrm{v}(t)\Delta t = 921.9$~GWh$_\mathrm{c}$~yr$^{-1}$). In Cases~1--3 the generation assets serve the IT and cooling loads jointly, so assigning shared capital and fuel to the cooling stream would require an arbitrary allocation rule; rather than impose one, the LCOC is reported only where it is allocation-free (Case~0), and cross-case cooling economics are carried by the TAC and the grid-cost margin.
+
+\runinhead{Energy payback time (EPBT)}
+Following the life-cycle energy convention for power plants \citep{lenzen2008nuclear}, the EPBT divides the cumulative primary-energy demand of plant construction and decommissioning, expressed as electricity-equivalent, by the plant's annual net generation:
+\begin{equation}
+\label{eq:epbt}
+\mathrm{EPBT} \;=\; \frac{e_k\, S_k}{E_\mathrm{gen}},
+\end{equation}
+with $e_k$ the embodied-energy intensity per unit of installed capacity and $S_k$ the installed rating. The nuclear factor $e_\mathrm{rx}=4.5$~MWh$_\mathrm{e}$-eq~kW$_\mathrm{e}^{-1}$ is the light-water-reactor midpoint of the Lenzen review \citep{lenzen2008nuclear}, applied to the 270~MW$_\mathrm{e}$ net rating; the NGCC factor $e_\mathrm{ng}=1.0$~MWh$_\mathrm{e}$-eq~kW$_\mathrm{e}^{-1}$ is a life-cycle-inventory screening value consistent with the NLR ATB combined-cycle cost basis \citep{atb2024nuclear}, applied to the 200~MW$_\mathrm{e}$ block. The denominator is the plant's full net generation including merchant exports, so the EPBT characterizes the generating asset itself rather than the IT share of its output; it is undefined for the grid-only Case~0, which amortizes no on-site plant. Nuclear-fuel-cycle energy is not included in the numerator; its operating-cost counterpart enters the TAC through the fuel price of Eq.~\eqref{eq:fuel_cost} \citep{li2026nuclearH2}.
+
+\runinhead{Water footprint, three tiers}
+The water endpoint separates on-site cooling-tower makeup from upstream generation water and reports both per unit of IT energy delivered:
+\begin{align}
+W_\mathrm{dir} \;=\;& \frac{w_\mathrm{v} \sum_t Q_\mathrm{v}(t)\Delta t \;+\; w_\mathrm{a} \sum_t Q_\mathrm{a}(t)\Delta t}{E_\mathrm{IT}}, \label{eq:water_direct}\\
+W_\mathrm{ind} \;=\;& \frac{w_\mathrm{rx} \sum_t P_\mathrm{tn}(t)\Delta t + w_\mathrm{ng} \sum_t P_\mathrm{ng}(t)\Delta t + w_\mathrm{g} \sum_t P_\mathrm{g}^{+}(t)\Delta t}{E_\mathrm{IT}}, \label{eq:water_indirect}\\
+W_\mathrm{tot} \;=\;& W_\mathrm{dir} + W_\mathrm{ind}, \qquad
+W_\mathrm{sc} \;=\; f_\mathrm{sc}\, \frac{W_\mathrm{tot}}{1000}, \label{eq:water_scarcity}
+\end{align}
+with the consumption factors $w$ listed in Supplementary Table~\ref{tab:endpoint_factors}. All factors are water \emph{consumption} (withdrawal net of return flow). The generation factors are per MWh$_\mathrm{e}$ \emph{generated} while the denominator is per MWh$_\mathrm{e}$ of IT energy \emph{delivered}: the nuclear term charges the full turbine output including the roughly 1.2~TWh~yr$^{-1}$ of merchant exports, because the cooling tower consumes that water at the site regardless of where the electricity is used. This site-attribution convention is deliberately conservative for the nuclear cases -- netting exports the way the carbon accounting of Eq.~\eqref{eq:carbon_cost} does would cut their indirect tier by roughly the export share -- and it is the reason Case~1 reports 6{,}918~L~MWh$_\mathrm{e}^{-1}$ against 1{,}964~L~MWh$_\mathrm{e}^{-1}$ for grid supply. The absorption factor resolves the trade documented in the main text: per MWh$_\mathrm{c}$ delivered, an absorption chiller rejects its cooling duty plus its driving heat, $(1+1/\mathrm{COP}_\mathrm{a})\approx 1.83$ times the rejected heat of an equal-duty electric chiller at the Houston annual-mean $\mathrm{COP}_\mathrm{a}\approx1.2$, so $w_\mathrm{a} = w_\mathrm{v}\,(1+1/1.2) = 0.183$~L~kWh$_\mathrm{c}^{-1}$. The scarcity tier converts litres to m$^3$ and weights by $f_\mathrm{sc}=0.65$, a basin characterization factor for the ERCOT South / Houston region taken as a conservative midpoint between the WRI Aqueduct baseline-water-stress class \citep{wri2023aqueduct} and the AWARE world-equivalent scale \citep{boulay2018aware}, on which the world average is 1.0. The direct-site tier is also the basis of the memo externality in Supplementary Table~\ref{tab:value_decomp}, which prices the Case~2 minus Case~1 increment of $W_\mathrm{dir} E_\mathrm{IT}$ at \$0.50~m$^{-3}$, a Texas industrial water-tariff midpoint (authors' estimate); at \$0.01~M~yr$^{-1}$ it is three orders of magnitude below the TAC terms.
+
+\begin{table}[pos=t]
+\centering
+\caption{Water-consumption factors and embodied-energy intensities used in the secondary endpoints. VCC, vapor-compression chiller; NGCC, natural gas combined cycle; NLR ATB, National Laboratory of the Rockies Annual Technology Baseline; AWARE, available water remaining characterization model. Generation factors are medians for recirculating (cooling-tower) plants; consumption basis throughout.}
+\label{tab:endpoint_factors}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\linewidth}{@{}L{0.11\linewidth}L{0.34\linewidth}L{0.21\linewidth}Y@{}}
+\toprule
+Symbol & Quantity & Value & Source \\
+\midrule
+$w_\mathrm{v}$  & VCC site water per cooling delivered & 0.10~L~kWh$_\mathrm{c}^{-1}$ & authors' estimate for hybrid cooling-tower duty; \citet{macknick2012water} covers generation only \\
+$w_\mathrm{a}$  & absorption site water per cooling delivered & 0.183~L~kWh$_\mathrm{c}^{-1}$ & $w_\mathrm{v}(1+1/\mathrm{COP}_\mathrm{a})$ at annual-mean $\mathrm{COP}_\mathrm{a}=1.2$ \\
+$w_\mathrm{rx}$ & nuclear generation, recirculating tower & 2.54~L~kWh$_\mathrm{e}^{-1}$ & \citet{macknick2012water}, median \\
+$w_\mathrm{ng}$ & NGCC generation, recirculating tower & 0.78~L~kWh$_\mathrm{e}^{-1}$ & \citet{macknick2012water}, median \\
+$w_\mathrm{g}$  & ERCOT grid blend & 1.42~L~kWh$_\mathrm{e}^{-1}$ & \citet{macknick2012water} factors weighted by the ERCOT mix \\
+$f_\mathrm{sc}$ & basin scarcity factor, ERCOT South & 0.65 (world mean $=1.0$) & midpoint of \citet{wri2023aqueduct} and \citet{boulay2018aware} \\
+$e_\mathrm{rx}$ & nuclear embodied energy & 4.5~MWh$_\mathrm{e}$-eq~kW$_\mathrm{e}^{-1}$ & \citet{lenzen2008nuclear}, light-water midpoint \\
+$e_\mathrm{ng}$ & NGCC embodied energy & 1.0~MWh$_\mathrm{e}$-eq~kW$_\mathrm{e}^{-1}$ & life-cycle screening value on the NLR ATB basis \citep{atb2024nuclear} \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -161,3 +161,20 @@ data/_raw/nlr_extract/
 
 # Tier 3 — NLR raw 1-minute profiles (manual download, 226 MB, third-party)
 data/workload/raw_nlr_colocation/*.csv
+
+# =============================================================================
+# submission_audit/ — pre-submission run-and-backfill audit (2026-07-26)
+# Tracked: the report, the merged results.json with per-number provenance, the
+# unrounded 100-run ledger, the Supplementary Note 7 draft and its source list,
+# the re-runnable driver scripts and the revised Figure 6. Not tracked: the
+# per-run solve artifacts of the 85 new runs (~28 MB), regenerable with
+# submission_audit/scripts/run_gate.py, run_b1.py and run_b2.py — same policy
+# as outputs/ above.
+# =============================================================================
+submission_audit/runs_gate/
+submission_audit/runs_b1/
+submission_audit/runs_b2/
+# Colour-vision simulations are QA by-products, regenerable from the tracked PNG.
+submission_audit/figures/*_protan.png
+submission_audit/figures/*_deuter.png
+submission_audit/figures/*_tritan.png
