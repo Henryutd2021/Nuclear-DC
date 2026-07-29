@@ -3,7 +3,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-added-large-files
-        args: ['--maxkb=1500']  # carbon-intensity CSVs ~1.1 MB, schematic PNG ~1.2 MB
+        args: ['--maxkb=1500']  # carbon-intensity CSVs are ~1.1 MB
       - id: check-yaml
         exclude: ^\.github/.*
       - id: check-toml

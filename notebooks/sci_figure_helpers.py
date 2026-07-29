@@ -3,7 +3,7 @@
 Importable from anywhere via:
     import sys
     sys.path.insert(0, "/home/honglin/.claude/skills/sci-figure/scripts")
-    from sci_figure_helpers import PALETTE, apply_sci_style, save_triplet
+    from sci_figure_helpers import PALETTE, apply_sci_style, save_pdf
 """
 from __future__ import annotations
 
@@ -181,17 +181,10 @@ def apply_journal_style(
     })
 
 
-def save_triplet(fig: plt.Figure, name: str, outdir: str = "figs") -> None:
-    """Export figure as PDF + SVG + PNG with bbox_inches='tight'.
-
-    PDF: vector, for journal submission.
-    SVG: vector with editable text (svg.fonttype='none'), for Illustrator polish.
-    PNG: 600 dpi raster, for paper drafts and slide decks.
-    """
+def save_pdf(fig: plt.Figure, name: str, outdir: str = "figs") -> None:
+    """Export a submission-ready vector PDF with a tight bounding box."""
     os.makedirs(outdir, exist_ok=True)
-    for ext in ("pdf", "svg", "png"):
-        dpi = 600 if ext == "png" else None
-        fig.savefig(f"{outdir}/{name}.{ext}", bbox_inches="tight", dpi=dpi)
+    fig.savefig(f"{outdir}/{name}.pdf", bbox_inches="tight")
 
 
 def _rc_size(name: str, fallback: float) -> float:

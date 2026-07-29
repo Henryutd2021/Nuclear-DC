@@ -47,6 +47,10 @@ env/
 *.ipynb
 !notebooks/paper_figures.ipynb
 
+# Figure assets are kept in vector PDF format only.
+*.png
+*.svg
+
 # Testing
 .pytest_cache/
 .coverage

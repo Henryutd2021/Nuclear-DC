@@ -31,7 +31,7 @@ _g = {}
 for i in (2, 3, 4):
     exec(compile("".join(nb["cells"][i]["source"]), f"cell{i}", "exec"), _g)
 _g.pop("__name__", None)
-globals().update(_g)  # PALETTE, df, save_triplet, add_panel_label, BODY_W, MAIN_FILLS, ...
+globals().update(_g)  # PALETTE, df, save_pdf, add_panel_label, BODY_W, MAIN_FILLS, ...
 
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
@@ -390,7 +390,7 @@ def build_operation_value(dirs):
     add_panel_label(ax_s, "b", x=-0.07, y=1.04)
     add_panel_label(ax_v, "c", x=-0.07, y=1.04)
     for d in dirs:
-        save_triplet(fig, "fig_operation_value", str(d))
+        save_pdf(fig, "fig_operation_value", str(d))
     plt.close(fig)
 
 
@@ -418,7 +418,7 @@ def build_baseline_economics(dirs):
     add_panel_label(ax_sc, "b", x=-0.14, y=1.045)
     add_panel_label(ax_ac, "c", x=-0.14, y=1.045)
     for d in dirs:
-        save_triplet(fig, "fig_baseline_economics", str(d))
+        save_pdf(fig, "fig_baseline_economics", str(d))
     plt.close(fig)
 
 

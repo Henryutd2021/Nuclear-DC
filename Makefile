@@ -1,9 +1,12 @@
-.PHONY: help data data-tier2 data-tier3 data-clean test lint format check
+.PHONY: help data data-tier2 data-tier3 data-clean test lint format check manuscript-applied-energy
 
 PYTHON := python3
 
 help:  ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+manuscript-applied-energy:  ## Compile the Applied Energy manuscript with BibTeX
+	cd "MANUSCRIPT/Applied Energy" && latexmk main.tex
 
 # =============================================================================
 # Data lifecycle (see data/README.md "How to get the data")

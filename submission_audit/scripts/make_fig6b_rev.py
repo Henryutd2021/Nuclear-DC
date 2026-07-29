@@ -40,7 +40,7 @@ from sci_figure_helpers import (  # noqa: E402
     PALETTE,
     add_panel_label,
     apply_sci_style,
-    save_triplet,
+    save_pdf,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -391,7 +391,7 @@ def figure_policy_sensitivity_summary_rev() -> None:
                 fontsize=7.2, bbox_to_anchor=(1.0, 0.10))
     add_panel_label(ax_t, "b", x=-0.12, y=1.10)
 
-    save_triplet(fig, "fig_policy_sensitivity_summary_rev", str(FIGURES))
+    save_pdf(fig, "fig_policy_sensitivity_summary_rev", str(FIGURES))
     plt.close(fig)
 
 

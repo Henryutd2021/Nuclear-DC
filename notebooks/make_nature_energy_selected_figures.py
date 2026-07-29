@@ -281,10 +281,9 @@ def main() -> None:
             f"cell {idx} does not produce {name}; notebook cells moved"
         )
         exec(compile(src, f"paper_figures.ipynb:cell{idx}", "exec"), env)
-        for ext in ("pdf", "svg", "png"):
-            src_path = OUT_FIGS / f"{name}.{ext}"
-            if src_path.exists():
-                shutil.copy2(src_path, NATURE_FIGS / src_path.name)
+        src_path = OUT_FIGS / f"{name}.pdf"
+        if src_path.exists():
+            shutil.copy2(src_path, NATURE_FIGS / src_path.name)
         print(f"wrote {name}")
 
 
